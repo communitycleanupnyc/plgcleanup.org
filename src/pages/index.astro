@@ -1,8 +1,11 @@
 ---
+const SUBSCRIBER_COUNT = 327;
 const nextCleanup = {
-  date: "Saturday, July 11",
-  time: "10am",
-  corner: "Maple St & Flatbush Ave",
+  date: "Saturday, June 20",
+  time: "10–11am",
+  corner: "Clarkson Ave & Bedford Ave",
+  mapsUrl:
+    "https://www.google.com/maps/search/?api=1&query=Clarkson%20Ave%20and%20Bedford%20Ave%2C%20Brooklyn%2C%20NY",
 };
 ---
 
@@ -16,7 +19,8 @@ const nextCleanup = {
       name="description"
       content="We clean Prospect Lefferts Gardens. No registration, all supplies included. Just show up."
     />
-    <link rel="icon" type="image/webp" href="/images/logo.webp" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/images/logo.webp" />
     <link
       rel="preload"
       href="/fonts/Inter.woff2"
@@ -39,7 +43,6 @@ const nextCleanup = {
         font-weight: 100 900;
         font-display: swap;
       }
-
       @font-face {
         font-family: "Inter";
         src: url("/fonts/Inter.woff2") format("woff2-variations");
@@ -74,9 +77,22 @@ const nextCleanup = {
         min-height: 100svh;
         display: flex;
         flex-direction: column;
-        max-width: 620px;
-        margin: 0 auto;
+        max-width: 640px;
+        margin-inline: auto;
         padding: clamp(1.5rem, 5vw, 2.5rem) clamp(1.25rem, 6vw, 2.5rem);
+        text-align: center;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
       }
 
       /* ── Header ──────────────────────────────── */
@@ -86,7 +102,7 @@ const nextCleanup = {
       }
 
       .logo {
-        display: block;
+        display: inline-block;
         width: 44px;
         height: 44px;
       }
@@ -106,6 +122,13 @@ const nextCleanup = {
         margin-bottom: 0.625rem;
       }
 
+      /* ── Headline + raccoon ──────────────────── */
+
+      .headline-wrap {
+        position: relative;
+        margin-bottom: clamp(1.25rem, 4vw, 1.875rem);
+      }
+
       h1 {
         font-family: "Fraunces", Georgia, serif;
         font-size: clamp(2.625rem, 10.5vw, 3.75rem);
@@ -114,8 +137,29 @@ const nextCleanup = {
         letter-spacing: -0.025em;
         font-optical-sizing: auto;
         font-variation-settings: "SOFT" 50, "WONK" 1;
-        margin-bottom: clamp(1.25rem, 4vw, 1.875rem);
       }
+
+      .raccoon {
+        position: absolute;
+        right: -16px;
+        top: 50%;
+        width: clamp(84px, 22vw, 116px);
+        height: auto;
+        transform: translateY(-50%) rotate(-8deg);
+        pointer-events: none;
+        user-select: none;
+      }
+
+      @media (max-width: 380px) {
+        .raccoon {
+          width: 64px;
+          right: -4px;
+          top: -8px;
+          transform: rotate(-8deg);
+        }
+      }
+
+      /* ── Mission ─────────────────────────────── */
 
       .mission {
         font-size: 1.0625rem;
@@ -130,118 +174,185 @@ const nextCleanup = {
         margin-bottom: clamp(2rem, 7vw, 3rem);
       }
 
-      /* ── CTA area ────────────────────────────── */
+      /* ── Next cleanup ────────────────────────── */
 
-      .cta-area {
-        position: relative;
-        /* reserve right-side space for the raccoon on wider viewports */
-        padding-right: clamp(0px, 30vw, 160px);
+      .next-cleanup {
+        margin-bottom: clamp(2rem, 7vw, 3rem);
       }
 
-      .cta-button {
-        display: inline-flex;
-        align-items: center;
-        font-family: "Inter", system-ui, sans-serif;
-        font-size: 1.0625rem;
-        font-weight: 600;
-        letter-spacing: -0.01em;
-        color: var(--paper);
-        background: var(--ink);
-        text-decoration: none;
-        padding: 1rem 1.375rem;
-        min-height: 56px;
-        border-radius: 3px;
-        white-space: nowrap;
-      }
-
-      .cta-button:focus-visible {
-        outline: 3px solid var(--green);
-        outline-offset: 3px;
-      }
-
-      .event-detail {
-        font-size: 0.9375rem;
-        font-variant-numeric: tabular-nums slashed-zero;
-        line-height: 1.45;
-        margin-top: 1rem;
-        color: var(--ink);
-      }
-
-      /* hi-vis highlighter under the date */
-      .event-date {
-        background: linear-gradient(
-          to bottom,
-          transparent 58%,
-          var(--green) 58%
-        );
-      }
-
-      .raccoon {
-        position: absolute;
-        right: -0.5rem;
-        bottom: -1.5rem;
-        width: clamp(110px, 28vw, 155px);
-        height: auto;
-        pointer-events: none;
-        user-select: none;
-      }
-
-      /* stack raccoon below on very small screens */
-      @media (max-width: 360px) {
-        .cta-area {
-          padding-right: 0;
-        }
-
-        .raccoon {
-          position: static;
-          display: block;
-          width: 90px;
-          margin-top: 1.25rem;
-        }
-      }
-
-      /* ── Footer ──────────────────────────────── */
-
-      footer {
-        margin-top: clamp(4rem, 14vw, 6rem);
-        padding-top: 1.25rem;
-        border-top: 1px solid rgba(26, 26, 23, 0.1);
-      }
-
-      .footer-links {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0 1.125rem;
-        margin-bottom: 0.875rem;
-        list-style: none;
-      }
-
-      .footer-links a {
-        font-size: 0.875rem;
+      .next-label {
+        font-size: 0.6875rem;
         font-weight: 500;
-        color: var(--ink);
-        text-decoration: none;
-        min-height: 44px;
-        display: inline-flex;
-        align-items: center;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        margin-bottom: 0.375rem;
       }
 
-      .footer-links a:hover {
+      .next-datetime {
+        font-size: 1.25rem;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums slashed-zero;
+        line-height: 1.3;
+        margin-bottom: 0.3rem;
+      }
+
+      .next-location a {
+        font-size: 1rem;
+        color: var(--ink);
         text-decoration: underline;
         text-decoration-thickness: 1px;
         text-underline-offset: 3px;
+        text-decoration-color: rgba(26, 26, 23, 0.35);
       }
 
-      .footer-links a:focus-visible {
+      .next-location a:hover {
+        text-decoration-color: var(--ink);
+      }
+
+      .next-location a:focus-visible {
         outline: 2px solid var(--green);
         outline-offset: 2px;
         border-radius: 2px;
       }
 
-      .footer-brand {
+      .next-reassurance {
+        font-size: 0.875rem;
+        color: var(--ink-muted);
+        margin-top: 0.375rem;
+      }
+
+      /* ── Subscribe ───────────────────────────── */
+
+      .subscribe {
+        margin-bottom: clamp(2rem, 7vw, 3rem);
+      }
+
+      .subscribe-copy {
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        max-width: 36ch;
+        margin-inline: auto;
+      }
+
+      .subscribe-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.625rem;
+        max-width: 360px;
+        margin-inline: auto;
+      }
+
+      .email-input {
+        width: 100%;
+        height: 56px;
+        padding: 0 1rem;
+        font-family: "Inter", system-ui, sans-serif;
+        font-size: 1rem;
+        color: var(--ink);
+        background: var(--paper);
+        border: 1.5px solid rgba(26, 26, 23, 0.25);
+        border-radius: 3px;
+        outline: none;
+        text-align: left;
+        transition: border-color 0.15s;
+      }
+
+      .email-input:focus {
+        border-color: rgba(26, 26, 23, 0.55);
+      }
+
+      .email-input:focus-visible {
+        outline: 2px solid var(--green);
+        outline-offset: 0;
+      }
+
+      .email-input::placeholder {
+        color: var(--ink-muted);
+        opacity: 0.7;
+      }
+
+      .subscribe-btn {
+        width: 100%;
+        height: 56px;
+        font-family: "Inter", system-ui, sans-serif;
+        font-size: 1.0625rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+        background: var(--green);
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+
+      .subscribe-btn:hover:not(:disabled) {
+        opacity: 0.88;
+      }
+
+      .subscribe-btn:focus-visible {
+        outline: 3px solid var(--ink);
+        outline-offset: 3px;
+      }
+
+      .subscribe-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .subscribe-status {
+        font-size: 0.875rem;
+        color: var(--ink-muted);
+        margin-top: 0.625rem;
+      }
+
+      /* ── Footer ──────────────────────────────── */
+
+      footer {
+        margin-top: auto;
+        padding-top: clamp(2.5rem, 8vw, 4rem);
+      }
+
+      .footer-icons {
+        display: flex;
+        justify-content: center;
+        gap: 0.25rem;
+        list-style: none;
+        margin-bottom: 1.125rem;
+      }
+
+      .footer-icons a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        color: var(--ink-muted);
+        border-radius: 4px;
+        transition: color 0.15s;
+      }
+
+      .footer-icons a:hover {
+        color: var(--ink);
+      }
+
+      .footer-icons a:focus-visible {
+        outline: 2px solid var(--green);
+        outline-offset: 2px;
+      }
+
+      .footer-icons svg {
+        width: 22px;
+        height: 22px;
+        flex-shrink: 0;
+      }
+
+      .copyright {
         font-size: 0.75rem;
         color: var(--ink-muted);
-        line-height: 1.6;
+        padding-bottom: clamp(1.5rem, 5vw, 2.5rem);
       }
     </style>
   </head>
@@ -260,49 +371,170 @@ const nextCleanup = {
     <main>
       <p class="eyebrow">Summer 2026</p>
 
-      <h1>We clean Prospect&nbsp;Lefferts Gardens.</h1>
-
-      <p class="mission">
-        No registration, all supplies included. Just show up.
-      </p>
-      <p class="human">Meet your neighbors. Have fun.</p>
-
-      <div class="cta-area">
-        <a
-          href="https://www.instagram.com/communitycleanupplg/"
-          class="cta-button"
-        >
-          Join the next cleanup&nbsp;&rarr;
-        </a>
-
-        <p class="event-detail">
-          <span class="event-date">{nextCleanup.date}</span>&ensp;&middot;&ensp;{nextCleanup.time}&ensp;&middot;&ensp;{nextCleanup.corner}
-        </p>
-
+      <div class="headline-wrap">
+        <h1>We clean Prospect&nbsp;Lefferts Gardens.</h1>
         <img
           src="/images/raccoon.webp"
           alt=""
           class="raccoon"
           aria-hidden="true"
-          width="155"
-          height="127"
+          width="116"
+          height="95"
         />
+      </div>
+
+      <p class="mission">No registration, all supplies included. Just show up.</p>
+      <p class="human">Meet your neighbors. Have fun.</p>
+
+      <div class="next-cleanup">
+        <p class="next-label">Next Cleanup</p>
+        <p class="next-datetime">{nextCleanup.date} &middot; {nextCleanup.time}</p>
+        <p class="next-location">
+          <a
+            href={nextCleanup.mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >{nextCleanup.corner}</a>
+        </p>
+        <p class="next-reassurance">No registration — just show up.</p>
+      </div>
+
+      <div class="subscribe">
+        <p class="subscribe-copy">
+          Subscribe to a weekly email joining <span id="subscriber-count">{SUBSCRIBER_COUNT}</span> of your neighbors, to learn about upcoming cleanups and events:
+        </p>
+
+        <form
+          id="subscribe-form"
+          class="subscribe-form"
+          action="https://communitycleanupplg.substack.com/subscribe"
+          method="get"
+          target="_blank"
+        >
+          <label for="email-input" class="sr-only">Email address</label>
+          <input
+            type="email"
+            id="email-input"
+            name="email"
+            class="email-input"
+            required
+            inputmode="email"
+            autocomplete="email"
+            placeholder="your@email.com"
+          />
+          <button type="submit" id="subscribe-btn" class="subscribe-btn">
+            Sign up
+          </button>
+        </form>
+
+        <p id="subscribe-status" class="subscribe-status" hidden></p>
       </div>
     </main>
 
     <footer>
-      <ul class="footer-links">
+      <ul class="footer-icons">
         <li>
-          <a href="https://www.instagram.com/communitycleanupplg/">Instagram</a>
+          <a
+            href="https://www.instagram.com/communitycleanupplg/"
+            aria-label="Instagram"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.791-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+            </svg>
+          </a>
         </li>
-        <li><a href="#">Discord</a></li>
-        <li><a href="mailto:hi@plgcleanup.org">hi@plgcleanup.org</a></li>
-        <li><a href="#">Amazon wishlist</a></li>
+        <li>
+          <a
+            href="https://discord.com/invite/H9her7r8N2"
+            aria-label="Discord"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942.0209-.0407.0012-.0895-.0407-.1047-1.3928-.5236-2.7215-1.1447-3.9659-1.8519-.0444-.0247-.0479-.0768-.0088-.1092.0265-.0194.053-.0396.0794-.0605a.077.077 0 01.0805-.0108c2.3888 1.0904 4.9751 1.0904 7.335 0a.0762.0762 0 01.0805.0107c.0265.021.053.0413.0795.0605.0391.0325.0357.0846-.0088.1092-1.2444.7071-2.5731 1.3283-3.9659 1.8519-.0419.0152-.0616.0641-.0407.1047.3531.699.764 1.3638 1.2255 1.9942a.0766.0766 0 00.0842.0276c1.9584-.6072 3.9469-1.5224 6.0017-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z" />
+            </svg>
+          </a>
+        </li>
+        <li>
+          <a
+            href="https://communitycleanupplg.substack.com/subscribe"
+            aria-label="Substack newsletter"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 17.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z" />
+            </svg>
+          </a>
+        </li>
+        <li>
+          <a href="mailto:communitycleanupplg@gmail.com" aria-label="Email us">
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+            </svg>
+          </a>
+        </li>
+        <li>
+          <a
+            href="https://www.amazon.com/registries/gl/guest-view/1Y3YRXM9ILG5I"
+            aria-label="Amazon wishlist"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+            </svg>
+          </a>
+        </li>
       </ul>
-      <p class="footer-brand">
-        Community Cleanup PLG &middot; plgcleanup.org &middot;
-        @communitycleanupplg
-      </p>
+      <p class="copyright">&copy; 2026 Community Cleanup PLG</p>
     </footer>
+
+    <script>
+      (function () {
+        const form = document.getElementById("subscribe-form");
+        const counter = document.getElementById("subscriber-count");
+        const btn = document.getElementById("subscribe-btn");
+        const status = document.getElementById("subscribe-status");
+        if (!form || !counter || !btn || !status) return;
+
+        let submitted = false;
+
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          if (submitted) return;
+          submitted = true;
+
+          counter.textContent = String(parseInt(counter.textContent, 10) + 1);
+          btn.disabled = true;
+          status.textContent = "Thanks — confirm in the tab that just opened.";
+          status.hidden = false;
+
+          window.open(
+            "https://communitycleanupplg.substack.com/subscribe",
+            "_blank",
+            "noopener,noreferrer"
+          );
+        });
+      })();
+    </script>
   </body>
 </html>
