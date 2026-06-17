@@ -1,12 +1,62 @@
 ---
-const SUBSCRIBER_COUNT = 327;
-const nextCleanup = {
-  date: "Saturday, June 20",
-  time: "10–11am",
-  corner: "Clarkson Ave & Bedford Ave",
-  mapsUrl:
-    "https://www.google.com/maps/search/?api=1&query=Clarkson%20Ave%20and%20Bedford%20Ave%2C%20Brooklyn%2C%20NY",
-};
+// ─── Build-time constants ────────────────────────────────────────────────────
+const CLEANUP_ISO        = "2026-06-20T10:00:00-04:00";
+const CLEANUP_TIME       = "10–11am";
+const CLEANUP_CORNER     = "Clarkson Ave & Bedford Ave";
+const CLEANUP_MAPS_URL   = "https://www.google.com/maps/search/?api=1&query=Clarkson%20Ave%20and%20Bedford%20Ave%2C%20Brooklyn%2C%20NY";
+const SUBSCRIBER_COUNT   = 327;
+
+// ─── Date logic (America/New_York) ──────────────────────────────────────────
+function etParts(d: Date) {
+  // en-CA gives YYYY-MM-DD — easy to split
+  const s = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(d);
+  const [y, m, day] = s.split("-").map(Number);
+  return { y, m, day };
+}
+
+const now        = new Date();
+const todayET    = etParts(now);
+const cleanupDate = new Date(CLEANUP_ISO);
+const cleanupET  = etParts(cleanupDate);
+
+// Whole-day difference using UTC midnight to dodge DST offsets
+const todayMs   = Date.UTC(todayET.y,   todayET.m   - 1, todayET.day);
+const cleanupMs = Date.UTC(cleanupET.y, cleanupET.m - 1, cleanupET.day);
+const N         = Math.round((cleanupMs - todayMs) / 86_400_000);
+
+const countdownLabel =
+  N <= 0 ? "today" :
+  N === 1 ? "tomorrow" :
+  `in ${N} days`;
+
+// Relative phrase — "This Saturday / Next Saturday / In N weeks"
+const todayDow      = new Date(todayMs).getUTCDay();           // 0=Sun 6=Sat
+const daysToThisSat = (6 - todayDow + 7) % 7;
+const thisSatMs     = todayMs + daysToThisSat * 86_400_000;
+const nextSatMs     = thisSatMs + 7 * 86_400_000;
+const weekWords     = ["one","two","three","four","five","six","seven","eight","nine","ten"];
+
+let relativePhrase: string;
+if      (cleanupMs === thisSatMs) relativePhrase = "This Saturday";
+else if (cleanupMs === nextSatMs) relativePhrase = "Next Saturday";
+else {
+  const wk = Math.max(1, Math.round(N / 7));
+  relativePhrase = `In ${weekWords[wk - 1] ?? wk} week${wk === 1 ? "" : "s"}`;
+}
+
+// Cleanup date display, e.g. "June 20"
+const cleanupDisplayDate = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/New_York",
+  month: "long", day: "numeric",
+}).format(cleanupDate);
+
+// Meteorological season + year (ET)
+const SEASONS = ["Winter","Winter","Spring","Spring","Spring",
+                 "Summer","Summer","Summer","Autumn","Autumn","Autumn","Winter"];
+const seasonLabel = `${SEASONS[todayET.m - 1]} ${todayET.y}`;
 ---
 
 <!doctype html>
@@ -51,23 +101,21 @@ const nextCleanup = {
       }
 
       :root {
-        --paper: #fbfbf9;
-        --ink: #1a1a17;
-        --ink-muted: #6b6b60;
-        --green: #c8ff00;
+        --paper:      #fbfbf9;
+        --ink:        #1a1a17;
+        --ink-muted:  #6b6b60;
+        --brand:      #63c9ea;   /* logo mark */
+        --accent:     #a1d74a;   /* sign-up button */
+        --select:     #eeb408;   /* text selection */
+        --control-h:  44px;
       }
 
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      html {
-        background: var(--paper);
-      }
+      html { background: var(--paper); }
+
+      ::selection          { background: var(--select); color: var(--ink); }
+      ::-moz-selection     { background: var(--select); color: var(--ink); }
 
       body {
         font-family: "Hanken Grotesk", system-ui, sans-serif;
@@ -80,149 +128,145 @@ const nextCleanup = {
         max-width: 640px;
         margin-inline: auto;
         padding: clamp(1.5rem, 5vw, 2.5rem) clamp(1.25rem, 6vw, 2.5rem);
-        text-align: center;
       }
 
       .sr-only {
         position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
+        width: 1px; height: 1px;
+        padding: 0; margin: -1px;
         overflow: hidden;
         clip: rect(0, 0, 0, 0);
         white-space: nowrap;
         border: 0;
       }
 
-      /* ── Header ──────────────────────────────── */
+      /* ── Header ──────────────────────────────────────── */
 
       .site-header {
-        margin-bottom: clamp(2.5rem, 9vw, 4.5rem);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20vh;
       }
 
-      .logo {
-        display: inline-block;
+      /* CSS-mask recolor: logo WebP alpha → brand blue */
+      .logo-mark {
         width: 44px;
         height: 44px;
+        flex-shrink: 0;
+        background: var(--brand);
+        -webkit-mask: url(/images/logo.webp) center / contain no-repeat;
+                mask: url(/images/logo.webp) center / contain no-repeat;
       }
 
-      /* ── Main ────────────────────────────────── */
-
-      main {
-        flex: 1;
-      }
-
-      .eyebrow {
+      .season-label {
         font-size: 0.6875rem;
         font-weight: 500;
         letter-spacing: 0.15em;
         text-transform: uppercase;
         color: var(--ink-muted);
-        margin-bottom: 0.625rem;
+        padding-top: 0.2rem; /* optical baseline with logo top */
       }
 
-      /* ── Headline + raccoon ──────────────────── */
+      /* ── Main ────────────────────────────────────────── */
 
-      .headline-wrap {
+      main { flex: 1; }
+
+      /* ── Hero ────────────────────────────────────────── */
+
+      .hero {
         position: relative;
-        margin-bottom: clamp(1.25rem, 4vw, 1.875rem);
+        margin-bottom: clamp(2rem, 7vw, 3.5rem);
       }
 
       h1 {
         font-family: "Fraunces", Georgia, serif;
-        font-size: clamp(2.625rem, 10.5vw, 3.75rem);
+        font-size: clamp(3.25rem, 11vw, 6rem);
         font-weight: 800;
-        line-height: 1.04;
-        letter-spacing: -0.025em;
+        line-height: 0.98;
+        letter-spacing: -0.03em;
         font-optical-sizing: auto;
         font-variation-settings: "SOFT" 50, "WONK" 1;
+        position: relative;
+        z-index: 1;
       }
 
       .raccoon {
         position: absolute;
-        right: -16px;
+        z-index: 0;
+        right: -8px;
         top: 50%;
-        width: clamp(84px, 22vw, 116px);
-        height: auto;
         transform: translateY(-50%) rotate(-8deg);
+        width: clamp(100px, 26vw, 148px);
+        height: auto;
         pointer-events: none;
         user-select: none;
+        opacity: 0.88;
       }
 
       @media (max-width: 380px) {
-        .raccoon {
-          width: 64px;
-          right: -4px;
-          top: -8px;
-          transform: rotate(-8deg);
-        }
+        .raccoon { width: 72px; }
       }
 
-      /* ── Mission ─────────────────────────────── */
-
-      .mission {
-        font-size: 1.0625rem;
-        line-height: 1.55;
-        margin-bottom: 0.3rem;
-      }
-
-      .human {
-        font-size: 1.0625rem;
-        line-height: 1.55;
-        color: var(--ink-muted);
-        margin-bottom: clamp(2rem, 7vw, 3rem);
-      }
-
-      /* ── Next cleanup ────────────────────────── */
+      /* ── Next Cleanup block ──────────────────────────── */
 
       .next-cleanup {
+        margin-inline: auto;
+        width: fit-content;
+        max-width: 100%;
+        text-align: left;
         margin-bottom: clamp(2rem, 7vw, 3rem);
       }
 
-      .next-label {
+      .next-countdown {
         font-size: 0.6875rem;
         font-weight: 500;
         letter-spacing: 0.15em;
         text-transform: uppercase;
         color: var(--ink-muted);
-        margin-bottom: 0.375rem;
+        margin-bottom: 0.5rem;
       }
 
-      .next-datetime {
-        font-size: 1.25rem;
-        font-weight: 600;
-        font-variant-numeric: tabular-nums slashed-zero;
-        line-height: 1.3;
-        margin-bottom: 0.3rem;
+      .next-row {
+        display: flex;
+        gap: 0.4ch;
+        font-size: 0.9375rem;
+        line-height: 1.55;
       }
+
+      .next-key { font-weight: 600; flex-shrink: 0; }
 
       .next-location a {
-        font-size: 1rem;
         color: var(--ink);
         text-decoration: underline;
         text-decoration-thickness: 1px;
         text-underline-offset: 3px;
-        text-decoration-color: rgba(26, 26, 23, 0.35);
+        text-decoration-color: rgba(26, 26, 23, 0.3);
       }
-
-      .next-location a:hover {
-        text-decoration-color: var(--ink);
-      }
-
+      .next-location a:hover  { text-decoration-color: var(--ink); }
       .next-location a:focus-visible {
-        outline: 2px solid var(--green);
+        outline: 2px solid var(--accent);
         outline-offset: 2px;
         border-radius: 2px;
       }
 
-      .next-reassurance {
-        font-size: 0.875rem;
+      .map-pin {
+        display: inline-flex;
+        align-items: center;
+        vertical-align: text-bottom;
+        margin-left: 0.2rem;
         color: var(--ink-muted);
-        margin-top: 0.375rem;
+      }
+      .map-pin svg { width: 15px; height: 15px; }
+
+      .next-reassurance {
+        font-size: 0.9375rem;
+        line-height: 1.55;
+        color: var(--ink-muted);
+        margin-top: 0.2rem;
       }
 
-      /* ── Subscribe ───────────────────────────── */
+      /* ── Subscribe ───────────────────────────────────── */
 
       .subscribe {
         margin-bottom: clamp(2rem, 7vw, 3rem);
@@ -230,85 +274,61 @@ const nextCleanup = {
 
       .subscribe-copy {
         font-size: 1rem;
-        line-height: 1.6;
-        margin-bottom: 1rem;
-        max-width: 36ch;
-        margin-inline: auto;
+        line-height: 1.55;
+        margin-bottom: 0.875rem;
       }
 
       .subscribe-form {
         display: flex;
-        flex-direction: column;
-        gap: 0.625rem;
-        max-width: 360px;
-        margin-inline: auto;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
       }
 
       .email-input {
+        height: var(--control-h);
         width: 100%;
-        height: 56px;
-        padding: 0 1rem;
+        max-width: 300px;
+        min-width: 160px;
+        padding: 0 0.875rem;
         font-family: "Hanken Grotesk", system-ui, sans-serif;
-        font-size: 1rem;
+        font-size: 0.9375rem;
         color: var(--ink);
         background: var(--paper);
         border: 1.5px solid rgba(26, 26, 23, 0.25);
         border-radius: 3px;
         outline: none;
-        text-align: left;
         transition: border-color 0.15s;
       }
-
-      .email-input:focus {
-        border-color: rgba(26, 26, 23, 0.55);
-      }
-
-      .email-input:focus-visible {
-        outline: 2px solid var(--green);
-        outline-offset: 0;
-      }
-
-      .email-input::placeholder {
-        color: var(--ink-muted);
-        opacity: 0.7;
-      }
+      .email-input:focus         { border-color: rgba(26, 26, 23, 0.55); }
+      .email-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
+      .email-input::placeholder  { color: var(--ink-muted); opacity: 0.7; }
 
       .subscribe-btn {
-        width: 100%;
-        height: 56px;
+        height: var(--control-h);
+        padding: 0 1.375rem;
         font-family: "Hanken Grotesk", system-ui, sans-serif;
-        font-size: 1.0625rem;
+        font-size: 0.9375rem;
         font-weight: 600;
-        letter-spacing: -0.01em;
         color: var(--ink);
-        background: var(--green);
+        background: var(--accent);
         border: none;
         border-radius: 3px;
         cursor: pointer;
+        white-space: nowrap;
         transition: opacity 0.15s;
       }
-
-      .subscribe-btn:hover:not(:disabled) {
-        opacity: 0.88;
-      }
-
-      .subscribe-btn:focus-visible {
-        outline: 3px solid var(--ink);
-        outline-offset: 3px;
-      }
-
-      .subscribe-btn:disabled {
-        opacity: 0.55;
-        cursor: not-allowed;
-      }
+      .subscribe-btn:hover:not(:disabled) { opacity: 0.88; }
+      .subscribe-btn:focus-visible        { outline: 3px solid var(--ink); outline-offset: 3px; }
+      .subscribe-btn:disabled             { opacity: 0.55; cursor: not-allowed; }
 
       .subscribe-status {
         font-size: 0.875rem;
         color: var(--ink-muted);
-        margin-top: 0.625rem;
+        margin-top: 0.5rem;
       }
 
-      /* ── Footer ──────────────────────────────── */
+      /* ── Footer ──────────────────────────────────────── */
 
       footer {
         margin-top: auto;
@@ -317,10 +337,11 @@ const nextCleanup = {
 
       .footer-icons {
         display: flex;
-        justify-content: center;
-        gap: 0.25rem;
+        gap: 0;
         list-style: none;
-        margin-bottom: 1.125rem;
+        margin-bottom: 1rem;
+        /* pull left edge flush with page left, icons have their own 44px tap cell */
+        margin-left: -10px;
       }
 
       .footer-icons a {
@@ -333,75 +354,84 @@ const nextCleanup = {
         border-radius: 4px;
         transition: color 0.15s;
       }
-
-      .footer-icons a:hover {
-        color: var(--ink);
-      }
-
+      .footer-icons a:hover       { color: var(--brand); }
       .footer-icons a:focus-visible {
-        outline: 2px solid var(--green);
+        outline: 2px solid var(--accent);
         outline-offset: 2px;
       }
 
-      .footer-icons svg {
-        width: 22px;
-        height: 22px;
-        flex-shrink: 0;
-      }
+      /*
+        Optical balance: Simple Icons (filled, glyph-to-edge) read heavier than
+        Heroicons (outline, internal padding) at the same px. Size them so they
+        feel equal weight: brand icons 20px, UI outline icons 22px.
+      */
+      .icon-brand { width: 20px; height: 20px; }
+      .icon-ui    { width: 22px; height: 22px; }
 
       .copyright {
-        font-size: 0.75rem;
-        color: var(--ink-muted);
-        padding-bottom: clamp(1.5rem, 5vw, 2.5rem);
+        font-size: 0.6875rem;
+        color: var(--ink);
+        opacity: 0.35;
       }
     </style>
   </head>
 
   <body>
     <header class="site-header">
-      <img
-        src="/images/logo.webp"
-        alt="Community Cleanup PLG"
-        class="logo"
-        width="44"
-        height="44"
-      />
+      <div
+        class="logo-mark"
+        role="img"
+        aria-label="Community Cleanup PLG"
+      ></div>
+      <span class="season-label">{seasonLabel}</span>
     </header>
 
     <main>
-      <p class="eyebrow">Summer 2026</p>
-
-      <div class="headline-wrap">
-        <h1>We clean Prospect&nbsp;Lefferts Gardens.</h1>
+      <!-- Raccoon in DOM first → z-index 0; h1 is z-index 1 via CSS -->
+      <div class="hero">
         <img
           src="/images/raccoon.webp"
           alt=""
           class="raccoon"
           aria-hidden="true"
-          width="116"
-          height="95"
+          width="148"
+          height="121"
         />
+        <h1>We clean Prospect&nbsp;Lefferts Gardens.</h1>
       </div>
 
-      <p class="mission">No registration, all supplies included. Just show up.</p>
-      <p class="human">Meet your neighbors. Have fun.</p>
-
       <div class="next-cleanup">
-        <p class="next-label">Next Cleanup</p>
-        <p class="next-datetime">{nextCleanup.date} &middot; {nextCleanup.time}</p>
-        <p class="next-location">
-          <a
-            href={nextCleanup.mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >{nextCleanup.corner}</a>
+        <p class="next-countdown">Next Cleanup {countdownLabel}</p>
+
+        <p class="next-row">
+          <span class="next-key">When:</span>
+          <span>{relativePhrase}, {cleanupDisplayDate} &middot; {CLEANUP_TIME}</span>
         </p>
-        <p class="next-reassurance">No registration — just show up.</p>
+
+        <p class="next-row next-location">
+          <span class="next-key">Where:</span>
+          <span>
+            <a
+              href={CLEANUP_MAPS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >{CLEANUP_CORNER}</a><span class="map-pin" aria-hidden="true"><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ><path d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" /><path d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 0 1 15 0z" /></svg></span>
+          </span>
+        </p>
+
+        <p class="next-reassurance">No registration, all supplies included. Just show up!</p>
       </div>
 
       <div class="subscribe">
         <p class="subscribe-copy">
-          Subscribe to a weekly email joining <span id="subscriber-count">{SUBSCRIBER_COUNT}</span> of your neighbors, to learn about upcoming cleanups and events:
+          Join <span id="subscriber-count">{SUBSCRIBER_COUNT}</span> of your neighbors, and subscribe to our weekly email for upcoming events:
         </p>
 
         <form
@@ -440,7 +470,7 @@ const nextCleanup = {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+            <svg class="icon-brand" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.791-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
             </svg>
           </a>
@@ -452,8 +482,8 @@ const nextCleanup = {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942.0209-.0407.0012-.0895-.0407-.1047-1.3928-.5236-2.7215-1.1447-3.9659-1.8519-.0444-.0247-.0479-.0768-.0088-.1092.0265-.0194.053-.0396.0794-.0605a.077.077 0 01.0805-.0108c2.3888 1.0904 4.9751 1.0904 7.335 0a.0762.0762 0 01.0805.0107c.0265.021.053.0413.0795.0605.0391.0325.0357.0846-.0088.1092-1.2444.7071-2.5731 1.3283-3.9659 1.8519-.0419.0152-.0616.0641-.0407.1047.3531.699.764 1.3638 1.2255 1.9942a.0766.0766 0 00.0842.0276c1.9584-.6072 3.9469-1.5224 6.0017-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z" />
+            <svg class="icon-brand" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z" />
             </svg>
           </a>
         </li>
@@ -464,7 +494,7 @@ const nextCleanup = {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+            <svg class="icon-brand" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
               <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 17.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z" />
             </svg>
           </a>
@@ -472,6 +502,7 @@ const nextCleanup = {
         <li>
           <a href="mailto:communitycleanupplg@gmail.com" aria-label="Email us">
             <svg
+              class="icon-ui"
               aria-hidden="true"
               viewBox="0 0 24 24"
               fill="none"
@@ -492,6 +523,7 @@ const nextCleanup = {
             rel="noopener noreferrer"
           >
             <svg
+              class="icon-ui"
               aria-hidden="true"
               viewBox="0 0 24 24"
               fill="none"
@@ -505,29 +537,27 @@ const nextCleanup = {
           </a>
         </li>
       </ul>
+
       <p class="copyright">&copy; 2026 Community Cleanup PLG</p>
     </footer>
 
     <script>
       (function () {
-        const form = document.getElementById("subscribe-form");
+        const form    = document.getElementById("subscribe-form");
         const counter = document.getElementById("subscriber-count");
-        const btn = document.getElementById("subscribe-btn");
-        const status = document.getElementById("subscribe-status");
+        const btn     = document.getElementById("subscribe-btn");
+        const status  = document.getElementById("subscribe-status");
         if (!form || !counter || !btn || !status) return;
 
         let submitted = false;
-
         form.addEventListener("submit", function (e) {
           e.preventDefault();
           if (submitted) return;
           submitted = true;
-
           counter.textContent = String(parseInt(counter.textContent, 10) + 1);
           btn.disabled = true;
           status.textContent = "Thanks — confirm in the tab that just opened.";
           status.hidden = false;
-
           window.open(
             "https://communitycleanupplg.substack.com/subscribe",
             "_blank",
