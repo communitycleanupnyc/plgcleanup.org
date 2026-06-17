@@ -1,6 +1,4 @@
 ---
-import { etDateParts } from "../data/event";
-
 interface Props {
     title?: string;
     description?: string;
@@ -10,22 +8,8 @@ const {
     description = "We clean Prospect Lefferts Gardens. No registration, all supplies included. Just show up.",
 } = Astro.props;
 
-const { y, m } = etDateParts(new Date());
-const SEASONS = [
-    "Winter",
-    "Winter",
-    "Spring",
-    "Spring",
-    "Spring",
-    "Summer",
-    "Summer",
-    "Summer",
-    "Autumn",
-    "Autumn",
-    "Autumn",
-    "Winter",
-];
-const seasonLabel = `${SEASONS[m - 1]} ${y}`;
+const TICKER_TEXT =
+    "2,972.55 pounds of trash collected since January 1, 2026 by 300+ volunteers";
 ---
 
 <!doctype html>
@@ -77,6 +61,8 @@ const seasonLabel = `${SEASONS[m - 1]} ${y}`;
                 --accent: #a1d74a;
                 --select: #eeb408;
                 --edge: clamp(1.25rem, 5vw, 3rem);
+                --ticker-h: 2.25rem;
+                --nav-h: 3.5rem;
             }
 
             *,
@@ -108,8 +94,7 @@ const seasonLabel = `${SEASONS[m - 1]} ${y}`;
                 min-height: 100svh;
                 display: flex;
                 flex-direction: column;
-                max-width: 900px;
-                margin-inline: auto;
+                overflow-x: clip;
             }
 
             .sr-only {
@@ -124,37 +109,193 @@ const seasonLabel = `${SEASONS[m - 1]} ${y}`;
                 border: 0;
             }
 
-            /* ── Header ─────────────────────────────────────── */
+            /* ── Ticker ─────────────────────────────────────── */
 
-            .site-header {
+            .ticker {
+                position: sticky;
+                top: 0;
+                z-index: 50;
+                display: flex;
+                align-items: center;
+                height: var(--ticker-h);
+                background: var(--bg);
+                border-bottom: 1px solid var(--line);
+                overflow: hidden;
+            }
+
+            .ticker__btn {
+                flex-shrink: 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: calc(var(--ticker-h) + 0.5rem);
+                height: var(--ticker-h);
+                border: none;
+                background: transparent;
+                color: var(--muted);
+                cursor: pointer;
+                border-right: 1px solid var(--line);
+                transition: color 0.15s;
+            }
+            .ticker__btn:hover {
+                color: var(--text);
+            }
+            .ticker__btn:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: -2px;
+            }
+
+            .ticker__btn .icon-pause {
+                display: none;
+            }
+            .ticker.is-playing .ticker__btn .icon-play {
+                display: none;
+            }
+            .ticker.is-playing .ticker__btn .icon-pause {
+                display: block;
+            }
+
+            .ticker__mask {
+                flex: 1;
+                overflow: hidden;
+                height: 100%;
+                display: flex;
+                align-items: center;
+            }
+
+            .ticker__track {
+                display: inline-flex;
+                gap: 3rem;
+                white-space: nowrap;
+                font-size: 0.6875rem;
+                font-weight: 500;
+                letter-spacing: 0.04em;
+                color: var(--muted);
+                font-variant-numeric: tabular-nums slashed-zero;
+                animation: ticker-scroll 32s linear infinite;
+                animation-play-state: paused;
+                padding-left: 1rem;
+            }
+
+            .ticker.is-playing .ticker__track {
+                animation-play-state: running;
+            }
+
+            @keyframes ticker-scroll {
+                to {
+                    transform: translateX(-50%);
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .ticker__track {
+                    animation: none;
+                }
+            }
+
+            /* ── Nav ────────────────────────────────────────── */
+
+            .nav {
+                position: fixed;
+                top: var(--ticker-h);
+                left: 0;
+                right: 0;
+                z-index: 40;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: var(--edge) var(--edge) 0;
-                margin-bottom: 20vh;
+                padding: 0 var(--edge);
+                height: var(--nav-h);
+                transition:
+                    transform 0.25s ease,
+                    background 0.25s ease,
+                    backdrop-filter 0.25s ease;
+            }
+
+            .nav--hidden {
+                transform: translateY(-130%);
+            }
+
+            .nav--solid {
+                background: rgba(20, 19, 15, 0.92);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+
+            .nav-home {
+                display: inline-flex;
+                align-items: center;
+                text-decoration: none;
+                border-radius: 4px;
+            }
+            .nav-home:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: 4px;
             }
 
             .logo-mark {
-                width: 44px;
-                height: 44px;
+                width: 32px;
+                height: 32px;
                 flex-shrink: 0;
                 background: var(--brand);
                 -webkit-mask: url(/images/logo.webp) center / contain no-repeat;
                 mask: url(/images/logo.webp) center / contain no-repeat;
             }
 
-            .season-label {
-                font-size: 0.6875rem;
-                font-weight: 500;
-                letter-spacing: 0.15em;
+            .nav-links {
+                display: flex;
+                align-items: center;
+                gap: 1.5rem;
+            }
+
+            .nav-link {
+                font-size: 0.75rem;
+                font-weight: 600;
+                letter-spacing: 0.1em;
                 text-transform: uppercase;
                 color: var(--muted);
+                text-decoration: none;
+                transition: color 0.15s;
+            }
+            .nav-link:hover {
+                color: var(--text);
+            }
+            .nav-link:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: 3px;
+                border-radius: 2px;
+            }
+
+            .nav-btn {
+                display: inline-flex;
+                align-items: center;
+                font-size: 0.75rem;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                color: var(--bg);
+                background: var(--accent);
+                text-decoration: none;
+                padding: 0.375rem 0.875rem;
+                border-radius: 999px;
+                transition: opacity 0.15s;
+            }
+            .nav-btn:hover {
+                opacity: 0.85;
+            }
+            .nav-btn:focus-visible {
+                outline: 3px solid var(--text);
+                outline-offset: 3px;
             }
 
             /* ── Main ───────────────────────────────────────── */
 
             main {
                 flex: 1;
+                max-width: 900px;
+                width: 100%;
+                margin-inline: auto;
+                padding-top: var(--nav-h);
             }
 
             /* ── Hero (home page) ───────────────────────────── */
@@ -162,7 +303,17 @@ const seasonLabel = `${SEASONS[m - 1]} ${y}`;
             .hero {
                 position: relative;
                 padding-left: var(--edge);
+                padding-top: clamp(3rem, 8vw, 5rem);
                 margin-bottom: clamp(2rem, 7vw, 3.5rem);
+            }
+
+            .hero-kicker {
+                font-size: 0.6875rem;
+                font-weight: 500;
+                letter-spacing: 0.15em;
+                text-transform: uppercase;
+                color: var(--muted);
+                margin-bottom: 0.875rem;
             }
 
             h1 {
@@ -318,37 +469,70 @@ const seasonLabel = `${SEASONS[m - 1]} ${y}`;
                 opacity: 0.75;
             }
 
-            /* ── Why volunteer ──────────────────────────────── */
+            /* ── Why volunteer (Config 3-col grid) ──────────── */
 
             .why {
-                max-width: 680px;
-                margin-inline: auto;
-                padding-inline: var(--edge);
+                /* break out of main's 900px to be 95vw */
+                width: 95vw;
+                margin-left: calc(50% - 47.5vw);
                 margin-bottom: clamp(2rem, 7vw, 3rem);
             }
 
-            .why-heading {
+            .why__label {
+                font-size: 0.6875rem;
+                font-weight: 600;
+                letter-spacing: 0.15em;
+                text-transform: uppercase;
+                color: var(--muted);
+                margin-bottom: 0.75rem;
+                padding-left: clamp(1rem, 2.5vw, 1.5rem);
+            }
+
+            .why__label::before {
+                content: "▪ ";
+            }
+
+            .why__grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                border-top: 1px solid var(--line);
+                border-bottom: 1px solid var(--line);
+            }
+
+            .why__col {
+                padding: 2rem clamp(1rem, 2.5vw, 1.5rem);
+            }
+
+            .why__col + .why__col {
+                border-left: 1px solid var(--line);
+            }
+
+            .why__col h3 {
                 font-family: "Fraunces", Georgia, serif;
-                font-size: clamp(1.5rem, 4vw, 2rem);
-                font-weight: 700;
+                font-size: clamp(1.4rem, 3vw, 2rem);
+                font-weight: 600;
+                font-optical-sizing: auto;
+                font-variation-settings:
+                    "SOFT" 50,
+                    "WONK" 1;
+                line-height: 1.1;
+                margin-bottom: 0.75rem;
             }
 
-            .why-block h3 {
-                font-size: 1rem;
-                font-weight: 700;
-                margin-bottom: 0.375rem;
-            }
-
-            .why-block p {
+            .why__col p {
                 font-size: 0.9375rem;
                 line-height: 1.6;
                 color: var(--muted);
             }
 
-            .why > * + * {
-                border-top: 1px solid var(--line);
-                padding-top: 1.25rem;
-                margin-top: 1.25rem;
+            @media (max-width: 760px) {
+                .why__grid {
+                    grid-template-columns: 1fr;
+                }
+                .why__col + .why__col {
+                    border-left: none;
+                    border-top: 1px solid var(--line);
+                }
             }
 
             /* ── Subscribe (iframe) ─────────────────────────── */
@@ -422,180 +606,261 @@ const seasonLabel = `${SEASONS[m - 1]} ${y}`;
                 border-radius: 2px;
             }
 
-            /* ── Footer ─────────────────────────────────────── */
+            /* ── Stub pages ─────────────────────────────────── */
 
-            footer {
-                margin-top: auto;
-                padding-top: clamp(2.5rem, 8vw, 4rem);
+            .stub-page {
+                padding: clamp(3rem, 8vw, 5rem) var(--edge) clamp(2rem, 7vw, 3rem);
             }
 
-            .footer-icons {
-                display: flex;
-                justify-content: center;
-                gap: 0;
-                list-style: none;
+            .stub-page h1 {
                 margin-bottom: 1rem;
             }
 
-            .footer-icons a {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                width: 44px;
-                height: 44px;
+            .stub-desc {
                 color: var(--muted);
-                border-radius: 4px;
+                margin-bottom: 2rem;
+                font-size: 1.0625rem;
+                line-height: 1.55;
+            }
+
+            /* ── Footer ─────────────────────────────────────── */
+
+            .site-footer {
+                border-top: 1px solid var(--line);
+                margin-top: auto;
+                padding-top: clamp(2rem, 5vw, 3rem);
+            }
+
+            .footer-grid {
+                max-width: 900px;
+                margin-inline: auto;
+                padding: 0 var(--edge) var(--edge);
+                display: grid;
+                grid-template-columns: auto auto 1fr;
+                gap: clamp(1.5rem, 5vw, 3rem);
+                align-items: start;
+            }
+
+            .footer-col {
+                display: flex;
+                flex-direction: column;
+                gap: 0.625rem;
+            }
+
+            .footer-col a {
+                font-size: 0.6875rem;
+                font-weight: 600;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: var(--muted);
+                text-decoration: none;
                 transition: color 0.15s;
             }
-            .footer-icons a:hover {
-                color: var(--brand);
+            .footer-col a:hover {
+                color: var(--text);
             }
-            .footer-icons a:focus-visible {
+            .footer-col a:focus-visible {
                 outline: 2px solid var(--accent);
-                outline-offset: 2px;
+                outline-offset: 3px;
+                border-radius: 2px;
             }
 
-            /* Optical balance: brand (filled, edge-to-edge) at 20px; UI outline at 22px */
-            .icon-brand {
-                width: 20px;
-                height: 20px;
-            }
-            .icon-ui {
-                width: 22px;
-                height: 22px;
+            .footer-right {
+                text-align: right;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 0.625rem;
             }
 
-            .copyright {
+            .footer-right a {
                 font-size: 0.6875rem;
+                font-weight: 600;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: var(--muted);
+                text-decoration: none;
+                transition: color 0.15s;
+            }
+            .footer-right a:hover {
+                color: var(--text);
+            }
+            .footer-right a:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: 3px;
+                border-radius: 2px;
+            }
+
+            .footer-copyright {
+                font-size: 0.6875rem;
+                font-weight: 600;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
                 color: var(--text);
                 opacity: 0.3;
-                margin-left: var(--edge);
-                margin-bottom: var(--edge);
+            }
+
+            @media (max-width: 600px) {
+                .footer-grid {
+                    grid-template-columns: 1fr;
+                    gap: 1.5rem;
+                }
+                .footer-right {
+                    text-align: left;
+                    align-items: flex-start;
+                }
             }
         </style>
     </head>
 
     <body>
-        <header class="site-header">
-            <div
-                class="logo-mark"
-                role="img"
-                aria-label="Community Cleanup PLG"
+        <!-- Sticky ticker at top of viewport -->
+        <div class="ticker" id="ticker">
+            <button
+                class="ticker__btn"
+                id="ticker-btn"
+                aria-pressed="false"
+                aria-label="Play ticker"
             >
+                <!-- play -->
+                <svg
+                    class="icon-play"
+                    aria-hidden="true"
+                    viewBox="0 0 12 12"
+                    fill="currentColor"
+                    width="10"
+                    height="10"
+                >
+                    <path d="M2 1.5l8 4.5-8 4.5V1.5z"></path>
+                </svg>
+                <!-- pause -->
+                <svg
+                    class="icon-pause"
+                    aria-hidden="true"
+                    viewBox="0 0 12 12"
+                    fill="currentColor"
+                    width="10"
+                    height="10"
+                >
+                    <rect x="2" y="1.5" width="3" height="9" rx="0.5"></rect>
+                    <rect x="7" y="1.5" width="3" height="9" rx="0.5"></rect>
+                </svg>
+            </button>
+            <div class="ticker__mask">
+                <div class="ticker__track" id="ticker-track">
+                    {/* 10 repetitions → animation moves -50% = 5 spans seamlessly */}
+                    {
+                        Array.from({ length: 10 }, (_, i) => (
+                            <span aria-hidden={i > 0 ? "true" : undefined}>
+                                {TICKER_TEXT}
+                            </span>
+                        ))
+                    }
+                </div>
             </div>
-            <span class="season-label">{seasonLabel}</span>
-        </header>
+        </div>
+
+        <!-- Fixed scroll-aware nav: logo left | ABOUT · FAQ · JOIN US right -->
+        <nav class="nav" id="main-nav" aria-label="Site navigation">
+            <a
+                href="/"
+                class="nav-home"
+                aria-label="Community Cleanup PLG — home"
+            >
+                <div class="logo-mark" aria-hidden="true"></div>
+            </a>
+            <div class="nav-links">
+                <a href="/about" class="nav-link">About</a>
+                <a href="/faq" class="nav-link">FAQ</a>
+                <a href="/join" class="nav-btn">Join us</a>
+            </div>
+        </nav>
 
         <main>
             <slot />
         </main>
 
-        <footer>
-            <ul class="footer-icons">
-                <li>
-                    <a
-                        href="https://www.instagram.com/communitycleanupplg/"
-                        aria-label="Instagram"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <svg
-                            class="icon-brand"
-                            aria-hidden="true"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                        >
-                            <path
-                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.791-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
-                            ></path>
-                        </svg>
-                    </a>
-                </li>
-                <li>
+        <footer class="site-footer">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <a href="/join">Join us</a>
+                    <a href="/faq">FAQ</a>
+                    <a href="/about">About</a>
+                </div>
+                <div class="footer-col">
                     <a
                         href="https://discord.com/invite/H9her7r8N2"
-                        aria-label="Discord"
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="noopener noreferrer">Discord</a
                     >
-                        <svg
-                            class="icon-brand"
-                            aria-hidden="true"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                        >
-                            <path
-                                d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"
-                            ></path>
-                        </svg>
-                    </a>
-                </li>
-                <li>
+                    <a href="mailto:communitycleanupplg@gmail.com">Email us</a>
                     <a
                         href="https://communitycleanupplg.substack.com/subscribe"
-                        aria-label="Substack newsletter"
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="noopener noreferrer">Substack</a
                     >
-                        <svg
-                            class="icon-brand"
-                            aria-hidden="true"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                        >
-                            <path
-                                d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 17.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"
-                            ></path>
-                        </svg>
-                    </a>
-                </li>
-                <li>
                     <a
-                        href="mailto:communitycleanupplg@gmail.com"
-                        aria-label="Email us"
+                        href="https://www.instagram.com/communitycleanupplg/"
+                        target="_blank"
+                        rel="noopener noreferrer">Instagram</a
                     >
-                        <svg
-                            class="icon-ui"
-                            aria-hidden="true"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <path
-                                d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
-                            ></path>
-                        </svg>
-                    </a>
-                </li>
-                <li>
                     <a
                         href="https://www.amazon.com/registries/gl/guest-view/1Y3YRXM9ILG5I"
-                        aria-label="Amazon wishlist"
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="noopener noreferrer">Support us</a
                     >
-                        <svg
-                            class="icon-ui"
-                            aria-hidden="true"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <path
-                                d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-                            ></path>
-                        </svg>
-                    </a>
-                </li>
-            </ul>
-
-            <p class="copyright">&copy; 2026 Community Cleanup PLG</p>
+                </div>
+                <div class="footer-right">
+                    <a href="/terms">Volunteering Terms</a>
+                    <p class="footer-copyright">
+                        &copy; Community Cleanup PLG 2026
+                    </p>
+                </div>
+            </div>
         </footer>
+
+        <script>
+            // Ticker play/pause toggle
+            const ticker = document.getElementById("ticker")!;
+            const tickerBtn = document.getElementById("ticker-btn")!;
+            tickerBtn.addEventListener("click", () => {
+                const playing = ticker.classList.toggle("is-playing");
+                tickerBtn.setAttribute("aria-pressed", String(playing));
+                tickerBtn.setAttribute(
+                    "aria-label",
+                    playing ? "Pause ticker" : "Play ticker",
+                );
+            });
+
+            // Scroll-aware nav: hide on down, reappear on up
+            const nav = document.getElementById("main-nav")!;
+            let lastY = 0;
+            let ticking = false;
+            window.addEventListener(
+                "scroll",
+                () => {
+                    if (!ticking) {
+                        requestAnimationFrame(() => {
+                            const y = window.scrollY;
+                            if (y < 80) {
+                                nav.classList.remove(
+                                    "nav--hidden",
+                                    "nav--solid",
+                                );
+                            } else if (y > lastY) {
+                                nav.classList.add("nav--hidden");
+                            } else {
+                                nav.classList.remove("nav--hidden");
+                                nav.classList.add("nav--solid");
+                            }
+                            lastY = y;
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
+                },
+                { passive: true },
+            );
+        </script>
     </body>
 </html>

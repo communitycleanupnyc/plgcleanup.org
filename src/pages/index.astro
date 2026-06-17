@@ -13,6 +13,9 @@ import {
 const cleanupDate = new Date(CLEANUP_ISO);
 const now = new Date();
 const todayET = etDateParts(now);
+
+const SEASONS = ["Winter","Winter","Spring","Spring","Spring","Summer","Summer","Summer","Autumn","Autumn","Autumn","Winter"];
+const seasonLabel = `${SEASONS[todayET.m - 1]} ${todayET.y}`;
 const cleanupET = etDateParts(cleanupDate);
 
 // Whole-day diff using UTC midnight to dodge DST
@@ -45,8 +48,8 @@ if (cleanupMs === thisSatMs) {
 ---
 
 <Base>
-    <!-- Raccoon in DOM before h1 so it's behind via z-index -->
     <div class="hero">
+        <p class="hero-kicker">{seasonLabel}</p>
         <h1>We clean Prospect&nbsp;Lefferts Gardens.</h1>
         <img
             src="/images/raccoon.webp"
@@ -128,19 +131,21 @@ if (cleanupMs === thisSatMs) {
         <a href="/join" class="join-btn">Join us this weekend</a>
     </div>
 
-    <section class="why" aria-labelledby="why-heading">
-        <h2 class="why-heading" id="why-heading">Why volunteer</h2>
-        <div class="why-block">
-            <h3>How it helps</h3>
-            <p>[placeholder] A cleaner block lifts the whole neighborhood, and the work itself is oddly satisfying. Replace.</p>
-        </div>
-        <div class="why-block">
-            <h3>What to expect</h3>
-            <p>[placeholder] Grab a picker and a bag, we point you at a stretch of sidewalk, and an hour later it's transformed. Replace.</p>
-        </div>
-        <div class="why-block">
-            <h3>Who you'll meet</h3>
-            <p>[placeholder] Your actual neighbors — every age, all welcome, zero experience needed. Replace.</p>
+    <section class="why" aria-labelledby="why-label">
+        <p class="why__label" id="why-label">Why volunteer</p>
+        <div class="why__grid">
+            <div class="why__col">
+                <h3>How it helps</h3>
+                <p>[placeholder] A cleaner block lifts the whole neighborhood, and the work itself is oddly satisfying. Replace.</p>
+            </div>
+            <div class="why__col">
+                <h3>What to expect</h3>
+                <p>[placeholder] Grab a picker and a bag, we point you at a stretch of sidewalk, and an hour later it's transformed. Replace.</p>
+            </div>
+            <div class="why__col">
+                <h3>Who you'll meet</h3>
+                <p>[placeholder] Your actual neighbors — every age, all welcome, zero experience needed. Replace.</p>
+            </div>
         </div>
     </section>
 
