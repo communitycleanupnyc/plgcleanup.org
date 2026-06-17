@@ -14,7 +14,20 @@ const cleanupDate = new Date(CLEANUP_ISO);
 const now = new Date();
 const todayET = etDateParts(now);
 
-const SEASONS = ["Winter","Winter","Spring","Spring","Spring","Summer","Summer","Summer","Autumn","Autumn","Autumn","Winter"];
+const SEASONS = [
+    "Winter",
+    "Winter",
+    "Spring",
+    "Spring",
+    "Spring",
+    "Summer",
+    "Summer",
+    "Summer",
+    "Autumn",
+    "Autumn",
+    "Autumn",
+    "Winter",
+];
 const seasonLabel = `${SEASONS[todayET.m - 1]} ${todayET.y}`;
 const cleanupET = etDateParts(cleanupDate);
 
@@ -23,7 +36,12 @@ const todayMs = Date.UTC(todayET.y, todayET.m - 1, todayET.day);
 const cleanupMs = Date.UTC(cleanupET.y, cleanupET.m - 1, cleanupET.day);
 const N = Math.round((cleanupMs - todayMs) / 86_400_000);
 
-const countdownLabel = N <= 0 ? "today" : N === 1 ? "tomorrow" : `in ${N} days`;
+// Conversational countdown sentence; null when N < 0 (hide rather than render "in -3 days")
+const countdownSentence =
+    N >= 2 ? `Curious about volunteering with us? The next cleanup is in ${N} days.`
+    : N === 1 ? "Curious about volunteering with us? The next cleanup is tomorrow."
+    : N === 0 ? "Curious about volunteering with us? The next cleanup is today."
+    : null;
 
 // "This Saturday / Next Saturday / Saturday" for the When line
 const todayDow = new Date(todayMs).getUTCDay(); // 0=Sun 6=Sat
@@ -67,9 +85,9 @@ if (cleanupMs === thisSatMs) {
     Empty cells in col1 on rows 1 and 4 let .span items fill col2–3.
   -->
     <div class="cleanup">
-        <!-- Row 1: countdown -->
-        <div aria-hidden="true"></div>
-        <p class="span cleanup-countdown">Next Cleanup {countdownLabel}</p>
+        <!-- Row 1: countdown sentence (hidden when event has passed) -->
+        {countdownSentence && <div aria-hidden="true"></div>}
+        {countdownSentence && <p class="span cleanup-countdown">{countdownSentence}</p>}
 
         <!-- Row 2: When — calendar icon is an add-to-calendar link (the easter egg) -->
         <a
@@ -127,8 +145,9 @@ if (cleanupMs === thisSatMs) {
         </p>
     </div>
 
-    <div class="join-wrap">
-        <a href="/join" class="join-btn">Join us this weekend</a>
+    <div class="cta-actions">
+        <a class="cta-primary" href="/join">Join us this weekend</a>
+        <a class="cta-secondary" href="/schedule">View schedule</a>
     </div>
 
     <section class="why" aria-labelledby="why-label">
@@ -136,15 +155,25 @@ if (cleanupMs === thisSatMs) {
         <div class="why__grid">
             <div class="why__col">
                 <h3>How it helps</h3>
-                <p>[placeholder] A cleaner block lifts the whole neighborhood, and the work itself is oddly satisfying. Replace.</p>
+                <p>
+                    [placeholder] A cleaner block lifts the whole neighborhood,
+                    and the work itself is oddly satisfying. Replace.
+                </p>
             </div>
             <div class="why__col">
                 <h3>What to expect</h3>
-                <p>[placeholder] Grab a picker and a bag, we point you at a stretch of sidewalk, and an hour later it's transformed. Replace.</p>
+                <p>
+                    [placeholder] Grab a picker and a bag, we point you at a
+                    stretch of sidewalk, and an hour later it's transformed.
+                    Replace.
+                </p>
             </div>
             <div class="why__col">
                 <h3>Who you'll meet</h3>
-                <p>[placeholder] Your actual neighbors — every age, all welcome, zero experience needed. Replace.</p>
+                <p>
+                    [placeholder] Your actual neighbors — every age, all
+                    welcome, zero experience needed. Replace.
+                </p>
             </div>
         </div>
     </section>
