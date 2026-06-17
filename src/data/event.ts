@@ -6,6 +6,7 @@ export const CLEANUP_MAPS_URL =
 export const CLEANUP_CALENDAR_URL =
   "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Community+Cleanup+PLG&dates=20260620T100000/20260620T110000&ctz=America%2FNew_York&location=Clarkson+Ave+%26+Bedford+Ave%2C+Brooklyn%2C+NY&details=No+registration%2C+all+supplies+included.+Just+show+up%21+https%3A%2F%2Fplgcleanup.org";
 export const SUBSCRIBER_COUNT = 327;
+export const VOLUNTEER_COUNT = 876;
 
 /** Parse a Date into year/month/day parts in America/New_York. */
 export function etDateParts(d: Date) {

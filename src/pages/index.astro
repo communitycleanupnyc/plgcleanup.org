@@ -8,6 +8,7 @@ import {
     CLEANUP_CALENDAR_URL,
     SUBSCRIBER_COUNT,
     etDateParts,
+    VOLUNTEER_COUNT,
 } from "../data/event";
 
 const cleanupDate = new Date(CLEANUP_ISO);
@@ -36,12 +37,14 @@ const todayMs = Date.UTC(todayET.y, todayET.m - 1, todayET.day);
 const cleanupMs = Date.UTC(cleanupET.y, cleanupET.m - 1, cleanupET.day);
 const N = Math.round((cleanupMs - todayMs) / 86_400_000);
 
-// Conversational countdown sentence; null when N < 0 (hide rather than render "in -3 days")
 const countdownSentence =
-    N >= 2 ? `Curious about volunteering with us? The next cleanup is in ${N} days.`
-    : N === 1 ? "Curious about volunteering with us? The next cleanup is tomorrow."
-    : N === 0 ? "Curious about volunteering with us? The next cleanup is today."
-    : null;
+    N >= 2
+        ? `The next cleanup is happening in ${N} days, and each cleanup is only an hour. Want to see why people love volunteering with us?`
+        : N === 1
+          ? "The next cleanup is happening tomorrow, and it\'s only an hour. Want to see why people love volunteering with us?"
+          : N === 0
+            ? "The next cleanup is today — and it\'s only an hour. Want to see why people love volunteering with us?"
+            : "Each cleanup is only an hour. Want to see why people love volunteering with us?";
 
 // "This Saturday / Next Saturday / Saturday" for the When line
 const todayDow = new Date(todayMs).getUTCDay(); // 0=Sun 6=Sat
@@ -67,8 +70,7 @@ if (cleanupMs === thisSatMs) {
 
 <Base>
     <div class="hero">
-        <p class="hero-kicker">{seasonLabel}</p>
-        <h1>We clean Prospect&nbsp;Lefferts Gardens.</h1>
+        <h1>Help clean up Prospect&nbsp;Lefferts Gardens.</h1>
         <img
             src="/images/raccoon.webp"
             alt=""
@@ -79,70 +81,12 @@ if (cleanupMs === thisSatMs) {
         />
     </div>
 
-    <!--
-    Next Cleanup grid:
-    col1 (icon) | col2 (label) | col3 (value)
-    Empty cells in col1 on rows 1 and 4 let .span items fill col2–3.
-  -->
-    <div class="cleanup">
-        <!-- Row 1: countdown sentence (hidden when event has passed) -->
-        {countdownSentence && <div aria-hidden="true"></div>}
-        {countdownSentence && <p class="span cleanup-countdown">{countdownSentence}</p>}
-
-        <!-- Row 2: When — calendar icon is an add-to-calendar link (the easter egg) -->
-        <a
-            class="icon-cell"
-            href={CLEANUP_CALENDAR_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Add to calendar"
-            title="Add to calendar"
-        >
-            <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-            >
-                <path
-                    d="M6.75 3V5.25M17.25 3V5.25M3 18.75V7.5C3 6.25736 4.00736 5.25 5.25 5.25H18.75C19.9926 5.25 21 6.25736 21 7.5V18.75M3 18.75C3 19.9926 4.00736 21 5.25 21H18.75C19.9926 21 21 19.9926 21 18.75M3 18.75V11.25C3 10.0074 4.00736 9 5.25 9H18.75C19.9926 9 21 10.0074 21 11.25V18.75"
-                ></path>
-            </svg>
-        </a>
-        <span class="cleanup-key">When:</span>
-        <span class="cleanup-val">{whenPhrase}</span>
-
-        <!-- Row 3: Where -->
-        <span class="icon-cell" aria-hidden="true">
-            <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-            >
-                <path d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path>
-                <path
-                    d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 0 1 15 0z"
-                ></path>
-            </svg>
-        </span>
-        <span class="cleanup-key">Where:</span>
-        <span class="cleanup-val">
-            <a href={CLEANUP_MAPS_URL} target="_blank" rel="noopener noreferrer"
-                >{CLEANUP_CORNER}</a
-            >
-        </span>
-
-        <!-- Row 4: reassurance -->
-        <div aria-hidden="true"></div>
-        <p class="span cleanup-reassurance">
-            No registration, all supplies included. Just show up!
+    <div class="hero-body">
+        <p>
+            Since 2023, {VOLUNTEER_COUNT} of your neighbors have been helping clean
+            up our streets with Community Cleanup PLG.
         </p>
+        <p>{countdownSentence}</p>
     </div>
 
     <div class="cta-actions">
@@ -154,10 +98,15 @@ if (cleanupMs === thisSatMs) {
         <p class="why__label" id="why-label">Why volunteer</p>
         <div class="why__grid">
             <div class="why__col">
-                <h3>How it helps</h3>
+                <h3>Why this is awesome!</h3>
                 <p>
-                    [placeholder] A cleaner block lifts the whole neighborhood,
-                    and the work itself is oddly satisfying. Replace.
+                    Every piece of trash counts. And when people see us on the
+                    streets, they are inspired to help. Besides, volunteering
+                    itself helps you: there are "significant positive effects of
+                    volunteering on social, physical and mental health"(<a
+                        href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10159229/"
+                        >Cambridge University Press</a
+                    >).
                 </p>
             </div>
             <div class="why__col">
@@ -171,27 +120,13 @@ if (cleanupMs === thisSatMs) {
             <div class="why__col">
                 <h3>Who you'll meet</h3>
                 <p>
-                    [placeholder] Your actual neighbors — every age, all
-                    welcome, zero experience needed. Replace.
+                    We usually have around 5–10 volunteers at every event. These
+                    are your neighbors, and they are awesome. You're welcome to
+                    chat or lock in and do your own thing. Over {
+                        VOLUNTEER_COUNT
+                    } of our neighbors have volunteered so far.
                 </p>
             </div>
         </div>
     </section>
-
-    <div class="subscribe">
-        <p class="subscribe-copy">
-            Join {SUBSCRIBER_COUNT} of your neighbors, and subscribe to our weekly
-            email for upcoming events:
-        </p>
-        <div class="iframe-wrap">
-            <iframe
-                src="https://communitycleanupplg.substack.com/embed"
-                title="Subscribe to the Community Cleanup PLG newsletter"
-                width="480"
-                height="150"
-                style="border:none; background:white; max-width:100%;"
-                frameborder="0"
-                scrolling="no"></iframe>
-        </div>
-    </div>
 </Base>
