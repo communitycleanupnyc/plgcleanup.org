@@ -1,9 +1,13 @@
 ---
 import Base from "../layouts/Base.astro";
 import {
-  CLEANUP_ISO, CLEANUP_TIME, CLEANUP_CORNER,
-  CLEANUP_MAPS_URL, CLEANUP_CALENDAR_URL, SUBSCRIBER_COUNT,
-  etDateParts,
+    CLEANUP_ISO,
+    CLEANUP_TIME,
+    CLEANUP_CORNER,
+    CLEANUP_MAPS_URL,
+    CLEANUP_CALENDAR_URL,
+    SUBSCRIBER_COUNT,
+    etDateParts,
 } from "../data/event";
 
 const cleanupDate = new Date(CLEANUP_ISO);
@@ -12,14 +16,11 @@ const todayET = etDateParts(now);
 const cleanupET = etDateParts(cleanupDate);
 
 // Whole-day diff using UTC midnight to dodge DST
-const todayMs   = Date.UTC(todayET.y,   todayET.m   - 1, todayET.day);
+const todayMs = Date.UTC(todayET.y, todayET.m - 1, todayET.day);
 const cleanupMs = Date.UTC(cleanupET.y, cleanupET.m - 1, cleanupET.day);
 const N = Math.round((cleanupMs - todayMs) / 86_400_000);
 
-const countdownLabel =
-  N <= 0 ? "today" :
-  N === 1 ? "tomorrow" :
-  `in ${N} days`;
+const countdownLabel = N <= 0 ? "today" : N === 1 ? "tomorrow" : `in ${N} days`;
 
 // "This Saturday / Next Saturday / Saturday" for the When line
 const todayDow = new Date(todayMs).getUTCDay(); // 0=Sun 6=Sat
@@ -28,96 +29,135 @@ const thisSatMs = todayMs + daysToThisSat * 86_400_000;
 const nextSatMs = thisSatMs + 7 * 86_400_000;
 
 const cleanupDisplayDate = new Intl.DateTimeFormat("en-US", {
-  timeZone: "America/New_York",
-  month: "long",
-  day: "numeric",
+    timeZone: "America/New_York",
+    month: "long",
+    day: "numeric",
 }).format(cleanupDate); // "June 20"
 
 let whenPhrase: string;
 if (cleanupMs === thisSatMs) {
-  whenPhrase = `${CLEANUP_TIME} this Saturday, ${cleanupDisplayDate}`;
+    whenPhrase = `${CLEANUP_TIME} this Saturday, ${cleanupDisplayDate}`;
 } else if (cleanupMs === nextSatMs) {
-  whenPhrase = `${CLEANUP_TIME} next Saturday, ${cleanupDisplayDate}`;
+    whenPhrase = `${CLEANUP_TIME} next Saturday, ${cleanupDisplayDate}`;
 } else {
-  whenPhrase = `${CLEANUP_TIME} Saturday, ${cleanupDisplayDate}`;
+    whenPhrase = `${CLEANUP_TIME} Saturday, ${cleanupDisplayDate}`;
 }
 ---
 
 <Base>
-  <!-- Raccoon in DOM before h1 so it's behind via z-index -->
-  <div class="hero">
-    <img
-      src="/images/raccoon.webp"
-      alt=""
-      class="raccoon"
-      aria-hidden="true"
-      width="148"
-      height="121"
-    />
-    <h1>We clean Prospect&nbsp;Lefferts Gardens.</h1>
-  </div>
+    <!-- Raccoon in DOM before h1 so it's behind via z-index -->
+    <div class="hero">
+        <h1>We clean Prospect&nbsp;Lefferts Gardens.</h1>
+        <img
+            src="/images/raccoon.webp"
+            alt=""
+            class="raccoon"
+            aria-hidden="true"
+            width="148"
+            height="121"
+        />
+    </div>
 
-  <!--
+    <!--
     Next Cleanup grid:
     col1 (icon) | col2 (label) | col3 (value)
     Empty cells in col1 on rows 1 and 4 let .span items fill col2–3.
   -->
-  <div class="cleanup">
-    <!-- Row 1: countdown -->
-    <div aria-hidden="true"></div>
-    <p class="span cleanup-countdown">Next Cleanup {countdownLabel}</p>
+    <div class="cleanup">
+        <!-- Row 1: countdown -->
+        <div aria-hidden="true"></div>
+        <p class="span cleanup-countdown">Next Cleanup {countdownLabel}</p>
 
-    <!-- Row 2: When — calendar icon is an add-to-calendar link (the easter egg) -->
-    <a
-      class="icon-cell"
-      href={CLEANUP_CALENDAR_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Add to calendar"
-      title="Add to calendar"
-    >
-      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6.75 3V5.25M17.25 3V5.25M3 18.75V7.5C3 6.25736 4.00736 5.25 5.25 5.25H18.75C19.9926 5.25 21 6.25736 21 7.5V18.75M3 18.75C3 19.9926 4.00736 21 5.25 21H18.75C19.9926 21 21 19.9926 21 18.75M3 18.75V11.25C3 10.0074 4.00736 9 5.25 9H18.75C19.9926 9 21 10.0074 21 11.25V18.75" />
-      </svg>
-    </a>
-    <span class="cleanup-key">When:</span>
-    <span class="cleanup-val">{whenPhrase}</span>
+        <!-- Row 2: When — calendar icon is an add-to-calendar link (the easter egg) -->
+        <a
+            class="icon-cell"
+            href={CLEANUP_CALENDAR_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Add to calendar"
+            title="Add to calendar"
+        >
+            <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <path
+                    d="M6.75 3V5.25M17.25 3V5.25M3 18.75V7.5C3 6.25736 4.00736 5.25 5.25 5.25H18.75C19.9926 5.25 21 6.25736 21 7.5V18.75M3 18.75C3 19.9926 4.00736 21 5.25 21H18.75C19.9926 21 21 19.9926 21 18.75M3 18.75V11.25C3 10.0074 4.00736 9 5.25 9H18.75C19.9926 9 21 10.0074 21 11.25V18.75"
+                ></path>
+            </svg>
+        </a>
+        <span class="cleanup-key">When:</span>
+        <span class="cleanup-val">{whenPhrase}</span>
 
-    <!-- Row 3: Where -->
-    <span class="icon-cell" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-        <path d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 0 1 15 0z" />
-      </svg>
-    </span>
-    <span class="cleanup-key">Where:</span>
-    <span class="cleanup-val">
-      <a href={CLEANUP_MAPS_URL} target="_blank" rel="noopener noreferrer">{CLEANUP_CORNER}</a>
-    </span>
+        <!-- Row 3: Where -->
+        <span class="icon-cell" aria-hidden="true">
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <path d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path>
+                <path
+                    d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 0 1 15 0z"
+                ></path>
+            </svg>
+        </span>
+        <span class="cleanup-key">Where:</span>
+        <span class="cleanup-val">
+            <a href={CLEANUP_MAPS_URL} target="_blank" rel="noopener noreferrer"
+                >{CLEANUP_CORNER}</a
+            >
+        </span>
 
-    <!-- Row 4: reassurance -->
-    <div aria-hidden="true"></div>
-    <p class="span cleanup-reassurance">No registration, all supplies included. Just show up!</p>
-  </div>
-
-  <div class="join-wrap">
-    <a href="/join" class="join-btn">Join us this weekend</a>
-  </div>
-
-  <div class="subscribe">
-    <p class="subscribe-copy">
-      Join {SUBSCRIBER_COUNT} of your neighbors, and subscribe to our weekly email for upcoming events:
-    </p>
-    <div class="iframe-wrap">
-      <iframe
-        src="https://communitycleanupplg.substack.com/embed"
-        title="Subscribe to the Community Cleanup PLG newsletter"
-        width="480"
-        height="150"
-        style="border:1px solid #EEE; background:white; max-width:100%;"
-        frameborder="0"
-        scrolling="no"
-      ></iframe>
+        <!-- Row 4: reassurance -->
+        <div aria-hidden="true"></div>
+        <p class="span cleanup-reassurance">
+            No registration, all supplies included. Just show up!
+        </p>
     </div>
-  </div>
+
+    <div class="join-wrap">
+        <a href="/join" class="join-btn">Join us this weekend</a>
+    </div>
+
+    <section class="why" aria-labelledby="why-heading">
+        <h2 class="why-heading" id="why-heading">Why volunteer</h2>
+        <div class="why-block">
+            <h3>How it helps</h3>
+            <p>[placeholder] A cleaner block lifts the whole neighborhood, and the work itself is oddly satisfying. Replace.</p>
+        </div>
+        <div class="why-block">
+            <h3>What to expect</h3>
+            <p>[placeholder] Grab a picker and a bag, we point you at a stretch of sidewalk, and an hour later it's transformed. Replace.</p>
+        </div>
+        <div class="why-block">
+            <h3>Who you'll meet</h3>
+            <p>[placeholder] Your actual neighbors — every age, all welcome, zero experience needed. Replace.</p>
+        </div>
+    </section>
+
+    <div class="subscribe">
+        <p class="subscribe-copy">
+            Join {SUBSCRIBER_COUNT} of your neighbors, and subscribe to our weekly
+            email for upcoming events:
+        </p>
+        <div class="iframe-wrap">
+            <iframe
+                src="https://communitycleanupplg.substack.com/embed"
+                title="Subscribe to the Community Cleanup PLG newsletter"
+                width="480"
+                height="150"
+                style="border:none; background:white; max-width:100%;"
+                frameborder="0"
+                scrolling="no"></iframe>
+        </div>
+    </div>
 </Base>
