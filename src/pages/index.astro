@@ -1,0 +1,308 @@
+---
+const nextCleanup = {
+  date: "Saturday, July 11",
+  time: "10am",
+  corner: "Maple St & Flatbush Ave",
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Community Cleanup PLG</title>
+    <meta
+      name="description"
+      content="We clean Prospect Lefferts Gardens. No registration, all supplies included. Just show up."
+    />
+    <link rel="icon" type="image/webp" href="/images/logo.webp" />
+    <link
+      rel="preload"
+      href="/fonts/Inter.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Fraunces.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <style>
+      @font-face {
+        font-family: "Fraunces";
+        src: url("/fonts/Fraunces.woff2") format("woff2-variations");
+        font-weight: 100 900;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "Inter";
+        src: url("/fonts/Inter.woff2") format("woff2-variations");
+        font-weight: 100 900;
+        font-display: swap;
+      }
+
+      :root {
+        --paper: #fbfbf9;
+        --ink: #1a1a17;
+        --ink-muted: #6b6b60;
+        --green: #c8ff00;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        background: var(--paper);
+      }
+
+      body {
+        font-family: "Inter", system-ui, sans-serif;
+        font-variant-numeric: slashed-zero;
+        background: var(--paper);
+        color: var(--ink);
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        max-width: 620px;
+        margin: 0 auto;
+        padding: clamp(1.5rem, 5vw, 2.5rem) clamp(1.25rem, 6vw, 2.5rem);
+      }
+
+      /* ── Header ──────────────────────────────── */
+
+      .site-header {
+        margin-bottom: clamp(2.5rem, 9vw, 4.5rem);
+      }
+
+      .logo {
+        display: block;
+        width: 44px;
+        height: 44px;
+      }
+
+      /* ── Main ────────────────────────────────── */
+
+      main {
+        flex: 1;
+      }
+
+      .eyebrow {
+        font-size: 0.6875rem;
+        font-weight: 500;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        margin-bottom: 0.625rem;
+      }
+
+      h1 {
+        font-family: "Fraunces", Georgia, serif;
+        font-size: clamp(2.625rem, 10.5vw, 3.75rem);
+        font-weight: 800;
+        line-height: 1.04;
+        letter-spacing: -0.025em;
+        font-optical-sizing: auto;
+        font-variation-settings: "SOFT" 50, "WONK" 1;
+        margin-bottom: clamp(1.25rem, 4vw, 1.875rem);
+      }
+
+      .mission {
+        font-size: 1.0625rem;
+        line-height: 1.55;
+        margin-bottom: 0.3rem;
+      }
+
+      .human {
+        font-size: 1.0625rem;
+        line-height: 1.55;
+        color: var(--ink-muted);
+        margin-bottom: clamp(2rem, 7vw, 3rem);
+      }
+
+      /* ── CTA area ────────────────────────────── */
+
+      .cta-area {
+        position: relative;
+        /* reserve right-side space for the raccoon on wider viewports */
+        padding-right: clamp(0px, 30vw, 160px);
+      }
+
+      .cta-button {
+        display: inline-flex;
+        align-items: center;
+        font-family: "Inter", system-ui, sans-serif;
+        font-size: 1.0625rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--paper);
+        background: var(--ink);
+        text-decoration: none;
+        padding: 1rem 1.375rem;
+        min-height: 56px;
+        border-radius: 3px;
+        white-space: nowrap;
+      }
+
+      .cta-button:focus-visible {
+        outline: 3px solid var(--green);
+        outline-offset: 3px;
+      }
+
+      .event-detail {
+        font-size: 0.9375rem;
+        font-variant-numeric: tabular-nums slashed-zero;
+        line-height: 1.45;
+        margin-top: 1rem;
+        color: var(--ink);
+      }
+
+      /* hi-vis highlighter under the date */
+      .event-date {
+        background: linear-gradient(
+          to bottom,
+          transparent 58%,
+          var(--green) 58%
+        );
+      }
+
+      .raccoon {
+        position: absolute;
+        right: -0.5rem;
+        bottom: -1.5rem;
+        width: clamp(110px, 28vw, 155px);
+        height: auto;
+        pointer-events: none;
+        user-select: none;
+      }
+
+      /* stack raccoon below on very small screens */
+      @media (max-width: 360px) {
+        .cta-area {
+          padding-right: 0;
+        }
+
+        .raccoon {
+          position: static;
+          display: block;
+          width: 90px;
+          margin-top: 1.25rem;
+        }
+      }
+
+      /* ── Footer ──────────────────────────────── */
+
+      footer {
+        margin-top: clamp(4rem, 14vw, 6rem);
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(26, 26, 23, 0.1);
+      }
+
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0 1.125rem;
+        margin-bottom: 0.875rem;
+        list-style: none;
+      }
+
+      .footer-links a {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--ink);
+        text-decoration: none;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .footer-links a:hover {
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+      }
+
+      .footer-links a:focus-visible {
+        outline: 2px solid var(--green);
+        outline-offset: 2px;
+        border-radius: 2px;
+      }
+
+      .footer-brand {
+        font-size: 0.75rem;
+        color: var(--ink-muted);
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="site-header">
+      <img
+        src="/images/logo.webp"
+        alt="Community Cleanup PLG"
+        class="logo"
+        width="44"
+        height="44"
+      />
+    </header>
+
+    <main>
+      <p class="eyebrow">Summer 2026</p>
+
+      <h1>We clean Prospect&nbsp;Lefferts Gardens.</h1>
+
+      <p class="mission">
+        No registration, all supplies included. Just show up.
+      </p>
+      <p class="human">Meet your neighbors. Have fun.</p>
+
+      <div class="cta-area">
+        <a
+          href="https://www.instagram.com/communitycleanupplg/"
+          class="cta-button"
+        >
+          Join the next cleanup&nbsp;&rarr;
+        </a>
+
+        <p class="event-detail">
+          <span class="event-date">{nextCleanup.date}</span>&ensp;&middot;&ensp;{nextCleanup.time}&ensp;&middot;&ensp;{nextCleanup.corner}
+        </p>
+
+        <img
+          src="/images/raccoon.webp"
+          alt=""
+          class="raccoon"
+          aria-hidden="true"
+          width="155"
+          height="127"
+        />
+      </div>
+    </main>
+
+    <footer>
+      <ul class="footer-links">
+        <li>
+          <a href="https://www.instagram.com/communitycleanupplg/">Instagram</a>
+        </li>
+        <li><a href="#">Discord</a></li>
+        <li><a href="mailto:hi@plgcleanup.org">hi@plgcleanup.org</a></li>
+        <li><a href="#">Amazon wishlist</a></li>
+      </ul>
+      <p class="footer-brand">
+        Community Cleanup PLG &middot; plgcleanup.org &middot;
+        @communitycleanupplg
+      </p>
+    </footer>
+  </body>
+</html>
