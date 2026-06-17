@@ -37,14 +37,16 @@ const todayMs = Date.UTC(todayET.y, todayET.m - 1, todayET.day);
 const cleanupMs = Date.UTC(cleanupET.y, cleanupET.m - 1, cleanupET.day);
 const N = Math.round((cleanupMs - todayMs) / 86_400_000);
 
+const NUMBER_WORDS = ["zero","one","two","three","four","five","six","seven","eight","nine"];
+const nWord = N >= 0 && N < 10 ? NUMBER_WORDS[N] : String(N);
+const nLabel = `<mark>${nWord} day${N === 1 ? "" : "s"} away</mark>`;
+
 const countdownSentence =
-    N >= 2
-        ? `The next cleanup is happening in ${N} days, and each cleanup is only an hour. Want to see why people love volunteering with us?`
-        : N === 1
-          ? "The next cleanup is happening tomorrow, and it\'s only an hour. Want to see why people love volunteering with us?"
-          : N === 0
-            ? "The next cleanup is today — and it\'s only an hour. Want to see why people love volunteering with us?"
-            : "Each cleanup is only an hour. Want to see why people love volunteering with us?";
+    N >= 1
+        ? `The next cleanup is only ${nLabel}, and each cleanup is only an hour. Want to see why people love volunteering with us?`
+        : N === 0
+          ? `The next cleanup is <mark>today</mark> — and it's only an hour. Want to see why people love volunteering with us?`
+          : "Each cleanup is only an hour. Want to see why people love volunteering with us?";
 
 // "This Saturday / Next Saturday / Saturday" for the When line
 const todayDow = new Date(todayMs).getUTCDay(); // 0=Sun 6=Sat
@@ -86,7 +88,7 @@ if (cleanupMs === thisSatMs) {
             Since 2023, {VOLUNTEER_COUNT} of your neighbors have been helping clean
             up our streets with Community Cleanup PLG.
         </p>
-        <p>{countdownSentence}</p>
+        <p set:html={countdownSentence}></p>
     </div>
 
     <div class="cta-actions">
