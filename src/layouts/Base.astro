@@ -2,10 +2,12 @@
 interface Props {
     title?: string;
     description?: string;
+    navMode?: "ticker" | "static";
 }
 const {
     title = "Community Cleanup PLG",
     description = "We clean Prospect Lefferts Gardens. No registration, all supplies included. Just show up.",
+    navMode = "ticker",
 } = Astro.props;
 
 const TICKER_TEXT =
@@ -164,6 +166,9 @@ const TICKER_TEXT =
                Swap is net-zero: chrome exits flow (-nav-h) + spacer appears (+nav-h). */
             #chrome-spacer { height: 0; }
             .site-chrome.is-fixed + #chrome-spacer { height: var(--nav-h); }
+
+            /* Static nav (join page etc.): no ticker, always-visible logo nav in flow */
+            .site-chrome.static-nav .ticker-bar { display: none; }
 
             /* Compact (at page top): ticker fills bar, nav links flush right, no logo */
             .site-chrome.compact {
@@ -753,27 +758,76 @@ const TICKER_TEXT =
 
             /* ── /join page ─────────────────────────────────── */
 
+            /* ── /join page ─────────────────────────────────── */
+
             .join-page {
-                padding-inline: var(--edge);
-                padding-bottom: clamp(2rem, 7vw, 3rem);
+                position: relative;
+                width: 95vw;
+                margin-left: calc(50% - 47.5vw);
+                padding-top: clamp(3rem, 8vw, 5rem);
+                padding-bottom: clamp(10rem, 22vw, 14rem);
+            }
+
+            .join-cart {
+                position: absolute;
+                bottom: clamp(1.5rem, 3vw, 2.5rem);
+                right: clamp(1rem, 2vw, 1.5rem);
+                width: clamp(140px, 16vw, 240px);
+                height: auto;
+                pointer-events: none;
+                user-select: none;
+            }
+
+            @media (max-width: 680px) {
+                .join-cart { display: none; }
             }
 
             .join-page h1 {
-                margin-bottom: 0.75rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .join-countdown {
+                font-size: clamp(1.5rem, 3vw, 2.25rem);
+                font-weight: 300;
+                letter-spacing: -0.02em;
+                line-height: 1.2;
+                margin-bottom: 1.25rem;
             }
 
             .join-sub {
                 font-size: 1.0625rem;
                 line-height: 1.55;
-                color: var(--muted);
-                margin-bottom: clamp(1.5rem, 5vw, 2.5rem);
+                color: var(--text);
+                margin-bottom: clamp(2rem, 5vw, 3rem);
+            }
+
+            .join-details {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: clamp(1.5rem, 3vw, 2.5rem);
+                margin-bottom: clamp(2rem, 5vw, 3rem);
+            }
+
+            .join-detail-label {
+                font-size: 1.5rem;
+                font-weight: 400;
+                letter-spacing: 0em;
+                text-transform: uppercase;
+                color: var(--text);
+                margin-bottom: 0.5rem;
+            }
+
+            .join-detail-value {
+                font-size: clamp(1.1rem, 2vw, 1.4rem);
+                font-weight: 300;
+                line-height: 1.45;
             }
 
             .join-reassurance {
                 font-size: 1rem;
-                font-weight: 600;
-                margin-top: 0.75rem;
-                margin-bottom: clamp(2rem, 7vw, 3rem);
+                font-weight: 400;
+                color: var(--text);
+                opacity: 0.6;
             }
 
             .back-link {
@@ -894,6 +948,128 @@ const TICKER_TEXT =
                 }
             }
 
+            /* ── Mobile nav ─────────────────────────────────── */
+
+            .nav-menu-btn {
+                display: none;
+                align-items: center;
+                justify-content: center;
+                background: none;
+                border: none;
+                color: var(--text);
+                cursor: pointer;
+                padding: 0.5rem;
+                margin-right: -0.5rem;
+                line-height: 0;
+                transition: color 225ms ease;
+            }
+            .nav-menu-btn:hover,
+            .nav-menu-btn:focus-visible { color: var(--accent); outline: none; }
+            .nav-menu-btn svg { width: 1.75rem; height: 1.75rem; }
+
+            .mobile-menu {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 200;
+                background: var(--bg);
+                flex-direction: column;
+            }
+            .mobile-menu.is-open { display: flex; }
+
+            .mobile-menu-close {
+                position: absolute;
+                top: clamp(0.75rem, 2vw, 1.25rem);
+                right: clamp(0.75rem, 2vw, 1.25rem);
+                background: none;
+                border: none;
+                color: var(--text);
+                cursor: pointer;
+                padding: 0.5rem;
+                line-height: 0;
+                transition: color 225ms ease;
+            }
+            .mobile-menu-close:hover,
+            .mobile-menu-close:focus-visible { color: var(--accent); outline: none; }
+            .mobile-menu-close svg { width: 1.75rem; height: 1.75rem; }
+
+            .mobile-menu-links {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: center;
+                gap: 0.25rem;
+                padding-top: clamp(4rem, 12vh, 6rem);
+            }
+
+            .mobile-menu-link {
+                font-size: clamp(2.5rem, 10vw, 3.5rem);
+                font-weight: 300;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                color: var(--text);
+                text-decoration: none;
+                line-height: 1.25;
+                padding: 0.25rem 1rem;
+                border-radius: var(--hover-radius);
+                transition:
+                    background-color 225ms ease,
+                    color 225ms ease;
+            }
+            .mobile-menu-link:hover,
+            .mobile-menu-link:focus-visible {
+                background: var(--accent);
+                color: var(--bg);
+                outline: none;
+            }
+
+            .mobile-menu-ctas {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+                padding: clamp(1.25rem, 4vw, 2rem);
+            }
+            .mobile-menu-ctas .cta-primary {
+                background: var(--accent);
+                color: var(--bg);
+                font-size: 1.5rem;
+                transition:
+                    background-color 225ms ease,
+                    color 225ms ease;
+            }
+            .mobile-menu-ctas .cta-primary:hover,
+            .mobile-menu-ctas .cta-primary:focus-visible {
+                background: var(--btn-light);
+                color: var(--bg);
+                outline: none;
+            }
+            .mobile-menu-ctas .cta-secondary {
+                background: var(--muted);
+                color: var(--text);
+                font-size: 1.5rem;
+                transition:
+                    background-color 225ms ease,
+                    color 225ms ease;
+            }
+            .mobile-menu-ctas .cta-secondary:hover,
+            .mobile-menu-ctas .cta-secondary:focus-visible {
+                background: var(--accent);
+                color: var(--bg);
+                outline: none;
+            }
+
+            @media (max-width: 1024px) {
+                .nav-wordmark { display: none; }
+                .nav-links    { display: none; }
+                .nav-menu-btn { display: inline-flex; }
+
+                /* Ticker expands to fill; nav shrinks to just the hamburger.
+                   Must override .nav { width: 95vw } or flex-basis:auto claims 95vw. */
+                .site-chrome.compact .ticker-bar { flex: 1; min-width: 0; }
+                .site-chrome.compact .nav        { flex: 0 0 auto; width: auto; }
+            }
+
             /* Touch devices: instant tap response + persistent highlight.
                hover:none = no hover capability (finger); pointer:coarse = imprecise input.
                Kills transitions so bg-color is immediate, then :focus keeps the accent
@@ -906,7 +1082,8 @@ const TICKER_TEXT =
                 .nav-link:focus,
                 .nav-btn:focus,
                 .cta-primary:focus,
-                .cta-secondary:focus {
+                .cta-secondary:focus,
+                .mobile-menu-link:focus {
                     background-color: var(--accent);
                     color: var(--bg);
                     box-shadow: none;
@@ -923,7 +1100,7 @@ const TICKER_TEXT =
     </head>
 
     <body>
-        <div class="site-chrome compact" id="site-chrome">
+        <div class={`site-chrome ${navMode === "ticker" ? "compact" : "static-nav"}`} id="site-chrome">
         <div class="ticker-bar">
             <div class="ticker" id="ticker">
                 <div class="ticker__viewport">
@@ -995,7 +1172,29 @@ const TICKER_TEXT =
                 <span class="nav-divider" aria-hidden="true"></span>
                 <a href="/join" class="nav-btn">Join</a>
             </div>
+            <button class="nav-menu-btn" id="nav-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                </svg>
+            </button>
         </nav>
+
+        <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation">
+            <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <nav class="mobile-menu-links" aria-label="Mobile navigation">
+                <a href="/about" class="mobile-menu-link">About</a>
+                <a href="/faq" class="mobile-menu-link">FAQ</a>
+            </nav>
+            <div class="mobile-menu-ctas">
+                <a href="/join" class="cta-primary">Join us</a>
+                <a href="/schedule" class="cta-secondary">View schedule</a>
+            </div>
+        </div>
+
         </div><!-- /.site-chrome -->
         <div id="chrome-spacer" aria-hidden="true"></div>
 
@@ -1045,6 +1244,10 @@ const TICKER_TEXT =
         </footer>
 
         <script>
+            // Declare first — used by both ticker and scroll sections
+            const chrome = document.getElementById("site-chrome")!;
+            const isStaticNav = chrome.classList.contains("static-nav");
+
             // ── Ticker ──────────────────────────────────────────
             const ticker = document.getElementById("ticker")!;
             const tickerToggle = document.getElementById("ticker-toggle")!;
@@ -1071,8 +1274,9 @@ const TICKER_TEXT =
             document.fonts.ready.then(fillTicker);
             new ResizeObserver(fillTicker).observe(tickerViewport);
 
-            // Autoplay on load — only if user has no motion preference
+            // Autoplay on load — only if user has no motion preference and ticker is shown
             if (
+                !isStaticNav &&
                 !window.matchMedia("(prefers-reduced-motion: reduce)").matches
             ) {
                 ticker.classList.add("is-playing");
@@ -1089,13 +1293,36 @@ const TICKER_TEXT =
                 );
             });
 
+            // ── Mobile menu ────────────────────────────────────────────────
+            const menuBtn   = document.getElementById("nav-menu-btn") as HTMLButtonElement | null;
+            const mobileMenu = document.getElementById("mobile-menu") as HTMLElement | null;
+            const closeBtn  = document.getElementById("mobile-menu-close") as HTMLButtonElement | null;
+
+            function openMobileMenu() {
+                mobileMenu!.classList.add("is-open");
+                menuBtn!.setAttribute("aria-expanded", "true");
+                document.body.style.overflow = "hidden";
+                closeBtn!.focus();
+            }
+            function closeMobileMenu() {
+                mobileMenu!.classList.remove("is-open");
+                menuBtn!.setAttribute("aria-expanded", "false");
+                document.body.style.overflow = "";
+                menuBtn!.focus();
+            }
+
+            menuBtn?.addEventListener("click", openMobileMenu);
+            closeBtn?.addEventListener("click", closeMobileMenu);
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape" && mobileMenu?.classList.contains("is-open")) closeMobileMenu();
+            });
+
             // ── Scroll-aware chrome reveal ──────────────────────────────────
-            const chrome = document.getElementById("site-chrome")!;
             const threshold = window.innerHeight * 0.25;
             let lastY = 0;
             let ticking = false;
 
-            window.addEventListener(
+            if (!isStaticNav) window.addEventListener(
                 "scroll",
                 () => {
                     if (!ticking) {

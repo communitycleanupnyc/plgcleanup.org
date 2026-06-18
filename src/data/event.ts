@@ -1,5 +1,6 @@
-export const CLEANUP_ISO = "2026-06-20T10:00:00-04:00";
-export const CLEANUP_TIME = "10–11am";
+export const CLEANUP_ISO     = "2026-06-20T10:00:00-04:00";
+export const CLEANUP_END_ISO = "2026-06-20T11:00:00-04:00";
+export const CLEANUP_TIME    = "10–11am";
 export const CLEANUP_CORNER = "Clarkson Ave & Bedford Ave";
 export const CLEANUP_MAPS_URL =
   "https://www.google.com/maps/search/?api=1&query=Clarkson%20Ave%20and%20Bedford%20Ave%2C%20Brooklyn%2C%20NY";

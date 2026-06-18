@@ -6,75 +6,64 @@ import {
     CLEANUP_CORNER,
     CLEANUP_MAPS_URL,
 } from "../data/event";
+import { getCountdown } from "../data/countdown";
 
 const cleanupDate = new Date(CLEANUP_ISO);
+const state = getCountdown(new Date());
 
-// Absolute date for the join page: "Saturday, June 20"
+const countdownLine =
+    state.tag === "past"         ? ""
+    : state.tag === "now"        ? "Is happening right now!"
+    : state.tag === "minutes"    ? `Is starting in ${state.n} minute${state.n === 1 ? "" : "s"}!`
+    : state.tag === "hours"      ? `Is starting in ${state.n} hour${state.n === 1 ? "" : "s"}!`
+    : state.tag === "tomorrow"   ? "Is tomorrow!"
+    : state.tag === "this-weekend"  ? `Is this ${state.dayName}!`
+    : state.tag === "next-weekend"  ? `Is next ${state.dayName}.`
+    : `That's in ${state.word} days.`;
+
 const joinDisplayDate = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/New_York",
     weekday: "long",
     month: "long",
     day: "numeric",
+    year: "numeric",
 }).format(cleanupDate);
 ---
 
 <Base
-    title="Join — Community Cleanup PLG"
+    title="Volunteer with Community Cleanup PLG"
     description="There's no registration — just show up. Here's where and when."
+    navMode="static"
 >
     <div class="join-page">
-        <h1>We weren't kidding :)</h1>
-        <p class="join-sub">There's no registration — just show up here:</p>
+        <h1>Our next cleanup</h1>
+        {countdownLine && <p class="join-countdown">{countdownLine}</p>}
+        <p class="join-sub">No registration, and we'll provide the supplies—just show up. Look for the shopping cart with our trash grabbers in it.</p>
 
-        <div class="cleanup">
-            <!-- When -->
-            <span class="icon-cell" aria-hidden="true">
-                <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                >
-                    <path
-                        d="M6.75 3V5.25M17.25 3V5.25M3 18.75V7.5C3 6.25736 4.00736 5.25 5.25 5.25H18.75C19.9926 5.25 21 6.25736 21 7.5V18.75M3 18.75C3 19.9926 4.00736 21 5.25 21H18.75C19.9926 21 21 19.9926 21 18.75M3 18.75V11.25C3 10.0074 4.00736 9 5.25 9H18.75C19.9926 9 21 10.0074 21 11.25V18.75"
-                    ></path>
-                </svg>
-            </span>
-            <span class="cleanup-key">When:</span>
-            <span class="cleanup-val"
-                >{joinDisplayDate} &middot; {CLEANUP_TIME}</span
-            >
-
-            <!-- Where -->
-            <span class="icon-cell" aria-hidden="true">
-                <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                >
-                    <path d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path>
-                    <path
-                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 0 1 15 0z"
-                    ></path>
-                </svg>
-            </span>
-            <span class="cleanup-key">Where:</span>
-            <span class="cleanup-val">
-                <a
-                    href={CLEANUP_MAPS_URL}
-                    target="_blank"
-                    rel="noopener noreferrer">{CLEANUP_CORNER}</a
-                >
-            </span>
+        <div class="join-details">
+            <div class="join-detail">
+                <p class="join-detail-label">When</p>
+                <p class="join-detail-value">
+                    {joinDisplayDate}<br />{CLEANUP_TIME}
+                </p>
+            </div>
+            <div class="join-detail">
+                <p class="join-detail-label">Where</p>
+                <p class="join-detail-value">
+                    <a
+                        href={CLEANUP_MAPS_URL}
+                        target="_blank"
+                        rel="noopener noreferrer">{CLEANUP_CORNER}</a>
+                <p>Prospect Lefferts Gardens<br />Brooklyn, New York</p>
+            </div>
         </div>
-
-        <p class="join-reassurance">
-            No registration, all supplies included. Just show up!
-        </p>
+        <img
+            src="/images/cart.webp"
+            alt=""
+            class="join-cart"
+            aria-hidden="true"
+            width="640"
+            height="634"
+        />
     </div>
 </Base>

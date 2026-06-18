@@ -1,80 +1,27 @@
 ---
 import Base from "../layouts/Base.astro";
-import {
-    CLEANUP_ISO,
-    CLEANUP_TIME,
-    etDateParts,
-    VOLUNTEER_COUNT,
-} from "../data/event";
+import { VOLUNTEER_COUNT } from "../data/event";
+import { getCountdown } from "../data/countdown";
 
-const cleanupDate = new Date(CLEANUP_ISO);
-const now = new Date();
-const todayET = etDateParts(now);
-
-const SEASONS = [
-    "Winter",
-    "Winter",
-    "Spring",
-    "Spring",
-    "Spring",
-    "Summer",
-    "Summer",
-    "Summer",
-    "Autumn",
-    "Autumn",
-    "Autumn",
-    "Winter",
-];
-const seasonLabel = `${SEASONS[todayET.m - 1]} ${todayET.y}`;
-const cleanupET = etDateParts(cleanupDate);
-
-// Whole-day diff using UTC midnight to dodge DST
-const todayMs = Date.UTC(todayET.y, todayET.m - 1, todayET.day);
-const cleanupMs = Date.UTC(cleanupET.y, cleanupET.m - 1, cleanupET.day);
-const N = Math.round((cleanupMs - todayMs) / 86_400_000);
-
-const NUMBER_WORDS = [
-    "zero",
-    "one",
-    "two",
-    "three",
-    "four",
-    "five",
-    "six",
-    "seven",
-    "eight",
-    "nine",
-];
-const nWord = N >= 0 && N < 10 ? NUMBER_WORDS[N] : String(N);
-const nLabel = `<a href="/join">${nWord} day${N === 1 ? "" : "s"}</a>`;
+const state  = getCountdown(new Date());
+const SUFFIX = ". Want to see why people love volunteering with us?";
 
 const countdownSentence =
-    N >= 1
-        ? `The next cleanup is in ${nLabel}. Want to see why people love volunteering with us?`
-        : N === 0
-          ? `The next cleanup is <a href="/join">today</a>. Want to see why people love volunteering with us?`
-          : "Each cleanup is only an hour. Want to see why people love volunteering with us?";
-
-// "This Saturday / Next Saturday / Saturday" for the When line
-const todayDow = new Date(todayMs).getUTCDay(); // 0=Sun 6=Sat
-const daysToThisSat = (6 - todayDow + 7) % 7;
-const thisSatMs = todayMs + daysToThisSat * 86_400_000;
-const nextSatMs = thisSatMs + 7 * 86_400_000;
-
-const cleanupDisplayDate = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York",
-    month: "long",
-    day: "numeric",
-}).format(cleanupDate); // "June 20"
-
-let whenPhrase: string;
-if (cleanupMs === thisSatMs) {
-    whenPhrase = `${CLEANUP_TIME} this Saturday, ${cleanupDisplayDate}`;
-} else if (cleanupMs === nextSatMs) {
-    whenPhrase = `${CLEANUP_TIME} next Saturday, ${cleanupDisplayDate}`;
-} else {
-    whenPhrase = `${CLEANUP_TIME} Saturday, ${cleanupDisplayDate}`;
-}
+    state.tag === "past"
+        ? `Each cleanup is only an hour${SUFFIX}`
+    : state.tag === "now"
+        ? `The next cleanup is <a href="/join">happening right now</a>${SUFFIX}`
+    : state.tag === "minutes"
+        ? `The next cleanup is in <a href="/join">${state.n} minute${state.n === 1 ? "" : "s"}</a>${SUFFIX}`
+    : state.tag === "hours"
+        ? `The next cleanup is in <a href="/join">${state.n} hour${state.n === 1 ? "" : "s"}</a>${SUFFIX}`
+    : state.tag === "tomorrow"
+        ? `The next cleanup is <a href="/join">tomorrow</a>${SUFFIX}`
+    : state.tag === "this-weekend"
+        ? `The next cleanup is <a href="/join">this ${state.dayName}</a>${SUFFIX}`
+    : state.tag === "next-weekend"
+        ? `The next cleanup is <a href="/join">next ${state.dayName}</a>${SUFFIX}`
+    : `The next cleanup is in <a href="/join">${state.word} days</a>${SUFFIX}`;
 ---
 
 <Base>
