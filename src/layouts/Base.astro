@@ -71,7 +71,7 @@ const TICKER_TEXT =
                 --hover-radius: 0;
                 --ticker-duration: 12s;
                 /* Content column: width + derived left-offset for the 95→90vw breakout */
-                --site-w: 90vw;
+                --site-w: 96vw;
                 --site-ml: calc(50% - var(--site-w) / 2);
             }
 
@@ -170,8 +170,19 @@ const TICKER_TEXT =
             #chrome-spacer { height: 0; }
             .site-chrome.is-fixed + #chrome-spacer { height: var(--nav-h); }
 
-            /* Static nav (join page etc.): no ticker, always-visible logo nav in flow */
+            /* Static nav (join, about, faq, …): fixed at top, visible by default,
+               slides away on scroll-down and back on scroll-up. */
+            .site-chrome.static-nav {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                transform: translateY(0);
+                transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .site-chrome.static-nav.is-hidden { transform: translateY(-100%); }
             .site-chrome.static-nav .ticker-bar { display: none; }
+            .site-chrome.static-nav + #chrome-spacer { height: var(--nav-h); }
 
             /* Compact (at page top): ticker fills bar, nav links flush right, no logo */
             .site-chrome.compact {
@@ -1323,14 +1334,32 @@ const TICKER_TEXT =
                 if (e.key === "Escape" && mobileMenu?.classList.contains("is-open")) closeMobileMenu();
             });
 
-            // ── Scroll-aware chrome reveal ──────────────────────────────────
-            const threshold = window.innerHeight * 0.25;
-            let lastY = 0;
-            let ticking = false;
-
-            if (!isStaticNav) window.addEventListener(
-                "scroll",
-                () => {
+            // ── Scroll behavior ─────────────────────────────────────────────
+            if (isStaticNav) {
+                // Static-nav pages: start visible, hide on scroll-down, reveal on scroll-up.
+                let lastY = window.scrollY;
+                let ticking = false;
+                window.addEventListener("scroll", () => {
+                    if (!ticking) {
+                        requestAnimationFrame(() => {
+                            const y = window.scrollY;
+                            if (y > lastY && y > 8) {
+                                chrome.classList.add("is-hidden");
+                            } else if (y < lastY) {
+                                chrome.classList.remove("is-hidden");
+                            }
+                            lastY = y;
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
+                }, { passive: true });
+            } else {
+                // Ticker pages: compact in-flow at top → fixed+revealed on scroll-up past 25vh.
+                const threshold = window.innerHeight * 0.25;
+                let lastY = 0;
+                let ticking = false;
+                window.addEventListener("scroll", () => {
                     if (!ticking) {
                         requestAnimationFrame(() => {
                             const y = window.scrollY;
@@ -1338,8 +1367,6 @@ const TICKER_TEXT =
                             const pastThreshold = y > threshold;
 
                             if (!pastThreshold) {
-                                // Slide up with transition (same animation as scrolling down),
-                                // then swap to static compact once offscreen.
                                 if (chrome.classList.contains("is-fixed") && !chrome.dataset.leaving) {
                                     chrome.dataset.leaving = "1";
                                     chrome.classList.remove("is-revealed");
@@ -1373,9 +1400,8 @@ const TICKER_TEXT =
                         });
                         ticking = true;
                     }
-                },
-                { passive: true },
-            );
+                }, { passive: true });
+            }
         </script>
     </body>
 </html>
