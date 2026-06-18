@@ -3,10 +3,6 @@ import Base from "../layouts/Base.astro";
 import {
     CLEANUP_ISO,
     CLEANUP_TIME,
-    CLEANUP_CORNER,
-    CLEANUP_MAPS_URL,
-    CLEANUP_CALENDAR_URL,
-    SUBSCRIBER_COUNT,
     etDateParts,
     VOLUNTEER_COUNT,
 } from "../data/event";
@@ -98,7 +94,7 @@ if (cleanupMs === thisSatMs) {
         <p>
             {VOLUNTEER_COUNT} of your neighbors have helped keep trash off our streets.
         </p>
-        &nbsp;
+        <p></p>
         <p set:html={countdownSentence} />
     </div>
 
@@ -113,10 +109,9 @@ if (cleanupMs === thisSatMs) {
             <div class="why__col">
                 <h3>Really, picking up trash?</h3>
                 <p>
-                    Every piece counts, down to a cigarette butt. Bonus: volunteering has "significant positive effects... on social, physical and mental health"  (<a
-                        href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10159229/"
-                        >Cambridge University Press</a
-                    >).
+                    Every piece counts, down to a cigarette butt. People see us on the streets and get inspired to help improve our community. Bonus: volunteering has "<a
+                        href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10159229/" title="Cambridge University Press (2026)"
+                        >significant positive effects... on social, physical, and mental health.</a>"
                 </p>
             </div>
             <div class="why__col">
