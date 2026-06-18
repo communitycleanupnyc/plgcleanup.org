@@ -70,6 +70,9 @@ const TICKER_TEXT =
                 --btn-light: var(--text);
                 --hover-radius: 0;
                 --ticker-duration: 12s;
+                /* Content column: width + derived left-offset for the 95→90vw breakout */
+                --site-w: 90vw;
+                --site-ml: calc(50% - var(--site-w) / 2);
             }
 
             *,
@@ -205,7 +208,7 @@ const TICKER_TEXT =
             }
 
             .ticker {
-                width: 95vw;
+                width: var(--site-w);
                 margin-inline: auto;
                 height: var(--ticker-h);
                 display: flex;
@@ -311,7 +314,7 @@ const TICKER_TEXT =
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                width: 95vw;
+                width: var(--site-w);
                 margin-inline: auto;
                 padding: 0;
                 height: var(--nav-h);
@@ -419,8 +422,8 @@ const TICKER_TEXT =
 
             .hero {
                 position: relative;
-                width: 95vw;
-                margin-left: calc(50% - 47.5vw);
+                width: var(--site-w);
+                margin-left: var(--site-ml);
                 padding-top: clamp(3rem, 8vw, 5rem);
                 margin-bottom: clamp(14rem, 7vw, 3.5rem);
             }
@@ -556,8 +559,8 @@ const TICKER_TEXT =
             /* ── Hero body (below h1, above CTA) ───────────── */
 
             .hero-body {
-                width: 95vw;
-                margin-left: calc(50% - 47.5vw);
+                width: var(--site-w);
+                margin-left: var(--site-ml);
                 /*padding-left: var(--edge);*/
                 padding-right: var(--edge);
                 display: flex;
@@ -586,11 +589,11 @@ const TICKER_TEXT =
                 letter-spacing: -0.03em;
             }
 
-            /* ── CTA buttons (95vw, stacked) ────────────────── */
+            /* ── CTA buttons (full site width, stacked) ─────── */
 
             .cta-actions {
-                width: 95vw;
-                margin-left: calc(50% - 47.5vw);
+                width: var(--site-w);
+                margin-left: var(--site-ml);
                 display: flex;
                 flex-direction: column;
                 gap: 0.75rem;
@@ -646,8 +649,8 @@ const TICKER_TEXT =
             /* ── Why volunteer (Config 3-col grid) ──────────── */
 
             .why {
-                width: 95vw;
-                margin-left: calc(50% - 47.5vw);
+                width: var(--site-w);
+                margin-left: var(--site-ml);
                 margin-bottom: clamp(2rem, 7vw, 3rem);
             }
 
@@ -762,8 +765,8 @@ const TICKER_TEXT =
 
             .join-page {
                 position: relative;
-                width: 95vw;
-                margin-left: calc(50% - 47.5vw);
+                width: var(--site-w);
+                margin-left: var(--site-ml);
                 padding-top: clamp(3rem, 8vw, 5rem);
                 padding-bottom: clamp(2rem, 7vw, 3rem);
             }
@@ -883,8 +886,8 @@ const TICKER_TEXT =
             }
 
             .footer-grid {
-                width: 95vw;
-                margin-left: calc(50% - 47.5vw);
+                width: var(--site-w);
+                margin-left: var(--site-ml);
                 padding-bottom: var(--edge);
                 display: grid;
                 grid-template-columns: auto auto 1fr;
@@ -1068,7 +1071,7 @@ const TICKER_TEXT =
                 .nav-menu-btn { display: inline-flex; }
 
                 /* Ticker expands to fill; nav shrinks to just the hamburger.
-                   Must override .nav { width: 95vw } or flex-basis:auto claims 95vw. */
+                   Must override .nav { width: var(--site-w) } or flex-basis:auto claims --site-w. */
                 .site-chrome.compact .ticker-bar { flex: 1; min-width: 0; }
                 .site-chrome.compact .nav        { flex: 0 0 auto; width: auto; }
             }
