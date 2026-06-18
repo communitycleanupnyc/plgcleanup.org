@@ -9,7 +9,7 @@ const {
 } = Astro.props;
 
 const TICKER_TEXT =
-    "2,972.55 pounds this year. 300+ volunteers. Join us this weekend. ➔";
+    "2,972.55 pounds this year. See which block we are cleaning next. ➔";
 ---
 
 <!doctype html>
@@ -137,10 +137,25 @@ const TICKER_TEXT =
 
             /* ── Ticker ─────────────────────────────────────── */
 
-            /* ── Site chrome: static, scrolls with page naturally ── */
+            /* ── Site chrome: static by default, scrolls with page ── */
             .site-chrome {
                 background: var(--bg);
                 z-index: 50;
+            }
+            /* Revealed state: fixed at top, slides in on scroll-up past threshold */
+            .site-chrome.is-fixed {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                transform: translateY(-100%);
+                transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .site-chrome.is-fixed.is-revealed {
+                transform: translateY(0);
+            }
+            .site-chrome.no-transition {
+                transition: none !important;
             }
 
             /* Compact (at page top): ticker fills bar, nav links flush right, no logo */
@@ -1021,7 +1036,7 @@ const TICKER_TEXT =
                 );
             });
 
-            // ── No scroll handler: site-chrome scrolls with page naturally ── 
+            // ── No scroll handler: site-chrome scrolls with page naturally ──
         </script>
     </body>
 </html>
