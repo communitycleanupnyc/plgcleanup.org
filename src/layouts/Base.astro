@@ -161,6 +161,10 @@ const TICKER_TEXT =
             .site-chrome.no-transition {
                 transition: none !important;
             }
+            /* Spacer holds layout height while chrome is position:fixed (out of flow).
+               Swap is net-zero: chrome exits flow (-nav-h) + spacer appears (+nav-h). */
+            #chrome-spacer { height: 0; }
+            .site-chrome.is-fixed + #chrome-spacer { height: var(--nav-h); }
 
             /* Compact (at page top): ticker fills bar, nav links flush right, no logo */
             .site-chrome.compact {
@@ -971,6 +975,7 @@ const TICKER_TEXT =
             </div>
         </nav>
         </div><!-- /.site-chrome -->
+        <div id="chrome-spacer" aria-hidden="true"></div>
 
         <main>
             <slot />
