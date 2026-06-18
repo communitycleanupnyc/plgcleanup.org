@@ -1031,11 +1031,17 @@ const TICKER_TEXT =
             });
 
             // ── Scroll-aware chrome ─────────────────────────────
-            // Uses transform:translateY(-100%) on the whole chrome — no layout
-            // shift. compact↔expanded switch happens while chrome is hidden.
+            // Hides only when scrolling DOWN past 25% of the page.
+            // Shows on any upward scroll. compact↔expanded swap is instant
+            // while chrome is off-screen (no visible layout jump).
             const chrome = document.getElementById("site-chrome")!;
             let lastY = 0;
             let ticking = false;
+            const maxScroll = Math.max(
+                1,
+                document.documentElement.scrollHeight - window.innerHeight,
+            );
+            const hideThreshold = maxScroll * 0.25;
 
             window.addEventListener(
                 "scroll",
@@ -1047,24 +1053,22 @@ const TICKER_TEXT =
                             const scrollingDown = y > lastY;
 
                             if (atTop) {
-                                // At very top: instant snap to compact, then show
+                                // Very top: snap to compact (no transition), show
                                 chrome.classList.add("no-transition");
                                 chrome.classList.add("compact");
                                 chrome.classList.remove("chrome--hidden");
-                                void chrome.offsetHeight; // force reflow
+                                void chrome.offsetHeight;
                                 chrome.classList.remove("no-transition");
-                            } else if (scrollingDown) {
-                                // Scrolling down: slide whole chrome away
+                            } else if (scrollingDown && y > hideThreshold) {
+                                // Past 25% and going down: slide away
                                 chrome.classList.add("chrome--hidden");
-                            } else {
-                                // Scrolling up: switch to expanded while still hidden,
-                                // then slide back in — no visible layout jump
-                                if (chrome.classList.contains("compact")) {
-                                    chrome.classList.add("no-transition");
-                                    chrome.classList.remove("compact");
-                                    void chrome.offsetHeight;
-                                    chrome.classList.remove("no-transition");
-                                }
+                            } else if (!scrollingDown && chrome.classList.contains("chrome--hidden")) {
+                                // Going up while hidden: switch to expanded,
+                                // then slide back in
+                                chrome.classList.add("no-transition");
+                                chrome.classList.remove("compact");
+                                void chrome.offsetHeight;
+                                chrome.classList.remove("no-transition");
                                 chrome.classList.remove("chrome--hidden");
                             }
 
