@@ -11,7 +11,7 @@ const {
 } = Astro.props;
 
 const TICKER_TEXT =
-    "2,972.55 pounds and counting. See which block is up next! →";
+    "2,972.55 pounds and counting, this year alone! See which block is up next. →";
 ---
 
 <!doctype html>
@@ -896,13 +896,9 @@ const TICKER_TEXT =
                 display: flex;
                 flex-direction: column;
                 gap: 0;
+                align-items: flex-start;
             }
 
-            /*
-             * Padding reserves vertical space so adjacent focus boxes are flush.
-             * Negative margin-inline cancels the indent so resting text stays
-             * column-aligned.
-             */
             .footer-col a {
                 font-size: 1rem;
                 font-weight: 400;
@@ -913,7 +909,7 @@ const TICKER_TEXT =
                 box-shadow: none;
                 border-radius: var(--hover-radius);
                 padding: 0.5625rem 0.5rem;
-                margin-inline: -0.5rem;
+                margin-left: -0.5rem;
                 transition:
                     background-color 225ms ease,
                     color 225ms ease;
