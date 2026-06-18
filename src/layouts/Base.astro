@@ -992,7 +992,22 @@ const TICKER_TEXT =
             }
             .nav-menu-btn:hover,
             .nav-menu-btn:focus-visible { color: var(--accent); outline: none; }
-            .nav-menu-btn svg { width: 1.75rem; height: 1.75rem; }
+            .nav-menu-btn svg { width: 1.75rem; height: 1.75rem; overflow: visible; }
+
+            /* Morphing hamburger ↔ ✕ */
+            .menu-icon__bar {
+                transform-box: view-box;
+                transform-origin: center;
+                transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .menu-icon__bar--top { transform: translateY(-12.5%) rotate(0deg); }
+            .menu-icon__bar--btm { transform: translateY( 12.5%) rotate(0deg); }
+            .nav-menu-btn[aria-expanded="true"] .menu-icon__bar--top { transform: translateY(0%) rotate( 45deg); }
+            .nav-menu-btn[aria-expanded="true"] .menu-icon__bar--btm { transform: translateY(0%) rotate(-45deg); }
+
+            /* Elevate chrome above the overlay so the toggle stays clickable */
+            .site-chrome.is-menu-open { z-index: 300; }
+            .site-chrome.compact.is-menu-open { position: relative; }
 
             .mobile-menu {
                 display: none;
@@ -1004,21 +1019,6 @@ const TICKER_TEXT =
             }
             .mobile-menu.is-open { display: flex; }
 
-            .mobile-menu-close {
-                position: absolute;
-                top: clamp(0.75rem, 2vw, 1.25rem);
-                right: clamp(0.75rem, 2vw, 1.25rem);
-                background: none;
-                border: none;
-                color: var(--text);
-                cursor: pointer;
-                padding: 0.5rem;
-                line-height: 0;
-                transition: color 225ms ease;
-            }
-            .mobile-menu-close:hover,
-            .mobile-menu-close:focus-visible { color: var(--accent); outline: none; }
-            .mobile-menu-close svg { width: 1.75rem; height: 1.75rem; }
 
             .mobile-menu-links {
                 flex: 1;
@@ -1200,8 +1200,9 @@ const TICKER_TEXT =
                 <a href="/join" class="nav-btn">Join</a>
             </div>
             <button class="nav-menu-btn" id="nav-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                    <path d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                    <line class="menu-icon__bar menu-icon__bar--top" x1="3.75" y1="12" x2="20.25" y2="12" />
+                    <line class="menu-icon__bar menu-icon__bar--btm" x1="3.75" y1="12" x2="20.25" y2="12" />
                 </svg>
             </button>
         </nav>
@@ -1211,11 +1212,6 @@ const TICKER_TEXT =
 
         <!-- Mobile menu: sibling of site-chrome so parent padding-inline can't constrain it -->
         <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation">
-            <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                    <path d="M6 18 18 6M6 6l12 12" />
-                </svg>
-            </button>
             <nav class="mobile-menu-links" aria-label="Mobile navigation">
                 <a href="/about" class="mobile-menu-link">About</a>
                 <a href="/faq" class="mobile-menu-link">FAQ</a>
@@ -1322,25 +1318,29 @@ const TICKER_TEXT =
             });
 
             // ── Mobile menu ────────────────────────────────────────────────
-            const menuBtn   = document.getElementById("nav-menu-btn") as HTMLButtonElement | null;
+            const menuBtn    = document.getElementById("nav-menu-btn") as HTMLButtonElement | null;
             const mobileMenu = document.getElementById("mobile-menu") as HTMLElement | null;
-            const closeBtn  = document.getElementById("mobile-menu-close") as HTMLButtonElement | null;
 
             function openMobileMenu() {
                 mobileMenu!.classList.add("is-open");
                 menuBtn!.setAttribute("aria-expanded", "true");
+                menuBtn!.setAttribute("aria-label", "Close menu");
+                chrome.classList.add("is-menu-open");
                 document.body.style.overflow = "hidden";
-                closeBtn!.focus();
+                mobileMenu!.querySelector<HTMLElement>(".mobile-menu-link")?.focus();
             }
             function closeMobileMenu() {
                 mobileMenu!.classList.remove("is-open");
                 menuBtn!.setAttribute("aria-expanded", "false");
+                menuBtn!.setAttribute("aria-label", "Open menu");
+                chrome.classList.remove("is-menu-open");
                 document.body.style.overflow = "";
                 menuBtn!.focus();
             }
 
-            menuBtn?.addEventListener("click", openMobileMenu);
-            closeBtn?.addEventListener("click", closeMobileMenu);
+            menuBtn?.addEventListener("click", () => {
+                mobileMenu?.classList.contains("is-open") ? closeMobileMenu() : openMobileMenu();
+            });
             document.addEventListener("keydown", (e) => {
                 if (e.key === "Escape" && mobileMenu?.classList.contains("is-open")) closeMobileMenu();
             });
