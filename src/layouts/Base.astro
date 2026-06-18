@@ -143,7 +143,13 @@ const TICKER_TEXT =
                 top: 0;
                 z-index: 50;
                 background: var(--bg);
-                overflow: hidden;
+                transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .site-chrome.chrome--hidden {
+                transform: translateY(-100%);
+            }
+            .site-chrome.no-transition {
+                transition: none !important;
             }
 
             /* Compact (at page top): ticker fills bar, nav links flush right, no logo */
@@ -170,8 +176,6 @@ const TICKER_TEXT =
                 height: var(--nav-h);
                 padding: 0 2.5vw 0 0;
                 justify-content: flex-end;
-                overflow: visible;
-                transition: none;
                 background: none;
             }
             .site-chrome.compact .nav-home { display: none; }
@@ -301,12 +305,6 @@ const TICKER_TEXT =
                 padding: 0;
                 height: var(--nav-h);
                 background: transparent;
-                overflow: hidden;
-                transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            .nav--hidden {
-                height: 0;
             }
 
             .nav-home {
@@ -972,9 +970,10 @@ const TICKER_TEXT =
             <div class="footer-grid">
                 <div class="footer-col">
                     <a href="/join">Join us</a>
+                    <a href="/schedule">Schedule</a>
                     <a href="/faq">FAQ</a>
                     <a href="/about">About</a>
-                    <a href="/community-agreements">Community agreements</a>
+                    <a href="/community-agreements">Agreements</a>
                 </div>
                 <div class="footer-col">
                     <a
@@ -1032,30 +1031,43 @@ const TICKER_TEXT =
             });
 
             // ── Scroll-aware chrome ─────────────────────────────
+            // Uses transform:translateY(-100%) on the whole chrome — no layout
+            // shift. compact↔expanded switch happens while chrome is hidden.
             const chrome = document.getElementById("site-chrome")!;
-            const nav = document.getElementById("main-nav")!;
             let lastY = 0;
             let ticking = false;
+
             window.addEventListener(
                 "scroll",
                 () => {
                     if (!ticking) {
                         requestAnimationFrame(() => {
                             const y = window.scrollY;
-                            const threshold = window.innerHeight * 0.25;
-                            if (y <= threshold) {
-                                // Top quarter: compact single-row, no logo
+                            const atTop = y < 20;
+                            const scrollingDown = y > lastY;
+
+                            if (atTop) {
+                                // At very top: instant snap to compact, then show
+                                chrome.classList.add("no-transition");
                                 chrome.classList.add("compact");
-                                nav.classList.remove("nav--hidden");
-                            } else if (y > lastY) {
-                                // Scrolling down past threshold: expand + hide nav
-                                chrome.classList.remove("compact");
-                                nav.classList.add("nav--hidden");
+                                chrome.classList.remove("chrome--hidden");
+                                void chrome.offsetHeight; // force reflow
+                                chrome.classList.remove("no-transition");
+                            } else if (scrollingDown) {
+                                // Scrolling down: slide whole chrome away
+                                chrome.classList.add("chrome--hidden");
                             } else {
-                                // Scrolling up: show full two-row chrome with logo
-                                chrome.classList.remove("compact");
-                                nav.classList.remove("nav--hidden");
+                                // Scrolling up: switch to expanded while still hidden,
+                                // then slide back in — no visible layout jump
+                                if (chrome.classList.contains("compact")) {
+                                    chrome.classList.add("no-transition");
+                                    chrome.classList.remove("compact");
+                                    void chrome.offsetHeight;
+                                    chrome.classList.remove("no-transition");
+                                }
+                                chrome.classList.remove("chrome--hidden");
                             }
+
                             lastY = y;
                             ticking = false;
                         });
