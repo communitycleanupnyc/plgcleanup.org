@@ -787,41 +787,23 @@ const TICKER_TEXT =
                 padding-bottom: clamp(2rem, 7vw, 3rem);
             }
 
-            .join-visual {
-                display: flex;
-                align-items: flex-end;
-                justify-content: space-between;
-                gap: clamp(1rem, 2vw, 1.5rem);
-                margin-top: clamp(2rem, 5vw, 3rem);
-                width: 100%;
-            }
-
-            .join-map {
-                display: block;
-                height: clamp(140px, 16vw, 240px);
-                aspect-ratio: 1.618;
-                border: 0;
-                flex-shrink: 0;
-                /* Approximate night mode: invert + hue-rotate brings colours back */
-                filter: invert(100%) hue-rotate(180deg);
-            }
-
+            /* Cart lives in the When column, map in the Where column */
             .join-cart {
                 display: block;
                 width: clamp(140px, 16vw, 240px);
                 height: auto;
-                flex-shrink: 0;
+                margin-top: clamp(1.5rem, 3vw, 2rem);
                 pointer-events: none;
                 user-select: none;
             }
 
-            @media (max-width: 680px) {
-                .join-visual {
-                    flex-direction: column;
-                    align-items: flex-end;
-                }
-                .join-map  { height: clamp(120px, 45vw, 180px); }
-                .join-cart { width:  clamp(120px, 45vw, 180px); }
+            .join-map {
+                display: block;
+                width: 100%;
+                aspect-ratio: 1.618;
+                border: 0;
+                margin-top: clamp(1.5rem, 3vw, 2rem);
+                filter: invert(100%) hue-rotate(180deg);
             }
 
             .join-page h1 {
