@@ -71,7 +71,7 @@ const TICKER_TEXT =
                 --hover-radius: 0;
                 --ticker-duration: 12s;
                 /* Content column: width + derived left-offset for the 95→90vw breakout */
-                --site-w: 92vw;
+                --site-w: 96vw;
                 --site-ml: calc(50% - var(--site-w) / 2);
             }
 
@@ -184,14 +184,15 @@ const TICKER_TEXT =
             .site-chrome.static-nav .ticker-bar { display: none; }
             .site-chrome.static-nav + #chrome-spacer { height: var(--nav-h); }
 
-            /* Compact (at page top): ticker fills bar, nav links flush right, no logo */
+            /* Compact (at page top): ticker fills bar, nav links flush right, no logo.
+               padding-inline centers the content at --site-w so the ticker left-edge
+               and nav right-edge align exactly with the content column below. */
             .site-chrome.compact {
                 display: flex;
                 align-items: stretch;
                 height: var(--nav-h);
                 background: var(--bg);
-                /* 1vw narrower per side than the main content column */
-                --compact-edge: calc((100vw - var(--site-w)) / 2 + 2vw);
+                padding-inline: calc((100vw - var(--site-w)) / 2);
             }
             .site-chrome.compact .ticker-bar {
                 flex: 0 0 50%;
@@ -201,14 +202,14 @@ const TICKER_TEXT =
             .site-chrome.compact .ticker {
                 width: 100%;
                 margin: 0;
-                padding-left: var(--compact-edge);
+                padding-left: 0;
                 border-bottom: none;
                 height: 100%;
             }
             .site-chrome.compact .nav {
                 flex: 0 0 50%;
                 height: var(--nav-h);
-                padding: 0 var(--compact-edge) 0 0;
+                padding: 0;
                 justify-content: flex-end;
                 background: none;
             }
@@ -597,7 +598,7 @@ const TICKER_TEXT =
             }
 
             .hero-body p:last-child {
-                font-size: clamp(2rem, 2.25vw, 1.75rem);
+                font-size: clamp(1.5rem, 2.25vw, 1.75rem);
                 font-weight: 200;
                 letter-spacing: -0.03em;
             }
@@ -619,8 +620,8 @@ const TICKER_TEXT =
                 text-transform: uppercase;
                 padding: 1.1rem 1.5rem;
                 font-family: "Hanken Grotesk", system-ui, sans-serif;
-                font-size: clamp(1rem, 2vw, 1.25rem);
-                font-weight: 600;
+                font-size: clamp(2rem, 2vw, 1.25rem);
+                font-weight: 400;
                 color: var(--bg);
                 background: var(--btn-light);
                 text-decoration: none;
@@ -642,8 +643,8 @@ const TICKER_TEXT =
                 text-transform: uppercase;
                 padding: 1.1rem 1.5rem;
                 font-family: "Hanken Grotesk", system-ui, sans-serif;
-                font-size: clamp(1rem, 2vw, 1.25rem);
-                font-weight: 600;
+                font-size: clamp(2rem, 2vw, 1.25rem);
+                font-weight: 400;
                 color: var(--text);
                 background: var(--muted);
                 text-decoration: none;
