@@ -61,6 +61,7 @@ const TICKER_TEXT =
                 --accent: #a1d74a;
                 --select: #eeb408;
                 --edge: clamp(1.25rem, 5vw, 3rem);
+                --ticker-bg: #111111;
                 --ticker-h: 2.25rem;
                 --nav-h: 3.5rem;
                 /* Round 6 additions */
@@ -145,41 +146,41 @@ const TICKER_TEXT =
                 overflow: hidden;
             }
 
-            /* Compact (at page top): ticker and nav share one row, no logo */
+            /* Compact (at page top): ticker left 50% + nav links right 50%, no logo */
             .site-chrome.compact {
                 display: flex;
-                align-items: center;
+                align-items: stretch;
                 height: var(--nav-h);
-                padding: 0 var(--edge);
-                border-bottom: 1px solid var(--line);
+                background: var(--ticker-bg);
+                border-bottom: 1px solid rgba(255,255,255,0.08);
             }
             .site-chrome.compact .ticker-bar {
-                flex: 1;
+                flex: 0 0 50%;
                 min-width: 0;
                 background: none;
-                height: 100%;
             }
             .site-chrome.compact .ticker {
                 width: 100%;
                 margin: 0;
+                padding-left: 2.5vw;
                 border-bottom: none;
                 height: 100%;
             }
             .site-chrome.compact .nav {
-                flex-shrink: 0;
+                flex: 0 0 50%;
                 height: var(--nav-h);
-                padding: 0;
+                padding: 0 2.5vw 0 0;
+                justify-content: flex-end;
                 overflow: visible;
-                transform: none !important;
-                background: none !important;
-                backdrop-filter: none !important;
+                transition: none;
+                background: none;
             }
             .site-chrome.compact .nav-home { display: none; }
 
             /* Full-bleed ticker wrapper (non-compact) */
             .ticker-bar {
                 width: 100%;
-                background: var(--bg);
+                background: var(--ticker-bg);
             }
 
             /* Visible 95vw bar with the bottom divider */
@@ -210,7 +211,7 @@ const TICKER_TEXT =
                 display: flex;
                 width: max-content;
                 will-change: transform;
-                transform: translateX(-50%);
+                transform: translateX(-25%);
                 font-size: 0.6875rem;
                 font-weight: 500;
                 letter-spacing: 0.04em;
@@ -221,8 +222,24 @@ const TICKER_TEXT =
 
             .ticker__segment {
                 flex-shrink: 0;
-                /* trailing space sets the pitch ≈ text-width + 40vw ≈ 55vw */
-                padding-right: clamp(3rem, 40vw, 35rem);
+                padding-right: clamp(2rem, 8vw, 6rem);
+            }
+
+            /* Clickable ticker segment */
+            .ticker__link {
+                display: inline-flex;
+                align-items: center;
+                text-decoration: none;
+                color: inherit;
+                padding: 0.25em 0.5em;
+                margin-right: clamp(1rem, 4vw, 3rem);
+                transition: background 120ms ease, color 120ms ease;
+            }
+            .ticker__link:hover,
+            .ticker__link:focus-visible {
+                background: var(--accent);
+                color: var(--bg);
+                outline: none;
             }
 
             .ticker.is-playing .ticker__track {
@@ -230,12 +247,12 @@ const TICKER_TEXT =
             }
 
             @keyframes ticker-rtl {
-                /* moves right (–50% → 0); identical copies make the loop seamless */
+                /* moves left by 1 segment (25% of 4-segment track); loop is seamless */
                 from {
-                    transform: translateX(+50%);
+                    transform: translateX(-25%);
                 }
                 to {
-                    transform: translateX(0);
+                    transform: translateX(-50%);
                 }
             }
 
@@ -280,10 +297,10 @@ const TICKER_TEXT =
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 0 var(--edge);
+                padding: 0 2.5vw;
                 height: var(--nav-h);
                 overflow: hidden;
-                transition: height 0.2s ease;
+                transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
 
             .nav--hidden {
@@ -378,7 +395,7 @@ const TICKER_TEXT =
                 width: 95vw;
                 margin-left: calc(50% - 47.5vw);
                 padding-top: clamp(3rem, 8vw, 5rem);
-                margin-bottom: clamp(2rem, 7vw, 3.5rem);
+                margin-bottom: clamp(14rem, 7vw, 3.5rem);
             }
 
             .hero-kicker {
@@ -409,7 +426,7 @@ const TICKER_TEXT =
                 z-index: 0;
                 right: var(--edge);
                 top: 85%;
-                transform: translateY(-50%) rotate(-20deg);
+                transform: translateY(-25%) rotate(-20deg);
                 width: clamp(100px, 26vw, 148px);
                 height: auto;
                 pointer-events: none;
@@ -519,7 +536,7 @@ const TICKER_TEXT =
                 display: flex;
                 flex-direction: column;
                 gap: 0.625rem;
-                margin-bottom: clamp(2rem, 6vw, 3rem);
+                margin-bottom: clamp(6rem, 6vw, 3rem);
             }
 
             .hero-body p {
@@ -872,15 +889,10 @@ const TICKER_TEXT =
             <div class="ticker" id="ticker">
                 <div class="ticker__viewport">
                     <div class="ticker__track">
-                        <!--
-                          Two identical segments. padding-right creates the pitch (~55vw).
-                          Resting: translateX(-50%) = start of segment 2.
-                          Animation: –50% → 0 (rightward, seamless loop).
-                        -->
-                        <span class="ticker__segment">{TICKER_TEXT}</span>
-                        <span class="ticker__segment" aria-hidden="true"
-                            >{TICKER_TEXT}</span
-                        >
+                        <a href="/join" class="ticker__segment ticker__link">{TICKER_TEXT}</a>
+                        <a href="/join" class="ticker__segment ticker__link" aria-hidden="true" tabindex="-1">{TICKER_TEXT}</a>
+                        <a href="/join" class="ticker__segment ticker__link" aria-hidden="true" tabindex="-1">{TICKER_TEXT}</a>
+                        <a href="/join" class="ticker__segment ticker__link" aria-hidden="true" tabindex="-1">{TICKER_TEXT}</a>
                     </div>
                 </div>
                 <!-- Control on the right, outside the scrolling area -->
@@ -1028,16 +1040,17 @@ const TICKER_TEXT =
                     if (!ticking) {
                         requestAnimationFrame(() => {
                             const y = window.scrollY;
-                            if (y < 10) {
-                                // At top: compact single-row mode, no logo
+                            const threshold = window.innerHeight * 0.25;
+                            if (y <= threshold) {
+                                // Top quarter: compact single-row, no logo
                                 chrome.classList.add("compact");
                                 nav.classList.remove("nav--hidden");
                             } else if (y > lastY) {
-                                // Scrolling down: expand and hide nav
+                                // Scrolling down past threshold: expand + hide nav
                                 chrome.classList.remove("compact");
                                 nav.classList.add("nav--hidden");
                             } else {
-                                // Scrolling up: expand and show nav with logo
+                                // Scrolling up: show full two-row chrome with logo
                                 chrome.classList.remove("compact");
                                 nav.classList.remove("nav--hidden");
                             }
