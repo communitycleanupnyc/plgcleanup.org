@@ -36,6 +36,14 @@ const joinDisplayDate = new Intl.DateTimeFormat("en-US", {
     navMode="static"
 >
     <div class="join-page">
+        <img
+            src="/images/cart.webp"
+            alt=""
+            class="join-cart"
+            aria-hidden="true"
+            width="640"
+            height="634"
+        />
         <h1>Our next cleanup</h1>
         {countdownLine && <p class="join-countdown">{countdownLine}</p>}
         <p class="join-sub">No registration, and we'll provide the supplies—just show up. Look for the shopping cart with our trash grabbers in it.</p>
@@ -46,14 +54,6 @@ const joinDisplayDate = new Intl.DateTimeFormat("en-US", {
                 <p class="join-detail-value">
                     {joinDisplayDate}<br />{CLEANUP_TIME}
                 </p>
-                <img
-                    src="/images/cart.webp"
-                    alt=""
-                    class="join-cart"
-                    aria-hidden="true"
-                    width="640"
-                    height="634"
-                />
             </div>
             <div class="join-detail">
                 <p class="join-detail-label">Where</p>

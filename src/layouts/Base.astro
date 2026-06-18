@@ -781,18 +781,24 @@ const TICKER_TEXT =
 
             .join-page {
                 position: relative;
+                isolation: isolate;
                 width: var(--site-w);
                 margin-left: var(--site-ml);
                 padding-top: clamp(3rem, 8vw, 5rem);
                 padding-bottom: clamp(2rem, 7vw, 3rem);
             }
 
-            /* Cart lives in the When column, map in the Where column */
             .join-cart {
-                display: block;
-                width: clamp(140px, 16vw, 240px);
+                /* --_base mirrors join-page padding-top so cart top = h1 top at wide */
+                --_base: clamp(3rem, 8vw, 5rem);
+                /* --_slide: 0 at ≥1130px, grows linearly to ~4rem at 375px */
+                --_slide: clamp(0rem, calc(6rem - 8.5vw), 4rem);
+                position: absolute;
+                top: calc(var(--_base) + var(--_slide));
+                right: 0;
+                width: clamp(140px, 18vw, 260px);
                 height: auto;
-                margin-top: clamp(1.5rem, 3vw, 2rem);
+                z-index: -1;
                 pointer-events: none;
                 user-select: none;
             }
