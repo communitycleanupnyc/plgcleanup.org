@@ -1005,15 +1005,17 @@ const TICKER_TEXT =
             .nav-menu-btn[aria-expanded="true"] .menu-icon__bar--top { transform: translateY(0%) rotate( 45deg); }
             .nav-menu-btn[aria-expanded="true"] .menu-icon__bar--btm { transform: translateY(0%) rotate(-45deg); }
 
-            /* Elevate chrome above the overlay so the toggle stays clickable */
-            .site-chrome.is-menu-open { z-index: 300; }
+            /* Chrome floats above menu (z-400) so toggle stays clickable; only button visible */
+            .site-chrome.is-menu-open { z-index: 400; background: transparent; }
             .site-chrome.compact.is-menu-open { position: relative; }
+            .site-chrome.is-menu-open .ticker-bar,
+            .site-chrome.is-menu-open .nav-home { opacity: 0; pointer-events: none; }
 
             .mobile-menu {
                 display: flex;
                 position: fixed;
                 inset: 0;
-                z-index: 200;
+                z-index: 300;
                 background: var(--bg);
                 flex-direction: column;
                 translate: 100%;
