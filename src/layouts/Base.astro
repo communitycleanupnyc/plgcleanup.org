@@ -1005,12 +1005,12 @@ const TICKER_TEXT =
             }
             /* JS sets this class to keep button in sync with chrome show/hide */
             .nav-menu-btn.is-nav-hidden { transform: translateY(-100%); }
-            /* State 2: chrome is fixed+stacked (ticker above nav). Button sits in nav row;
-               hide must clear ticker-h + nav-h so translateY(-100%) alone isn't enough. */
-            .site-chrome.is-fixed ~ .nav-menu-btn { top: var(--ticker-h); }
-            .site-chrome.is-fixed ~ .nav-menu-btn.is-nav-hidden {
-                transform: translateY(calc(-1 * (var(--ticker-h) + 100%)));
-            }
+            /* State 2: both rows equal height (nav-h) → play and menu buttons share
+               the same vertical midpoint within their stripe. Button sits in the nav
+               row; hide needs -200% (= -2×nav-h) to clear the full chrome height. */
+            .site-chrome.is-fixed .ticker { height: var(--nav-h); }
+            .site-chrome.is-fixed ~ .nav-menu-btn { top: var(--nav-h); }
+            .site-chrome.is-fixed ~ .nav-menu-btn.is-nav-hidden { transform: translateY(-200%); }
             .nav-menu-btn:focus-visible { color: var(--accent); outline: none; }
             @media (hover: hover) {
                 .nav-menu-btn:hover { color: var(--accent); outline: none; }
