@@ -190,6 +190,8 @@ const TICKER_TEXT =
                 align-items: stretch;
                 height: var(--nav-h);
                 background: var(--bg);
+                /* 1vw narrower per side than the main content column */
+                --compact-edge: calc((100vw - var(--site-w)) / 2 + 1vw);
             }
             .site-chrome.compact .ticker-bar {
                 flex: 0 0 50%;
@@ -199,14 +201,14 @@ const TICKER_TEXT =
             .site-chrome.compact .ticker {
                 width: 100%;
                 margin: 0;
-                padding-left: 1rem;
+                padding-left: var(--compact-edge);
                 border-bottom: none;
                 height: 100%;
             }
             .site-chrome.compact .nav {
                 flex: 0 0 50%;
                 height: var(--nav-h);
-                padding: 0 2.5vw 0 0;
+                padding: 0 var(--compact-edge) 0 0;
                 justify-content: flex-end;
                 background: none;
             }
