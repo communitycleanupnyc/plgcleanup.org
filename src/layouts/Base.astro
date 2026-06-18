@@ -1056,16 +1056,26 @@ const TICKER_TEXT =
                             const pastThreshold = y > threshold;
 
                             if (!pastThreshold) {
-                                if (chrome.classList.contains("is-fixed")) {
-                                    chrome.classList.add("no-transition");
-                                    chrome.classList.remove("is-fixed", "is-revealed");
-                                    chrome.classList.add("compact");
-                                    void chrome.offsetHeight;
-                                    chrome.classList.remove("no-transition");
+                                // Slide up with transition (same animation as scrolling down),
+                                // then swap to static compact once offscreen.
+                                if (chrome.classList.contains("is-fixed") && !chrome.dataset.leaving) {
+                                    chrome.dataset.leaving = "1";
+                                    chrome.classList.remove("is-revealed");
+                                    chrome.addEventListener("transitionend", () => {
+                                        delete chrome.dataset.leaving;
+                                        if (!chrome.classList.contains("is-revealed")) {
+                                            chrome.classList.add("no-transition");
+                                            chrome.classList.remove("is-fixed");
+                                            chrome.classList.add("compact");
+                                            void chrome.offsetHeight;
+                                            chrome.classList.remove("no-transition");
+                                        }
+                                    }, { once: true });
                                 }
                             } else if (scrollingDown) {
                                 chrome.classList.remove("is-revealed");
                             } else {
+                                delete chrome.dataset.leaving;
                                 if (!chrome.classList.contains("is-fixed")) {
                                     chrome.classList.add("no-transition");
                                     chrome.classList.remove("compact");
