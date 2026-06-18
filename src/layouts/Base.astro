@@ -113,8 +113,8 @@ const TICKER_TEXT =
                 color: inherit;
                 text-decoration: underline;
                 text-decoration-thickness: 1px;
-                text-underline-offset: 5px;
-                text-decoration-color: rgba(245, 244, 238, 0.3);
+                text-underline-offset: 8px;
+                text-decoration-color:var(--text);
                 transition: text-decoration-color 120ms ease;
             }
             a:not([class]):hover,
@@ -1062,8 +1062,11 @@ const TICKER_TEXT =
                                 void chrome.offsetHeight;
                                 chrome.classList.remove("no-transition");
                             } else if (scrollingDown) {
-                                // Any downward scroll: hide immediately
+                                // Hide instantly — no transition, scrolls away like normal content
+                                chrome.classList.add("no-transition");
                                 chrome.classList.add("chrome--hidden");
+                                void chrome.offsetHeight;
+                                chrome.classList.remove("no-transition");
                             } else if (!scrollingDown && y > hideThreshold && chrome.classList.contains("chrome--hidden")) {
                                 // Scrolling up past threshold while hidden: show expanded
                                 chrome.classList.add("no-transition");
