@@ -1018,18 +1018,24 @@ const TICKER_TEXT =
                 z-index: 300;
                 background: var(--bg);
                 flex-direction: column;
-                translate: 100%;
                 visibility: hidden;
-                transition:
-                    translate 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                    visibility 0s 0.4s; /* delay visibility until after slide-out completes */
             }
-            .mobile-menu.is-open {
-                translate: 0%;
-                visibility: visible;
-                transition:
-                    translate 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                    visibility 0s 0s; /* visible immediately on open */
+            .mobile-menu.is-open { visibility: visible; }
+
+            /* Mobile only: slide in/out from the right */
+            @media (max-width: 1024px) {
+                .mobile-menu {
+                    translate: 100%;
+                    transition:
+                        translate 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        visibility 0s 0.4s;
+                }
+                .mobile-menu.is-open {
+                    translate: 0%;
+                    transition:
+                        translate 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        visibility 0s 0s;
+                }
             }
 
 
