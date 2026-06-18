@@ -62,8 +62,8 @@ const TICKER_TEXT =
                 --select: #eeb408;
                 --edge: clamp(1.25rem, 5vw, 3rem);
                 --ticker-bg: rgba(255, 255, 255, 0.07);
-                --ticker-h: 2.25rem;
-                --nav-h: 3.5rem;
+                --ticker-h: 3rem;
+                --nav-h: 4.25rem;
                 /* Round 6 additions */
                 --btn-light: var(--text);
                 --hover-radius: 0;
@@ -151,8 +151,7 @@ const TICKER_TEXT =
                 display: flex;
                 align-items: stretch;
                 height: var(--nav-h);
-                background: var(--ticker-bg);
-                border-bottom: 1px solid rgba(255,255,255,0.08);
+                background: transparent;
             }
             .site-chrome.compact .ticker-bar {
                 flex: 0 0 50%;
@@ -162,7 +161,7 @@ const TICKER_TEXT =
             .site-chrome.compact .ticker {
                 width: 100%;
                 margin: 0;
-                padding-left: 2.5vw;
+                padding-left: 1rem;
                 border-bottom: none;
                 height: 100%;
             }
@@ -180,17 +179,14 @@ const TICKER_TEXT =
             /* Full-bleed ticker wrapper (non-compact) */
             .ticker-bar {
                 width: 100%;
-                background: var(--ticker-bg);
+                background: transparent;
             }
 
-            /* Visible 95vw bar with the bottom divider */
             .ticker {
-                width: 95vw;
-                margin-inline: auto;
+                width: 100%;
                 height: var(--ticker-h);
                 display: flex;
                 align-items: center;
-                border-bottom: 1px solid var(--line);
             }
 
             .ticker__viewport {
@@ -215,7 +211,7 @@ const TICKER_TEXT =
                 font-size: 0.6875rem;
                 font-weight: 500;
                 letter-spacing: 0.04em;
-                color: var(--muted);
+                color: var(--text);
                 font-variant-numeric: tabular-nums slashed-zero;
                 white-space: nowrap;
             }
@@ -225,14 +221,15 @@ const TICKER_TEXT =
                 padding-right: clamp(2rem, 8vw, 6rem);
             }
 
-            /* Clickable ticker segment */
+            /* Clickable ticker: gray box only around the text, not the bar */
             .ticker__link {
                 display: inline-flex;
                 align-items: center;
                 text-decoration: none;
-                color: inherit;
-                padding: 0.25em 0.5em;
-                margin-right: clamp(1rem, 4vw, 3rem);
+                color: var(--text);
+                background: rgba(255, 255, 255, 0.07);
+                padding: 0.35em 0.75em;
+                margin-right: clamp(0.75rem, 2vw, 1.5rem);
                 transition: background 120ms ease, color 120ms ease;
             }
             .ticker__link:hover,
