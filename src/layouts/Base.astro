@@ -1348,7 +1348,10 @@ const TICKER_TEXT =
                 menuBtn!.setAttribute("aria-expanded", "true");
                 menuBtn!.setAttribute("aria-label", "Close menu");
                 document.body.style.overflow = "hidden";
-                mobileMenu!.querySelector<HTMLElement>(".mobile-menu-link")?.focus();
+                // Keyboard users need focus moved into the dialog; touch users don't
+                if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
+                    mobileMenu!.querySelector<HTMLElement>(".mobile-menu-link")?.focus();
+                }
             }
             function closeMobileMenu() {
                 mobileMenu!.classList.remove("is-open");
