@@ -71,7 +71,7 @@ const TICKER_TEXT =
                 --hover-radius: 0;
                 --ticker-duration: 12s;
                 /* Content column: width + derived left-offset for the 95→90vw breakout */
-                --site-w: 96vw;
+                --site-w: 94vw;
                 --site-ml: calc(50% - var(--site-w) / 2);
             }
 
@@ -620,8 +620,9 @@ const TICKER_TEXT =
                 text-transform: uppercase;
                 padding: 1.1rem 1.5rem;
                 font-family: "Hanken Grotesk", system-ui, sans-serif;
-                font-size: clamp(2rem, 2vw, 1.25rem);
+                font-size: clamp(1.75rem, 2vw, 1.25rem);
                 font-weight: 400;
+                letter-spacing: -0.04em;
                 color: var(--bg);
                 background: var(--btn-light);
                 text-decoration: none;
@@ -643,7 +644,8 @@ const TICKER_TEXT =
                 text-transform: uppercase;
                 padding: 1.1rem 1.5rem;
                 font-family: "Hanken Grotesk", system-ui, sans-serif;
-                font-size: clamp(2rem, 2vw, 1.25rem);
+                font-size: clamp(1.75rem, 2vw, 1.25rem);
+                letter-spacing: -0.04em;
                 font-weight: 400;
                 color: var(--text);
                 background: var(--muted);
@@ -1199,6 +1201,10 @@ const TICKER_TEXT =
             </button>
         </nav>
 
+        </div><!-- /.site-chrome -->
+        <div id="chrome-spacer" aria-hidden="true"></div>
+
+        <!-- Mobile menu: sibling of site-chrome so parent padding-inline can't constrain it -->
         <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation">
             <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -1214,9 +1220,6 @@ const TICKER_TEXT =
                 <a href="/schedule" class="cta-secondary">View schedule</a>
             </div>
         </div>
-
-        </div><!-- /.site-chrome -->
-        <div id="chrome-spacer" aria-hidden="true"></div>
 
         <main>
             <slot />
