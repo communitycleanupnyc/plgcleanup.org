@@ -11,7 +11,7 @@ const {
 } = Astro.props;
 
 const TICKER_TEXT =
-    "2,972.55 pounds this year. See which block is up next. →";
+    "2,972.55 pounds and counting. See which block is up next! →";
 ---
 
 <!doctype html>
@@ -765,21 +765,24 @@ const TICKER_TEXT =
                 width: 95vw;
                 margin-left: calc(50% - 47.5vw);
                 padding-top: clamp(3rem, 8vw, 5rem);
-                padding-bottom: clamp(10rem, 22vw, 14rem);
+                padding-bottom: clamp(2rem, 7vw, 3rem);
             }
 
             .join-cart {
-                position: absolute;
-                bottom: clamp(1.5rem, 3vw, 2.5rem);
-                right: clamp(1rem, 2vw, 1.5rem);
+                display: block;
                 width: clamp(140px, 16vw, 240px);
                 height: auto;
+                margin-top: clamp(2rem, 5vw, 3rem);
+                margin-left: auto;
                 pointer-events: none;
                 user-select: none;
             }
 
             @media (max-width: 680px) {
-                .join-cart { display: none; }
+                .join-cart {
+                    width: clamp(120px, 45vw, 180px);
+                    margin-left: 0;
+                }
             }
 
             .join-page h1 {
@@ -806,6 +809,12 @@ const TICKER_TEXT =
                 grid-template-columns: 1fr 1fr;
                 gap: clamp(1.5rem, 3vw, 2.5rem);
                 margin-bottom: clamp(2rem, 5vw, 3rem);
+            }
+
+            @media (max-width: 540px) {
+                .join-details {
+                    grid-template-columns: 1fr;
+                }
             }
 
             .join-detail-label {
@@ -1212,12 +1221,12 @@ const TICKER_TEXT =
                     <a href="/community-agreements">Agreements</a>
                 </div>
                 <div class="footer-col">
+                    <a href="mailto:communitycleanupplg@gmail.com">Email us</a>
                     <a
                         href="https://discord.com/invite/H9her7r8N2"
                         target="_blank"
                         rel="noopener noreferrer">Discord</a
                     >
-                    <a href="mailto:communitycleanupplg@gmail.com">Email us</a>
                     <a
                         href="https://communitycleanupplg.substack.com/subscribe"
                         target="_blank"
