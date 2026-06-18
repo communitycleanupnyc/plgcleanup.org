@@ -182,6 +182,8 @@ const TICKER_TEXT =
             }
             .site-chrome.static-nav.is-hidden { transform: translateY(-100%); }
             .site-chrome.static-nav .ticker-bar { display: none; }
+            /* When fixed (sticky reveal), show only nav bar — ticker is an at-top element */
+            .site-chrome.is-fixed .ticker-bar { display: none; }
             .site-chrome.static-nav + #chrome-spacer { height: var(--nav-h); }
 
             /* Compact (at page top): ticker fills bar, nav links flush right, no logo.
@@ -1003,11 +1005,8 @@ const TICKER_TEXT =
                     color 225ms ease,
                     transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             }
-            /* Button tracks chrome via sibling selector — hides when chrome hides */
-            .site-chrome.static-nav.is-hidden ~ .nav-menu-btn,
-            .site-chrome.is-fixed:not(.is-revealed) ~ .nav-menu-btn {
-                transform: translateY(-100%);
-            }
+            /* JS sets this class to keep button in sync with chrome show/hide */
+            .nav-menu-btn.is-nav-hidden { transform: translateY(-100%); }
             .nav-menu-btn:focus-visible { color: var(--accent); outline: none; }
             @media (hover: hover) {
                 .nav-menu-btn:hover { color: var(--accent); outline: none; }
@@ -1394,8 +1393,10 @@ const TICKER_TEXT =
                             const y = window.scrollY;
                             if (y > lastY && y > 8) {
                                 chrome.classList.add("is-hidden");
+                                menuBtn?.classList.add("is-nav-hidden");
                             } else if (y < lastY) {
                                 chrome.classList.remove("is-hidden");
+                                menuBtn?.classList.remove("is-nav-hidden");
                             }
                             lastY = y;
                             ticking = false;
@@ -1416,6 +1417,8 @@ const TICKER_TEXT =
                             const pastThreshold = y > threshold;
 
                             if (!pastThreshold) {
+                                // Back near top — always show button
+                                menuBtn?.classList.remove("is-nav-hidden");
                                 if (chrome.classList.contains("is-fixed") && !chrome.dataset.leaving) {
                                     chrome.dataset.leaving = "1";
                                     chrome.classList.remove("is-revealed");
@@ -1431,8 +1434,12 @@ const TICKER_TEXT =
                                     }, { once: true });
                                 }
                             } else if (scrollingDown) {
+                                // Scrolling down past threshold — hide button with chrome
                                 chrome.classList.remove("is-revealed");
+                                menuBtn?.classList.add("is-nav-hidden");
                             } else {
+                                // Scrolling up past threshold — reveal button with chrome
+                                menuBtn?.classList.remove("is-nav-hidden");
                                 delete chrome.dataset.leaving;
                                 if (!chrome.classList.contains("is-fixed")) {
                                     chrome.classList.add("no-transition");
