@@ -453,8 +453,8 @@ const TICKER_TEXT =
 
             h1 {
                 font-family: "Fraunces", Georgia, serif;
-                font-size: clamp(3.25rem, 11vw, 6rem);
-                font-weight: 800;
+                font-size: clamp(6.25rem, 11vw, 6rem);
+                font-weight: 700;
                 line-height: 1.1;
                 letter-spacing: -0.01em;
                 font-optical-sizing: auto;
@@ -1112,10 +1112,9 @@ const TICKER_TEXT =
                 .nav-links    { display: none; }
                 .nav-menu-btn { display: flex; }
 
-                /* Ticker expands to fill; nav shrinks to just the hamburger.
-                   Must override .nav { width: var(--site-w) } or flex-basis:auto claims --site-w. */
+                /* Ticker expands to fill; nav is a fixed-width spacer for the external button. */
                 .site-chrome.compact .ticker-bar { flex: 1; min-width: 0; }
-                .site-chrome.compact .nav        { flex: 0 0 auto; width: auto; }
+                .site-chrome.compact .nav        { flex: 0 0 2.75rem; } /* 1.75rem svg + 2×0.5rem padding */
             }
 
             /* Touch devices: instant tap response + persistent highlight.
