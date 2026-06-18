@@ -83,11 +83,11 @@ const TICKER_TEXT =
             }
 
             ::selection {
-                background: var(--select);
+                background: var(--accent);
                 color: var(--bg);
             }
             ::-moz-selection {
-                background: var(--select);
+                background: var(--accent);
                 color: var(--bg);
             }
 
@@ -112,14 +112,18 @@ const TICKER_TEXT =
             a:not([class]) {
                 color: inherit;
                 text-decoration: underline;
-                text-decoration-thickness: 1px;
+                text-decoration-thickness: 2px;
                 text-underline-offset: 8px;
                 text-decoration-color:var(--text);
                 transition: text-decoration-color 120ms ease;
             }
             a:not([class]):hover,
             a:not([class]):focus-visible {
-                text-decoration-color: var(--accent);
+                background-color: var(--accent);
+                color: var(--bg);
+                transition: color 120ms ease;
+                transition: background-color 120ms ease;
+                text-decoration: none;
                 outline: none;
             }
 
@@ -1036,7 +1040,50 @@ const TICKER_TEXT =
                 );
             });
 
-            // ── No scroll handler: site-chrome scrolls with page naturally ──
+            // ── Scroll-aware chrome reveal ──────────────────────────────────
+            const chrome = document.getElementById("site-chrome")!;
+            const threshold = window.innerHeight * 0.25;
+            let lastY = 0;
+            let ticking = false;
+
+            window.addEventListener(
+                "scroll",
+                () => {
+                    if (!ticking) {
+                        requestAnimationFrame(() => {
+                            const y = window.scrollY;
+                            const scrollingDown = y > lastY;
+                            const pastThreshold = y > threshold;
+
+                            if (!pastThreshold) {
+                                if (chrome.classList.contains("is-fixed")) {
+                                    chrome.classList.add("no-transition");
+                                    chrome.classList.remove("is-fixed", "is-revealed");
+                                    chrome.classList.add("compact");
+                                    void chrome.offsetHeight;
+                                    chrome.classList.remove("no-transition");
+                                }
+                            } else if (scrollingDown) {
+                                chrome.classList.remove("is-revealed");
+                            } else {
+                                if (!chrome.classList.contains("is-fixed")) {
+                                    chrome.classList.add("no-transition");
+                                    chrome.classList.remove("compact");
+                                    chrome.classList.add("is-fixed");
+                                    void chrome.offsetHeight;
+                                    chrome.classList.remove("no-transition");
+                                }
+                                chrome.classList.add("is-revealed");
+                            }
+
+                            lastY = y;
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
+                },
+                { passive: true },
+            );
         </script>
     </body>
 </html>
