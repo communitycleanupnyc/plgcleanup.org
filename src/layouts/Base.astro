@@ -1354,9 +1354,10 @@ const TICKER_TEXT =
                 mobileMenu!.classList.remove("is-open");
                 menuBtn!.setAttribute("aria-expanded", "false");
                 menuBtn!.setAttribute("aria-label", "Open menu");
-                chrome.classList.remove("is-menu-open");
                 document.body.style.overflow = "";
                 menuBtn!.blur(); // clear focus/hover highlight; Escape handler restores focus for keyboard
+                // Keep chrome elevated until slide-out finishes (matches 0.4s transition)
+                setTimeout(() => chrome.classList.remove("is-menu-open"), 400);
             }
 
             menuBtn?.addEventListener("click", () => {
