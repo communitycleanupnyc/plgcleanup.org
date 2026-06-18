@@ -1010,14 +1010,25 @@ const TICKER_TEXT =
             .site-chrome.compact.is-menu-open { position: relative; }
 
             .mobile-menu {
-                display: none;
+                display: flex;
                 position: fixed;
                 inset: 0;
                 z-index: 200;
                 background: var(--bg);
                 flex-direction: column;
+                translate: 100%;
+                visibility: hidden;
+                transition:
+                    translate 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                    visibility 0s 0.4s; /* delay visibility until after slide-out completes */
             }
-            .mobile-menu.is-open { display: flex; }
+            .mobile-menu.is-open {
+                translate: 0%;
+                visibility: visible;
+                transition:
+                    translate 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                    visibility 0s 0s; /* visible immediately on open */
+            }
 
 
             .mobile-menu-links {
