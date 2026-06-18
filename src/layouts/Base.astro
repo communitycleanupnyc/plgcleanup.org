@@ -1037,11 +1037,7 @@ const TICKER_TEXT =
             const chrome = document.getElementById("site-chrome")!;
             let lastY = 0;
             let ticking = false;
-            const maxScroll = Math.max(
-                1,
-                document.documentElement.scrollHeight - window.innerHeight,
-            );
-            const hideThreshold = maxScroll * 0.25;
+            const hideThreshold = window.innerHeight * 0.25;
 
             window.addEventListener(
                 "scroll",
