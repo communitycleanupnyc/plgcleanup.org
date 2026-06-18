@@ -1022,8 +1022,8 @@ const TICKER_TEXT =
             }
             .mobile-menu.is-open { visibility: visible; }
 
-            /* Mobile only: slide in/out from the right */
-            @media (max-width: 1024px) {
+            /* Touch devices only: slide in/out from the right */
+            @media (hover: none) and (pointer: coarse) {
                 .mobile-menu {
                     translate: 100%;
                     transition:
