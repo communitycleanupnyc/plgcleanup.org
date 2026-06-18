@@ -221,10 +221,17 @@ const TICKER_TEXT =
                 padding-right: clamp(2rem, 8vw, 6rem);
             }
 
-            /* Continuous band: bg lives on the track, not individual segments */
-            .ticker__track {
+            /* Continuous band: bg lives on the viewport (always fills full width) */
+            .ticker__viewport {
                 background: rgba(255, 255, 255, 0.07);
                 transition: background 120ms ease;
+                cursor: pointer;
+            }
+            .ticker__viewport:hover {
+                background: var(--accent);
+            }
+            .ticker__viewport:hover .ticker__link {
+                color: var(--bg);
             }
             .ticker__link {
                 display: inline-flex;
@@ -233,13 +240,6 @@ const TICKER_TEXT =
                 color: var(--text);
                 padding: 0.35em 0.75em;
             }
-            .ticker__viewport:hover .ticker__track {
-                background: var(--accent);
-            }
-            .ticker__viewport:hover .ticker__link {
-                color: var(--bg);
-            }
-            .ticker__viewport { cursor: pointer; }
 
             .ticker.is-playing .ticker__track {
                 animation: ticker-rtl var(--ticker-duration) linear infinite;
