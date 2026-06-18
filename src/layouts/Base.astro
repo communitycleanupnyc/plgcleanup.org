@@ -439,7 +439,7 @@ const TICKER_TEXT =
                 width: var(--site-w);
                 margin-left: var(--site-ml);
                 padding-top: clamp(3rem, 8vw, 5rem);
-                margin-bottom: clamp(14rem, 7vw, 3.5rem);
+                margin-bottom: clamp(10rem, 7vw, 3.5rem);
             }
 
             .hero-kicker {
@@ -453,10 +453,10 @@ const TICKER_TEXT =
 
             h1 {
                 font-family: "Fraunces", Georgia, serif;
-                font-size: clamp(2rem, 5vw, 3rem);
+                font-size: clamp(3rem, 5vw, 3rem);
                 font-weight: 700;
                 line-height: 1.1;
-                letter-spacing: -0.01em;
+                letter-spacing: -0.05em;
                 font-optical-sizing: auto;
                 font-variation-settings:
                     "SOFT" 50,
@@ -474,7 +474,7 @@ const TICKER_TEXT =
                 position: absolute;
                 z-index: 0;
                 right: var(--edge);
-                top: 85%;
+                top: 110%;
                 transform: translateY(-25%) rotate(-20deg);
                 width: clamp(100px, 26vw, 148px);
                 height: auto;
@@ -597,7 +597,7 @@ const TICKER_TEXT =
             }
 
             .hero-body p:first-child {
-                font-size: clamp(3rem, 3.5vw, 2.75rem);
+                font-size: clamp(2rem, 3.5vw, 2.75rem);
                 line-height: 1.25;
                 margin-bottom: 1rem;
             }
@@ -999,7 +999,14 @@ const TICKER_TEXT =
                 cursor: pointer;
                 padding: 0.5rem;
                 line-height: 0;
-                transition: color 225ms ease;
+                transition:
+                    color 225ms ease,
+                    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            /* Button tracks chrome via sibling selector — hides when chrome hides */
+            .site-chrome.static-nav.is-hidden ~ .nav-menu-btn,
+            .site-chrome.is-fixed:not(.is-revealed) ~ .nav-menu-btn {
+                transform: translateY(-100%);
             }
             .nav-menu-btn:focus-visible { color: var(--accent); outline: none; }
             @media (hover: hover) {
