@@ -146,7 +146,7 @@ const TICKER_TEXT =
                 overflow: hidden;
             }
 
-            /* Compact (at page top): ticker left 50% + nav links right 50%, no logo */
+            /* Compact (at page top): ticker fills bar, nav links flush right, no logo */
             .site-chrome.compact {
                 display: flex;
                 align-items: stretch;
@@ -155,7 +155,7 @@ const TICKER_TEXT =
                 border-bottom: 1px solid rgba(255,255,255,0.08);
             }
             .site-chrome.compact .ticker-bar {
-                flex: 0 0 50%;
+                flex: 1;
                 min-width: 0;
                 background: none;
             }
@@ -167,7 +167,8 @@ const TICKER_TEXT =
                 height: 100%;
             }
             .site-chrome.compact .nav {
-                flex: 0 0 50%;
+                flex-shrink: 0;
+                width: auto;
                 height: var(--nav-h);
                 padding: 0 2.5vw 0 0;
                 justify-content: flex-end;
@@ -297,8 +298,11 @@ const TICKER_TEXT =
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 0 2.5vw;
+                width: 95vw;
+                margin-inline: auto;
+                padding: 0 var(--edge);
                 height: var(--nav-h);
+                background: rgba(255, 255, 255, 0.05);
                 overflow: hidden;
                 transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
@@ -984,7 +988,7 @@ const TICKER_TEXT =
                     <a
                         href="https://communitycleanupplg.substack.com/subscribe"
                         target="_blank"
-                        rel="noopener noreferrer">Substack</a
+                        rel="noopener noreferrer">Newsletter</a
                     >
                     <a
                         href="https://www.instagram.com/communitycleanupplg/"
