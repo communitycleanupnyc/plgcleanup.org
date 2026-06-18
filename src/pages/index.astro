@@ -50,13 +50,13 @@ const NUMBER_WORDS = [
     "nine",
 ];
 const nWord = N >= 0 && N < 10 ? NUMBER_WORDS[N] : String(N);
-const nLabel = `<mark>${nWord} day${N === 1 ? "" : "s"} away</mark>`;
+const nLabel = `<a href="/join">${nWord} day${N === 1 ? "" : "s"}</a>`;
 
 const countdownSentence =
     N >= 1
-        ? `The next cleanup is only ${nLabel}, and each cleanup lasts an hour. Want to see why people love volunteering with us?`
+        ? `The next cleanup is in ${nLabel}. Want to see why people love volunteering with us?`
         : N === 0
-          ? `The next cleanup is <mark>today</mark> — and it's only an hour. Want to see why people love volunteering with us?`
+          ? `The next cleanup is <a href="/join">today</a>. Want to see why people love volunteering with us?`
           : "Each cleanup is only an hour. Want to see why people love volunteering with us?";
 
 // "This Saturday / Next Saturday / Saturday" for the When line
@@ -83,7 +83,7 @@ if (cleanupMs === thisSatMs) {
 
 <Base>
     <div class="hero">
-        <h1>Help clean up Prospect&nbsp;Lefferts Gardens.</h1>
+        <h1>Clean Prospect&nbsp;Lefferts Gardens.</h1>
         <img
             src="/images/raccoon.webp"
             alt=""
@@ -96,9 +96,9 @@ if (cleanupMs === thisSatMs) {
 
     <div class="hero-body">
         <p>
-            Since 2023, {VOLUNTEER_COUNT} of your neighbors have been helping clean
-            up our streets with Community Cleanup PLG.
+            {VOLUNTEER_COUNT} of your neighbors have helped keep trash off our streets.
         </p>
+        &nbsp;
         <p set:html={countdownSentence} />
     </div>
 
@@ -111,12 +111,9 @@ if (cleanupMs === thisSatMs) {
         <p class="why__label" id="why-label">Why volunteer</p>
         <div class="why__grid">
             <div class="why__col">
-                <h3>Why this is awesome!</h3>
+                <h3>Really, picking up trash?</h3>
                 <p>
-                    Every piece of trash counts. And when people see us on the
-                    streets, they are inspired to help. Besides, volunteering
-                    itself helps you: there are "significant positive effects of
-                    volunteering on social, physical and mental health"(<a
+                    Every piece counts, down to a cigarette butt. Bonus: volunteering has "significant positive effects... on social, physical and mental health"  (<a
                         href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10159229/"
                         >Cambridge University Press</a
                     >).
@@ -125,19 +122,17 @@ if (cleanupMs === thisSatMs) {
             <div class="why__col">
                 <h3>What to expect</h3>
                 <p>
-                    [placeholder] Grab a picker and a bag, we point you at a
+                    No need to bring anything: we'll give you gloves, a picker, and a bag. You'll find a
                     stretch of sidewalk, and an hour later it's transformed.
-                    Replace.
+                    Optional crew shot at the end.
                 </p>
             </div>
             <div class="why__col">
                 <h3>Who you'll meet</h3>
                 <p>
-                    We usually have around 5–10 volunteers at every event. These
-                    are your neighbors, and they are awesome. You're welcome to
-                    chat or lock in and do your own thing. Over {
-                        VOLUNTEER_COUNT
-                    } of our neighbors have volunteered so far.
+                    Around 5–10 fellow volunteers. These
+                    are your neighbors, and they rock. Chat or
+                    lock in and enjoy the rhythmic process of sanitation.
                 </p>
             </div>
         </div>
