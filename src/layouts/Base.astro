@@ -168,7 +168,7 @@ const TICKER_TEXT =
             /* Spacer holds layout height while chrome is position:fixed (out of flow).
                Swap is net-zero: chrome exits flow (-nav-h) + spacer appears (+nav-h). */
             #chrome-spacer { height: 0; }
-            .site-chrome.is-fixed + #chrome-spacer { height: var(--nav-h); }
+            .site-chrome.is-fixed ~ #chrome-spacer { height: var(--nav-h); }
 
             /* Static nav (join, about, faq, …): fixed at top, visible by default,
                slides away on scroll-down and back on scroll-up. */
@@ -182,9 +182,7 @@ const TICKER_TEXT =
             }
             .site-chrome.static-nav.is-hidden { transform: translateY(-100%); }
             .site-chrome.static-nav .ticker-bar { display: none; }
-            /* When fixed (sticky reveal), show only nav bar — ticker is an at-top element */
-            .site-chrome.is-fixed .ticker-bar { display: none; }
-            .site-chrome.static-nav + #chrome-spacer { height: var(--nav-h); }
+            .site-chrome.static-nav ~ #chrome-spacer { height: var(--nav-h); }
 
             /* Compact (at page top): ticker fills bar, nav links flush right, no logo.
                padding-inline centers the content at --site-w so the ticker left-edge
@@ -1007,6 +1005,8 @@ const TICKER_TEXT =
             }
             /* JS sets this class to keep button in sync with chrome show/hide */
             .nav-menu-btn.is-nav-hidden { transform: translateY(-100%); }
+            /* When chrome is fixed, ticker sits above the nav row — offset button down to match */
+            .site-chrome.is-fixed ~ .nav-menu-btn { top: var(--ticker-h); }
             .nav-menu-btn:focus-visible { color: var(--accent); outline: none; }
             @media (hover: hover) {
                 .nav-menu-btn:hover { color: var(--accent); outline: none; }
