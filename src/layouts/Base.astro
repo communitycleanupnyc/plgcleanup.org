@@ -1005,6 +1005,12 @@ const TICKER_TEXT =
             }
             /* JS sets this class to keep button in sync with chrome show/hide */
             .nav-menu-btn.is-nav-hidden { transform: translateY(-100%); }
+            /* State 2: chrome is fixed+stacked (ticker above nav). Button sits in nav row;
+               hide must clear ticker-h + nav-h so translateY(-100%) alone isn't enough. */
+            .site-chrome.is-fixed ~ .nav-menu-btn { top: var(--ticker-h); }
+            .site-chrome.is-fixed ~ .nav-menu-btn.is-nav-hidden {
+                transform: translateY(calc(-1 * (var(--ticker-h) + 100%)));
+            }
             .nav-menu-btn:focus-visible { color: var(--accent); outline: none; }
             @media (hover: hover) {
                 .nav-menu-btn:hover { color: var(--accent); outline: none; }
@@ -1425,6 +1431,7 @@ const TICKER_TEXT =
                                         if (!chrome.classList.contains("is-revealed")) {
                                             chrome.classList.add("no-transition");
                                             chrome.classList.remove("is-fixed");
+                                            chrome.classList.add("compact");
                                             void chrome.offsetHeight;
                                             chrome.classList.remove("no-transition");
                                         }
@@ -1440,6 +1447,7 @@ const TICKER_TEXT =
                                 delete chrome.dataset.leaving;
                                 if (!chrome.classList.contains("is-fixed")) {
                                     chrome.classList.add("no-transition");
+                                    chrome.classList.remove("compact");
                                     chrome.classList.add("is-fixed");
                                     void chrome.offsetHeight;
                                     chrome.classList.remove("no-transition");
