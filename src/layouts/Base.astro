@@ -232,12 +232,11 @@ const TICKER_TEXT =
                 margin-right: clamp(0.75rem, 2vw, 1.5rem);
                 transition: background 120ms ease, color 120ms ease;
             }
-            .ticker__link:hover,
-            .ticker__link:focus-visible {
+            .ticker__viewport:hover .ticker__link {
                 background: var(--accent);
                 color: var(--bg);
-                outline: none;
             }
+            .ticker__viewport { cursor: pointer; }
 
             .ticker.is-playing .ticker__track {
                 animation: ticker-rtl var(--ticker-duration) linear infinite;
