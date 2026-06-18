@@ -990,8 +990,10 @@ const TICKER_TEXT =
                 line-height: 0;
                 transition: color 225ms ease;
             }
-            .nav-menu-btn:hover,
             .nav-menu-btn:focus-visible { color: var(--accent); outline: none; }
+            @media (hover: hover) {
+                .nav-menu-btn:hover { color: var(--accent); outline: none; }
+            }
             .nav-menu-btn svg { width: 1.75rem; height: 1.75rem; overflow: visible; }
 
             /* Morphing hamburger ↔ ✕ */
@@ -1354,14 +1356,17 @@ const TICKER_TEXT =
                 menuBtn!.setAttribute("aria-label", "Open menu");
                 chrome.classList.remove("is-menu-open");
                 document.body.style.overflow = "";
-                menuBtn!.focus();
+                menuBtn!.blur(); // clear focus/hover highlight; Escape handler restores focus for keyboard
             }
 
             menuBtn?.addEventListener("click", () => {
                 mobileMenu?.classList.contains("is-open") ? closeMobileMenu() : openMobileMenu();
             });
             document.addEventListener("keydown", (e) => {
-                if (e.key === "Escape" && mobileMenu?.classList.contains("is-open")) closeMobileMenu();
+                if (e.key === "Escape" && mobileMenu?.classList.contains("is-open")) {
+                    closeMobileMenu();
+                    menuBtn?.focus(); // return focus for keyboard users closing via Escape
+                }
             });
 
             // ── Scroll behavior ─────────────────────────────────────────────
