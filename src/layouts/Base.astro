@@ -787,20 +787,40 @@ const TICKER_TEXT =
                 padding-bottom: clamp(2rem, 7vw, 3rem);
             }
 
+            .join-visual {
+                display: flex;
+                align-items: flex-end;
+                justify-content: flex-end;
+                gap: clamp(1rem, 2vw, 1.5rem);
+                margin-top: clamp(2rem, 5vw, 3rem);
+            }
+
+            .join-map {
+                display: block;
+                height: clamp(140px, 16vw, 240px);
+                aspect-ratio: 1.618;
+                border: 0;
+                flex-shrink: 0;
+                /* Approximate night mode: invert + hue-rotate brings colours back */
+                filter: invert(100%) hue-rotate(180deg);
+            }
+
             .join-cart {
                 display: block;
                 width: clamp(140px, 16vw, 240px);
                 height: auto;
-                margin-top: clamp(2rem, 5vw, 3rem);
-                margin-left: auto;
+                flex-shrink: 0;
                 pointer-events: none;
                 user-select: none;
             }
 
             @media (max-width: 680px) {
-                .join-cart {
-                    width: clamp(120px, 45vw, 180px);
+                .join-visual {
+                    flex-direction: column;
+                    align-items: flex-end;
                 }
+                .join-map  { height: clamp(120px, 45vw, 180px); }
+                .join-cart { width:  clamp(120px, 45vw, 180px); }
             }
 
             .join-page h1 {
@@ -1230,21 +1250,21 @@ const TICKER_TEXT =
                 <div class="footer-col">
                     <a href="/join">Join</a>
                     <a href="/schedule">Schedule</a>
+                    <a href="/community-agreements">Agreements</a>
                     <a href="/faq">FAQ</a>
                     <a href="/about">About</a>
-                    <a href="/community-agreements">Agreements</a>
                 </div>
                 <div class="footer-col">
+                    <a
+                        href="https://communitycleanupplg.substack.com/subscribe"
+                        target="_blank"
+                        rel="noopener noreferrer">Newsletter</a
+                    >
                     <a href="mailto:communitycleanupplg@gmail.com">Email us</a>
                     <a
                         href="https://discord.com/invite/H9her7r8N2"
                         target="_blank"
                         rel="noopener noreferrer">Discord</a
-                    >
-                    <a
-                        href="https://communitycleanupplg.substack.com/subscribe"
-                        target="_blank"
-                        rel="noopener noreferrer">Newsletter</a
                     >
                     <a
                         href="https://www.instagram.com/communitycleanupplg/"
