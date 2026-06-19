@@ -48,6 +48,64 @@ public/
 
 ---
 
+## Carousel (`src/components/Carousel.astro`)
+
+### Architecture
+
+**Motion engine:** [Embla Carousel v8](https://www.embla-carousel.com/) (`embla-carousel` npm package). Embla owns all scroll physics — it translates `.embla__container` via `transform: translate3d()` and fires `select`/`pointerDown`/`pointerUp`/`reInit` events. No hand-rolled offset math, no `scrollLeft`, no `scroll-snap-type`.
+
+**Popup positioning:** [Floating UI](https://floating-ui.com/) (`@floating-ui/dom`). `computePosition` with `strategy:'fixed'`, `placement:'right-start'`, middleware: `offset(8) + flip() + shift({padding:12})`. Computed once on open; no `autoUpdate`.
+
+```
+.embla__viewport (overflow:hidden, margin-right bleed)
+  └─ .embla__container (transform: translate3d — Embla owned)
+       └─ .embla__slide.card ×N
+            └─ .card__media (position:relative, overflow:hidden)
+                 └─ <img> (filter: grayscale transition)
+```
+
+**Right bleed:** `.embla__viewport { margin-right: calc(50% - 50vw) }` extends the track to the viewport's right edge past the 94vw content column.
+
+**Image optimization:** Astro `<Image>` → Sharp at build time → per-image WebP srcsets (1×/2×/3× capped at intrinsic), `loading="eager"` on index 0, `layout="none"`.
+
+### Highlight model
+
+`committedIndex` starts at `-1` (no card colored on load). JS toggles `.is-active` on whichever slide is "shown":
+
+```
+shown = ps.isOpen ? ps.sourceIndex : committedIndex
+```
+
+- **On load:** `committedIndex = -1` → all slides start grayscale; color appears on first hover/focus (CSS `:hover`) or navigation
+- **After arrow/drag navigation:** `embla.on('select')` → `committedIndex = embla.selectedScrollSnap()`
+- **Mobile tap / keyboard:** click handler sets `committedIndex = tappedIndex` before opening popup
+
+### Hover — pure CSS, zero JS
+
+Desktop hover is handled entirely by CSS `:hover` — no `pointerenter` listeners, no `hoveredIndex` tracking. The browser's hit-testing drives the transition directly, bypassing Embla's rAF loop entirely (which is what caused previous JS-driven opacity transitions to appear instant on desktop).
+
+```css
+/* Resting state: B&W */
+.card__media img { filter: grayscale(1); transition: filter 225ms cubic-bezier(.6,0,.4,1); }
+
+/* Full color: hover (CSS), keyboard focus, or committed active card (JS .is-active) */
+.embla__slide:hover .card__media img,
+.embla__slide:focus-within .card__media img,
+.embla__slide.is-active .card__media img { filter: grayscale(0); }
+```
+
+### Desktop vs mobile differences
+
+| | Desktop (mouse) | Mobile (touch) |
+|---|---|---|
+| Hover | Pure CSS `:hover` on `.embla__slide` → `filter: grayscale(0)` on img | No hover; active = `committedIndex` |
+| Cursor | `grab` at rest (`.embla__viewport`), `grabbing` while dragging (`.is-dragging`) | n/a |
+| Vertical scroll | Normal | `touch-action: pan-y pinch-zoom` on `.embla__container` |
+| Tap | Opens popup; does not change `committedIndex` | Opens popup; sets `committedIndex = tappedIndex` (sticky highlight) |
+| Drag suppression | Embla `stopPropagation()`s `click` in capture phase after drags — no manual drag tracking needed | Same |
+
+---
+
 ## CSS design system
 
 All CSS lives in `Base.astro` as `<style is:global>`. No CSS files, no framework. Pages add no additional styles — everything is in the base.

@@ -8,7 +8,9 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "astro": "^6.4.7"
+    "@floating-ui/dom": "^1.7.6",
+    "astro": "^6.4.7",
+    "embla-carousel": "^8.6.0"
   },
   "overrides": {
     "esbuild": "^0.28.1"

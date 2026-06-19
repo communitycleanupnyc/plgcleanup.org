@@ -1,7 +1,35 @@
 ---
 import Base from "../layouts/Base.astro";
+import Carousel from "../components/Carousel.astro";
+import type { CarouselItem } from "../components/carousel.types";
+import { testimonials } from "../data/testimonials";
+import type { ImageMetadata } from "astro";
 import { VOLUNTEER_COUNT } from "../data/event";
 import { getCountdown } from "../data/countdown";
+
+const files = import.meta.glob<{ default: ImageMetadata }>(
+    "../assets/testimonials/*.{jpg,jpeg,png,webp}",
+    { eager: true },
+);
+
+const items: CarouselItem[] = testimonials.map((t) => {
+    const mod = files[`../assets/testimonials/${t.file}`];
+    if (!mod)
+        throw new Error(
+            `[testimonials] No image for "${t.file}" referenced in testimonials.ts`,
+        );
+    return { ...t, img: mod.default };
+});
+
+// Fail loudly if an image file has no matching data entry
+const knownFiles = new Set(testimonials.map((t) => t.file));
+for (const path of Object.keys(files)) {
+    const file = path.split("/").pop()!;
+    if (!knownFiles.has(file))
+        throw new Error(
+            `[testimonials] Image "${file}" has no entry in testimonials.ts`,
+        );
+}
 
 const state  = getCountdown(new Date());
 const SUFFIX = ". Want to see why people love volunteering with us?";
@@ -78,4 +106,6 @@ const countdownSentence =
             </div>
         </div>
     </section>
+
+    <Carousel items={items} variant="natural" heading="Why trash club" />
 </Base>

@@ -1,0 +1,500 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import type { CarouselProps } from './carousel.types';
+
+const {
+  items,
+  variant = 'natural',
+  grayscale = false,
+  enablePopup = true,
+  heading,
+  sizePx = { mobile: 280, desktop: 380 },
+} = Astro.props as CarouselProps;
+
+const N = items.length;
+const headingId = `ch-${Math.random().toString(36).slice(2, 9)}`;
+const popupNameId = `${headingId}-name`;
+
+const DENSITIES = [1, 2, 3];
+
+function renderInfo(img: ImageMetadata) {
+  const ar = img.width / img.height;
+  const wMobile  = Math.round(variant === 'square' ? sizePx.mobile  : sizePx.mobile  * ar);
+  const wDesktop = Math.round(variant === 'square' ? sizePx.desktop : sizePx.desktop * ar);
+  const sizes = `(max-width: 599px) ${wMobile}px, ${wDesktop}px`;
+  const maxRendered = Math.max(wMobile, wDesktop);
+  let widths = DENSITIES.map(d => Math.round(maxRendered * d)).filter(w => w <= img.width);
+  if (widths.length === 0) widths = [img.width];
+  return { sizes, widths };
+}
+---
+
+{N > 0 && (
+<section
+  class="carousel-section"
+  aria-labelledby={headingId}
+  data-carousel
+  data-variant={variant}
+  data-grayscale={String(grayscale)}
+  data-enable-popup={String(enablePopup)}
+  style={`--size-d:${sizePx.desktop}px; --size-m:${sizePx.mobile}px`}
+>
+  <header class="carousel-header">
+    {heading && <h2 id={headingId} class="carousel-heading">{heading}</h2>}
+    <p class="carousel-counter" aria-live="polite"></p>
+    <div class="carousel-controls">
+      <button class="carousel-arrow" data-dir="prev" aria-label="Previous">
+        <svg xmlns="http://www.w3.org/2000/svg" width="34" height="24" fill="none" viewBox="0 0 34 24"><path fill="currentColor" fill-rule="evenodd" d="M11.478 19.75 4 12l7.478-7.75.733.709-6.302 6.53H30v1.021H5.91l6.301 6.531z" clip-rule="evenodd"/></svg>
+      </button>
+      <button class="carousel-arrow" data-dir="next" aria-label="Next">
+        <svg xmlns="http://www.w3.org/2000/svg" width="34" height="24" fill="none" viewBox="0 0 34 24"><path fill="currentColor" fill-rule="evenodd" d="M22.522 4.25 30 12l-7.478 7.75-.733-.709 6.302-6.53H4V11.49h24.09L21.79 4.959z" clip-rule="evenodd"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="embla">
+    <div class="embla__viewport">
+      <ul class="embla__container" role="list">
+        {items.map((item, index) => {
+          const info = renderInfo(item.img);
+          return (
+            <li
+              class="embla__slide card"
+              data-index={index}
+              data-name={item.name}
+              data-has-popup={String(enablePopup && !!item.body)}
+              style={item.focusPosition ? `--pos:${item.focusPosition}` : undefined}
+            >
+              <div class="card__media">
+                <Image
+                  src={item.img}
+                  alt={item.alt}
+                  widths={info.widths}
+                  sizes={info.sizes}
+                  format="webp"
+                  quality={75}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  layout="none"
+                />
+              </div>
+              <p class="card__name">{item.name}</p>
+              <p class="card__quote">{item.quote}</p>
+              {enablePopup && item.body && (
+                <>
+                  <button
+                    class="card__trigger"
+                    aria-haspopup="dialog"
+                    aria-label={`Read ${item.name}'s testimonial`}
+                  ></button>
+                  <div class="card__tpl" hidden aria-hidden="true" set:html={item.body} />
+                </>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </div>
+
+  {enablePopup && (
+    <div
+      class="popup"
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby={popupNameId}
+      hidden
+    >
+      <button class="popup__close" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <h3 id={popupNameId} class="popup__name"></h3>
+      <div class="popup__body"></div>
+    </div>
+  )}
+</section>
+)}
+
+<style>
+  /* ── Section layout ─────────────────────────────── */
+  .carousel-section {
+    width: var(--site-w);
+    margin-left: var(--site-ml);
+    margin-bottom: clamp(2rem, 7vw, 3rem);
+  }
+
+  .carousel-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .carousel-heading {
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .carousel-heading::before {
+    content: "";
+    display: block;
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 0.75rem;
+    background: var(--text);
+  }
+
+  .carousel-counter {
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    opacity: 0.5;
+    font-variant-numeric: tabular-nums slashed-zero;
+    white-space: nowrap;
+  }
+
+  .carousel-controls {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .carousel-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    background: var(--text);
+    border: none;
+    color: var(--bg);
+    cursor: pointer;
+    transition: background-color 225ms ease, color 225ms ease;
+  }
+  .carousel-arrow:hover,
+  .carousel-arrow:focus-visible {
+    background: var(--accent);
+    color: var(--bg);
+    outline: none;
+  }
+
+  /* ── Embla track ────────────────────────────────── */
+  /* Viewport left-edge flush with content; right bleeds to viewport edge. */
+  .embla__viewport {
+    overflow: hidden;
+    margin-right: calc(50% - 50vw);
+    cursor: grab;
+  }
+  .embla__viewport.is-dragging { cursor: grabbing; }
+
+  .embla__container {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .embla__slide {
+    flex: 0 0 auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+  }
+
+  /* ── Media box ─────────────────────────────────── */
+  .card__media {
+    position: relative;
+    overflow: hidden;
+  }
+  /* Resting state: B&W. Transition to full color on hover/active. */
+  .card__media img {
+    display: block;
+    filter: grayscale(1);
+    transition: filter 225ms cubic-bezier(.6, 0, .4, 1);
+  }
+  /* Full color: hover (pure CSS, no JS) + keyboard focus + committed active card */
+  .embla__slide:hover .card__media img,
+  .embla__slide:focus-within .card__media img,
+  .embla__slide.is-active .card__media img { filter: grayscale(0); }
+
+  @media (prefers-reduced-motion: reduce) { .card__media img { transition: none; } }
+
+  /* NATURAL: uniform height, auto width, no crop */
+  [data-variant="natural"] .card__media     { height: var(--size-d); }
+  [data-variant="natural"] .card__media img { height: 100%; width: auto; }
+
+  /* SQUARE: fixed side, centered cover crop */
+  [data-variant="square"]  .card__media     { width: var(--size-d); aspect-ratio: 1 / 1; }
+  [data-variant="square"]  .card__media img { width: 100%; height: 100%; object-fit: cover; object-position: var(--pos, center); }
+
+  @media (max-width: 599px) {
+    [data-variant="natural"] .card__media { height: var(--size-m); }
+    [data-variant="square"]  .card__media { width: var(--size-m); }
+  }
+
+  /* ── Card text ──────────────────────────────────── */
+  .card__name {
+    margin-top: 0.625rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .card__quote {
+    font-size: 0.875rem;
+    font-weight: 300;
+    color: var(--text);
+    opacity: 0.7;
+    line-height: 1.45;
+    margin-top: 0.25rem;
+    max-width: 22ch;
+  }
+
+  /* Full-card invisible trigger */
+  .card__trigger {
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+  .card__trigger:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: -2px;
+  }
+
+  /* ── Popup ──────────────────────────────────────── */
+  .popup {
+    position: fixed;
+    z-index: 200;
+    background: var(--bg);
+    border: 1.5px solid var(--line);
+    padding: 1.25rem;
+    max-width: min(380px, calc(100vw - 24px));
+    max-height: min(60vh, 480px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .popup__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 2rem;
+    height: 2rem;
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 150ms ease;
+  }
+  .popup__close:hover,
+  .popup__close:focus-visible {
+    opacity: 1;
+    outline: none;
+  }
+
+  .popup__name {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+    padding-right: 2rem;
+  }
+
+  .popup__body {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    font-weight: 300;
+    color: var(--text);
+  }
+  .popup__body a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .popup__body a:hover { color: var(--accent); }
+</style>
+
+<script>
+  import EmblaCarousel from 'embla-carousel';
+  import { computePosition, flip, shift, offset } from '@floating-ui/dom';
+
+  document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((section) => {
+    const enablePopup = section.dataset.enablePopup === 'true';
+
+    const viewport = section.querySelector<HTMLElement>('.embla__viewport');
+    const slides   = Array.from(section.querySelectorAll<HTMLElement>('.embla__slide'));
+    const counter  = section.querySelector<HTMLElement>('.carousel-counter');
+
+    if (!viewport || slides.length === 0) return;
+    const N = slides.length;
+
+    const embla = EmblaCarousel(viewport, {
+      align: 'start',
+      containScroll: false,
+      loop: true,
+      slidesToScroll: 1,
+    });
+
+    // Re-measure after images are sized at load
+    if (document.readyState === 'complete') {
+      embla.reInit();
+    } else {
+      window.addEventListener('load', () => embla.reInit(), { once: true });
+    }
+
+    // ── Drag cursor ─────────────────────────────────
+    embla.on('pointerDown', () => viewport.classList.add('is-dragging'));
+    embla.on('pointerUp',   () => viewport.classList.remove('is-dragging'));
+
+    // ── Highlight model ─────────────────────────────
+    // -1 = no card colored at load; color appears on first hover (CSS) or navigation (.is-active).
+    // Desktop hover is handled by pure CSS :hover — no JS tracking needed.
+    let committedIndex = -1;
+
+    type PopupState = {
+      isOpen: boolean;
+      sourceIndex: number;
+      downX: number; downY: number; downCandidate: boolean;
+    };
+    const ps: PopupState = { isOpen: false, sourceIndex: -1, downX: 0, downY: 0, downCandidate: false };
+
+    function applyActive() {
+      const shown = ps.isOpen ? ps.sourceIndex : committedIndex;
+      slides.forEach((s, i) => s.classList.toggle('is-active', i === shown));
+    }
+
+    applyActive();
+
+    // ── Counter ─────────────────────────────────────
+    function updateCounter() {
+      if (counter) counter.textContent = `${embla.selectedScrollSnap() + 1} of ${N}`;
+    }
+
+    // After user navigates, committed follows Embla's snap
+    embla.on('select', () => {
+      committedIndex = embla.selectedScrollSnap();
+      applyActive();
+      updateCounter();
+    });
+    embla.on('reInit', updateCounter);
+    updateCounter();
+
+    // ── Arrow buttons ────────────────────────────────
+    section.querySelector('[data-dir=prev]')?.addEventListener('click', () => embla.scrollPrev());
+    section.querySelector('[data-dir=next]')?.addEventListener('click', () => embla.scrollNext());
+
+    // ── Popup ────────────────────────────────────────
+    if (!enablePopup) return;
+
+    const popup      = section.querySelector<HTMLElement>('.popup')!;
+    const popupName  = popup.querySelector<HTMLElement>('.popup__name')!;
+    const popupBody  = popup.querySelector<HTMLElement>('.popup__body')!;
+    const popupClose = popup.querySelector<HTMLButtonElement>('.popup__close')!;
+
+    // Track pointer type from last pointerdown (MouseEvent.pointerType not available on click)
+    let lastPointerType = 'mouse';
+    viewport.addEventListener('pointerdown', (e: PointerEvent) => {
+      lastPointerType = e.pointerType;
+    }, { passive: true });
+
+    // Embla stopPropagation()s click in capture phase after drags,
+    // so this only fires on genuine taps/clicks (< dragThreshold movement).
+    section.addEventListener('click', (e: MouseEvent) => {
+      const trigger = (e.target as HTMLElement).closest<HTMLElement>('.card__trigger');
+      if (!trigger) return;
+      const slide = trigger.closest<HTMLElement>('.embla__slide');
+      if (!slide || slide.dataset.hasPopup !== 'true') return;
+
+      const index      = parseInt(slide.dataset.index ?? '0', 10);
+      const fromKeyboard = e.detail === 0;
+
+      // Touch/pen tap or keyboard: make the highlight sticky
+      if (lastPointerType !== 'mouse' || fromKeyboard) {
+        committedIndex = index;
+        applyActive();
+      }
+
+      // Keyboard: anchor to card rect; pointer: anchor to pointer position
+      const rect   = trigger.getBoundingClientRect();
+      const anchorX = fromKeyboard ? rect.left   : e.clientX;
+      const anchorY = fromKeyboard ? rect.bottom : e.clientY;
+      openPopup(index, anchorX, anchorY, fromKeyboard, slide);
+    });
+
+    function openPopup(index: number, anchorX: number, anchorY: number, fromKeyboard: boolean, cardEl: HTMLElement) {
+      popupName.textContent = slides[index].dataset.name ?? '';
+      const tpl = slides[index].querySelector<HTMLElement>('.card__tpl');
+      popupBody.innerHTML = tpl?.innerHTML ?? '';
+      popup.style.visibility = 'hidden';
+      popup.removeAttribute('hidden');
+      ps.isOpen = true;
+      ps.sourceIndex = index;
+      applyActive();
+
+      const reference = fromKeyboard
+        ? cardEl
+        : { getBoundingClientRect: () => ({ x: anchorX, y: anchorY, width: 0, height: 0, left: anchorX, right: anchorX, top: anchorY, bottom: anchorY }) };
+
+      computePosition(reference as Element, popup, {
+        strategy: 'fixed',
+        placement: 'right-start',
+        middleware: [offset(8), flip(), shift({ padding: 12 })],
+      }).then(({ x, y }) => {
+        Object.assign(popup.style, { position: 'fixed', left: `${x}px`, top: `${y}px`, visibility: '' });
+        popupClose.focus();
+      });
+    }
+
+    function closePopup() {
+      if (!ps.isOpen) return;
+      const prev = ps.sourceIndex;
+      ps.isOpen = false;
+      ps.sourceIndex = -1;
+      popup.setAttribute('hidden', '');
+      applyActive();
+      slides[prev]?.querySelector<HTMLElement>('.card__trigger')?.focus();
+    }
+
+    popupClose.addEventListener('click', closePopup);
+
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && ps.isOpen) closePopup();
+    });
+
+    // Outside-tap dismiss (not on scroll: cancel if moved > 10px before pointerup)
+    document.addEventListener('pointerdown', (e: PointerEvent) => {
+      if (!ps.isOpen) { ps.downCandidate = false; return; }
+      const t = e.target as HTMLElement;
+      if (popup.contains(t) || t.closest('.embla__slide')) { ps.downCandidate = false; return; }
+      ps.downX = e.clientX; ps.downY = e.clientY; ps.downCandidate = true;
+    });
+    document.addEventListener('pointermove', (e: PointerEvent) => {
+      if (!ps.downCandidate) return;
+      if (Math.hypot(e.clientX - ps.downX, e.clientY - ps.downY) > 10) ps.downCandidate = false;
+    });
+    document.addEventListener('pointerup', (e: PointerEvent) => {
+      if (!ps.isOpen || !ps.downCandidate) { ps.downCandidate = false; return; }
+      ps.downCandidate = false;
+      const t = e.target as HTMLElement;
+      if (!popup.contains(t) && !t.closest('.embla__slide')) closePopup();
+    });
+  });
+</script>

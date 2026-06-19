@@ -5,4 +5,5 @@ export default defineConfig({
   server: {
     host: true,
   },
+  image: { responsiveStyles: true },
 });
