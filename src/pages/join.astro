@@ -16,7 +16,7 @@ const countdownLine =
     : state.tag === "now"        ? "Is happening right now!"
     : state.tag === "minutes"    ? `Is starting in ${state.n} minute${state.n === 1 ? "" : "s"}!`
     : state.tag === "hours"      ? `Is starting in ${state.n} hour${state.n === 1 ? "" : "s"}!`
-    : state.tag === "tomorrow"   ? "Is tomorrow!"
+    : state.tag === "tomorrow"   ? "is tomorrow!"
     : state.tag === "this-weekend"  ? `Is this ${state.dayName}!`
     : state.tag === "next-weekend"  ? `Is next ${state.dayName}.`
     : `That's in ${state.word} days.`;
@@ -36,9 +36,9 @@ const joinDisplayDate = new Intl.DateTimeFormat("en-US", {
     navMode="static"
 >
     <div class="join-page">
-        <h1>Our next cleanup</h1>
+        <h1>Our next cleanup...</h1>
         {countdownLine && <p class="join-countdown">{countdownLine}</p>}
-        <p class="join-sub">Zero registration needed, and we provide the supplies—just show up. Look for the shopping cart with trash grabbers to find your squad 😊</p>
+        <p class="join-sub">Zero registration needed, and we provide the supplies—just show up. Look for the shopping cart with trash grabbers to find your squad leader and say hi. </p>
 
         <div class="join-details">
             <div class="join-detail">
