@@ -191,6 +191,7 @@ All uppercase `0.6875rem` links, `--muted` color, hover to `--text`.
 ## Development notes
 
 - **Cloudflare Pages build command:** `npm run build` / output dir: `dist`
+- **Testing on iPhone (or any device on the same Wi-Fi):** The dev server is configured with `server: { host: true }` in `astro.config.mjs`, so it binds to `0.0.0.0`. Run `npm run dev`, allow the incoming connection in LuLu when prompted, then open `http://<your-mac-ip>:4321` on the device. Find your Mac's IP with `ipconfig getifaddr en0`. The terminal will also print a `Network:` URL when the server starts.
 - **No server-side code** — everything is `output: "static"`, build-time only
 - **Date/season logic runs at build time** — the live site is a snapshot; Cloudflare's scheduled rebuild (GitHub Action, daily) keeps the countdown fresh
 - **CSS mask for logo:** `background: var(--brand); mask: url(/images/logo.webp) center/contain no-repeat` on a `<div>` — recolors the logo to `--brand` without needing an SVG

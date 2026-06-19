@@ -26,7 +26,7 @@ const TICKER_TEXT =
         <link rel="apple-touch-icon" href="/images/logo.webp" />
         <link
             rel="preload"
-            href="/fonts/HankenGrotesk.woff2"
+            href="/fonts/Inter.woff2"
             as="font"
             type="font/woff2"
             crossorigin
@@ -42,15 +42,14 @@ const TICKER_TEXT =
         <style is:global>
             @font-face {
                 font-family: "Fraunces";
-                src: url("/fonts/Fraunces.woff2") format("woff2-variations");
-                font-weight: 100 900;
+                src: url("/fonts/Fraunces.woff2") format("woff2");
+                font-weight: 300 900;
                 font-display: swap;
             }
             @font-face {
-                font-family: "Hanken Grotesk";
-                src: url("/fonts/HankenGrotesk.woff2")
-                    format("woff2-variations");
-                font-weight: 100 900;
+                font-family: "Inter";
+                src: url("/fonts/Inter.woff2") format("woff2");
+                font-weight: 200 700;
                 font-display: swap;
             }
 
@@ -73,6 +72,8 @@ const TICKER_TEXT =
                 /* Content column: width + derived left-offset for the 95→90vw breakout */
                 --site-w: 94vw;
                 --site-ml: calc(50% - var(--site-w) / 2);
+                /* Body typeface — change here to switch fonts site-wide */
+                --font-body: "Inter", system-ui, sans-serif;
             }
 
             *,
@@ -103,7 +104,7 @@ const TICKER_TEXT =
             }
 
             body {
-                font-family: "Hanken Grotesk", system-ui, sans-serif;
+                font-family: var(--font-body);
                 font-variant-numeric: slashed-zero;
                 background: var(--bg);
                 color: var(--text);
@@ -172,20 +173,18 @@ const TICKER_TEXT =
 
             /* Static nav (join, about, faq, …): fixed at top, visible by default,
                slides away on scroll-down and back on scroll-up.
-               Uses same padding-inline centering as compact so JOIN right edge
-               aligns exactly with the content column (no margin-inline rounding diff). */
+               Chrome spans full viewport (left:0/right:0) for bg bleed; .nav inside
+               uses its own width+margin-inline:auto — same centering path as page content. */
             .site-chrome.static-nav {
                 position: fixed;
                 top: 0;
                 left: 0;
                 right: 0;
-                padding-inline: calc((100vw - var(--site-w)) / 2);
                 transform: translateY(0);
                 transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             }
             .site-chrome.static-nav.is-hidden { transform: translateY(-100%); }
             .site-chrome.static-nav .ticker-bar { display: none; }
-            .site-chrome.static-nav .nav { width: 100%; margin: 0; }
             .site-chrome.static-nav ~ #chrome-spacer { height: var(--nav-h); }
 
             /* Compact (at page top): ticker fills the left half, nav links flush right.
@@ -480,11 +479,11 @@ const TICKER_TEXT =
                 font-size: clamp(3rem, 5vw, 3rem);
                 font-weight: 700;
                 line-height: 1.1;
-                letter-spacing: -0.05em;
+                letter-spacing: -0.02em;
                 font-optical-sizing: auto;
                 font-variation-settings:
-                    "SOFT" 50,
-                    "WONK" 3;
+                    "SOFT" 75,
+                    "WONK" 1;
             }
 
             /* Hero h1 is much larger; z-index lifts it above the raccoon */
@@ -616,7 +615,7 @@ const TICKER_TEXT =
                 line-height: 1.4;
                 color: var(--text);
                 font-weight: 400;
-                letter-spacing: -0.03em;
+                letter-spacing: -0.005em;
                 max-width: 70ch;
             }
 
@@ -629,7 +628,7 @@ const TICKER_TEXT =
             .hero-body p:last-child {
                 font-size: clamp(1.5rem, 2.25vw, 1.75rem);
                 font-weight: 200;
-                letter-spacing: -0.03em;
+                letter-spacing: 0.0em;
             }
 
             /* ── CTA buttons (full site width, stacked) ─────── */
@@ -648,7 +647,7 @@ const TICKER_TEXT =
                 text-align: center;
                 text-transform: uppercase;
                 padding: 1.1rem 1.5rem;
-                font-family: "Hanken Grotesk", system-ui, sans-serif;
+                font-family: var(--font-body);
                 font-size: clamp(1.75rem, 2vw, 1.25rem);
                 font-weight: 400;
                 letter-spacing: -0.04em;
@@ -672,7 +671,7 @@ const TICKER_TEXT =
                 text-align: center;
                 text-transform: uppercase;
                 padding: 1.1rem 1.5rem;
-                font-family: "Hanken Grotesk", system-ui, sans-serif;
+                font-family: var(--font-body);
                 font-size: clamp(1.75rem, 2vw, 1.25rem);
                 letter-spacing: -0.04em;
                 font-weight: 400;
@@ -977,7 +976,7 @@ const TICKER_TEXT =
 
             .footer-right {
                 font-size: 1rem;
-                font-weight: 400;
+                font-weight: 200;
                 letter-spacing: 0em;
                 text-align: right;
                 display: flex;
@@ -1265,8 +1264,8 @@ const TICKER_TEXT =
                         <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                         <path
                             stroke-width="1.5"
-                            stroke-linecap="round"
-                            d="M14.25 9v6M9.75 9v6"
+                            stroke-linecap="square"
+                            d="M14.25 10v4M9.75 10v4"
                         />
                     </svg>
                 </button>
