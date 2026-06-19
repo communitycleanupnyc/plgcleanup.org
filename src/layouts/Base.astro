@@ -44,13 +44,13 @@ const TICKER_TEXT =
                 font-family: "Fraunces";
                 src: url("/fonts/Fraunces.woff2") format("woff2");
                 font-weight: 300 900;
-                font-display: swap;
+                font-display: block;
             }
             @font-face {
                 font-family: "Inter";
                 src: url("/fonts/Inter.woff2") format("woff2");
                 font-weight: 200 700;
-                font-display: swap;
+                font-display: block;
             }
 
             :root {
@@ -744,12 +744,12 @@ const TICKER_TEXT =
             .why__col h3 {
                 font-family: "Fraunces", Georgia, serif;
                 font-size: clamp(2rem, 3vw, 2rem);
-                font-weight: 350;
+                font-weight: 300;
                 letter-spacing: -0.03em;
                 font-optical-sizing: auto;
                 font-variation-settings:
                     "SOFT" 50,
-                    "WONK" 1;
+                    "WONK" 0;
                 line-height: 1.1;
                 margin-bottom: 0.75rem;
             }
