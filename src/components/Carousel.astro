@@ -9,7 +9,7 @@ const {
   grayscale = false,
   enablePopup = true,
   heading,
-  sizePx = { mobile: 280, desktop: 380 },
+  sizePx = { mobile: 400, desktop: 460 },
 } = Astro.props as CarouselProps;
 
 const N = items.length;
@@ -157,9 +157,9 @@ function renderInfo(img: ImageMetadata) {
   .carousel-counter {
     font-size: 0.8125rem;
     font-weight: 400;
-    letter-spacing: 0.04em;
+    letter-spacing: -0.01rem;
     color: var(--text);
-    opacity: 0.5;
+    /*opacity: 0.5;*/
     font-variant-numeric: tabular-nums slashed-zero;
     white-space: nowrap;
   }
@@ -199,7 +199,7 @@ function renderInfo(img: ImageMetadata) {
 
   .embla__container {
     display: flex;
-    gap: 1rem;
+    gap: 0.15rem;
     align-items: flex-start;
     touch-action: pan-y pinch-zoom;
   }
