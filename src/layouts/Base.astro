@@ -1005,13 +1005,14 @@ const TICKER_TEXT =
             }
             /* JS sets this class to keep button in sync with chrome show/hide */
             .nav-menu-btn.is-nav-hidden { transform: translateY(-100%); }
-            /* State 2: ticker row = nav-link box height (1.1rem + 2×0.413rem = 1.926rem)
-               so the colored band matches the hover boxes on the nav links.
-               viewport stretches to fill the row → no black gap between ticker and nav.
-               Nav links center in their 3.52rem row → equal 0.797rem above/below. */
-            .site-chrome.is-fixed .ticker { height: 1.926rem; }
-            .site-chrome.is-fixed .ticker__viewport { align-self: stretch; }
-            .site-chrome.is-fixed ~ .nav-menu-btn { top: 1.926rem; }
+            /* State 2: G = (nav-h − 1.926rem) / 2 = 0.797rem (same gap in compact).
+               Ticker row = G + T = (nav-h + 1.926rem) / 2 ≈ 2.723rem.
+               Viewport at flex-end → sits at the bottom of the ticker row, so there
+               is exactly G of black above the band. Nav links center in their nav-h
+               row (G above/below). Result: three equal G gaps throughout the chrome. */
+            .site-chrome.is-fixed .ticker { height: calc((var(--nav-h) + 1.926rem) / 2); }
+            .site-chrome.is-fixed .ticker__viewport { align-self: flex-end; }
+            .site-chrome.is-fixed ~ .nav-menu-btn { top: calc((var(--nav-h) + 1.926rem) / 2); }
             .site-chrome.is-fixed ~ .nav-menu-btn.is-nav-hidden { transform: translateY(-200%); }
             .nav-menu-btn:focus-visible { color: var(--accent); outline: none; }
             @media (hover: hover) {
