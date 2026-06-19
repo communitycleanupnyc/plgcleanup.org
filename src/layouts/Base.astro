@@ -1009,6 +1009,7 @@ const TICKER_TEXT =
                the same vertical midpoint within their stripe. Button sits in the nav
                row; hide needs -200% (= -2×nav-h) to clear the full chrome height. */
             .site-chrome.is-fixed .ticker { height: var(--nav-h); }
+            .site-chrome.is-fixed .ticker__viewport { align-self: stretch; }
             .site-chrome.is-fixed ~ .nav-menu-btn { top: var(--nav-h); }
             .site-chrome.is-fixed ~ .nav-menu-btn.is-nav-hidden { transform: translateY(-200%); }
             .nav-menu-btn:focus-visible { color: var(--accent); outline: none; }
