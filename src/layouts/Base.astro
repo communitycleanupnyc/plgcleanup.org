@@ -1194,6 +1194,11 @@ const TICKER_TEXT =
                 a, button {
                     transition: none !important;
                 }
+                /* Preserve the layout slide-in/out transition on the menu button
+                   so it tracks the nav bar on scroll. Only colour transitions are killed. */
+                .nav-menu-btn {
+                    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                }
                 .footer-col a:focus,
                 .nav-link:focus,
                 .nav-btn:focus,
