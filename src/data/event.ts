@@ -1,3 +1,6 @@
+// TODO: add comments, definitions & examples 
+// TODO: infer CLEANUP_TIME from ISO format (and simplify date entry)
+// TODO: infer maps URL from intersection
 export const CLEANUP_ISO     = "2026-06-20T10:00:00-04:00";
 export const CLEANUP_END_ISO = "2026-06-20T11:00:00-04:00";
 export const CLEANUP_TIME    = "10–11am";
