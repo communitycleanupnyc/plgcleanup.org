@@ -1083,20 +1083,38 @@ const TICKER_TEXT =
             }
             .mobile-menu.is-open { visibility: visible; }
 
-            /* Touch devices only: slide in/out from the right */
+            /* Touch devices only: slide in/out from the right with a spring feel.
+               --menu-spring is a CSS linear() easing reproducing a *critically
+               damped* physics spring (stiffness 500, mass 1): quick, springy start
+               that eases in and stops exactly on target — no overshoot, no bounce
+               back and forth. This matches how Figma's Config menu is tuned.
+               Baseline-supported since 2023 (Chrome 113+, Safari 17.4+, FF 112+);
+               older engines fall back to a straight-line ease. No JS, no library. */
             @media (hover: none) and (pointer: coarse) {
                 .mobile-menu {
+                    --menu-spring: linear(
+                        0 0%, 0.095 6%, 0.276 11%, 0.458 17%, 0.611 22%,
+                        0.728 28%, 0.814 33%, 0.875 39%, 0.917 44%, 0.946 50%,
+                        0.964 56%, 0.977 61%, 0.985 67%, 0.991 72%, 0.994 78%,
+                        0.996 83%, 0.998 89%, 1 100%
+                    );
                     translate: 100%;
                     transition:
-                        translate 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                        visibility 0s 0.4s;
+                        translate 0.44s var(--menu-spring),
+                        visibility 0s 0.44s;
                 }
                 .mobile-menu.is-open {
                     translate: 0%;
                     transition:
-                        translate 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        translate 0.44s var(--menu-spring),
                         visibility 0s 0s;
                 }
+            }
+
+            /* Honor reduced-motion: skip the slide, just show/hide. */
+            @media (hover: none) and (pointer: coarse) and (prefers-reduced-motion: reduce) {
+                .mobile-menu,
+                .mobile-menu.is-open { transition: visibility 0s; }
             }
 
 

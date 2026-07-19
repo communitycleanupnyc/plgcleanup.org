@@ -14,9 +14,26 @@ const {
 
 const N = items.length;
 const headingId = `ch-${Math.random().toString(36).slice(2, 9)}`;
-const popupNameId = `${headingId}-name`;
 
 const DENSITIES = [1, 2, 3];
+
+// Testimonial bodies are trusted, first-party text. Authors write prose with real
+// line breaks — a blank line starts a new paragraph, a single newline is a line
+// break — plus optional inline <a href="…">…</a> links. This renders that to HTML:
+// paragraphs from blank lines, <br> from single newlines, and every link made to
+// open safely in a new tab (so target/rel never have to be repeated in the data).
+function formatBody(raw: string): string {
+  const html = raw
+    .replace(/\r\n?/g, '\n')
+    .trim()
+    .split(/\n[ \t]*\n+/)                                        // blank line → paragraph
+    .map((block) => `<p>${block.split('\n').map((l) => l.trim()).join('<br>')}</p>`)  // newline → <br>
+    .join('');
+  return html.replace(                                           // links open in a new tab
+    /<a\b(?![^>]*\btarget=)/gi,
+    '<a target="_blank" rel="noopener noreferrer"',
+  );
+}
 
 function renderInfo(img: ImageMetadata) {
   const ar = img.width / img.height;
@@ -62,8 +79,6 @@ function renderInfo(img: ImageMetadata) {
             <li
               class="embla__slide card"
               data-index={index}
-              data-name={item.name}
-              data-has-popup={String(enablePopup && !!item.body)}
               style={item.focusPosition ? `--pos:${item.focusPosition}` : undefined}
             >
               <div class="card__media">
@@ -78,19 +93,34 @@ function renderInfo(img: ImageMetadata) {
                   decoding="async"
                   layout="none"
                 />
+                {enablePopup && item.body && (
+                  <div class="card__panel" hidden>
+                    <button class="card__panel-close" aria-label="Close testimonial">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                      </svg>
+                    </button>
+                    <div class="card__panel-body" set:html={formatBody(item.body)} />
+                  </div>
+                )}
               </div>
-              <p class="card__name">{item.name}</p>
-              <p class="card__quote">{item.quote}</p>
-              {enablePopup && item.body && (
-                <>
+              <div class="card__caption">
+                <div class="card__caption-text">
+                  <p class="card__name">{item.name}</p>
+                  <p class="card__quote">{item.quote}</p>
+                </div>
+                {enablePopup && item.body && (
                   <button
-                    class="card__trigger"
-                    aria-haspopup="dialog"
+                    class="card__toggle"
+                    aria-expanded="false"
                     aria-label={`Read ${item.name}'s testimonial`}
-                  ></button>
-                  <div class="card__tpl" hidden aria-hidden="true" set:html={item.body} />
-                </>
-              )}
+                  >
+                    <svg class="card__toggle-icon" width="20" height="20" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                )}
+              </div>
             </li>
           );
         })}
@@ -98,23 +128,6 @@ function renderInfo(img: ImageMetadata) {
     </div>
   </div>
 
-  {enablePopup && (
-    <div
-      class="popup"
-      role="dialog"
-      aria-modal="false"
-      aria-labelledby={popupNameId}
-      hidden
-    >
-      <button class="popup__close" aria-label="Close">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-          <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <h3 id={popupNameId} class="popup__name"></h3>
-      <div class="popup__body"></div>
-    </div>
-  )}
 </section>
 )}
 
@@ -228,7 +241,11 @@ function renderInfo(img: ImageMetadata) {
   .embla__slide:focus-within .card__media img,
   .embla__slide.is-active .card__media img { filter: grayscale(0); }
 
-  @media (prefers-reduced-motion: reduce) { .card__media img { transition: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .card__media img,
+    .card__panel,
+    .card__toggle-icon { transition: none; }
+  }
 
   /* NATURAL: uniform height, auto width, no crop */
   [data-variant="natural"] .card__media     { height: var(--size-d); }
@@ -243,9 +260,22 @@ function renderInfo(img: ImageMetadata) {
     [data-variant="square"]  .card__media { width: var(--size-m); }
   }
 
-  /* ── Card text ──────────────────────────────────── */
-  .card__name {
+  /* ── Card caption (below the image) ─────────────────
+     The whole caption box is a tap target that opens the panel: text on the
+     left, reveal arrow on the right, vertically centered between name & quote. */
+  .card__caption {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     margin-top: 0.625rem;
+    cursor: pointer;
+  }
+  .card__caption-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .card__name {
     font-size: 0.9375rem;
     font-weight: 600;
     color: var(--text);
@@ -260,81 +290,120 @@ function renderInfo(img: ImageMetadata) {
     max-width: 22ch;
   }
 
-  /* Full-card invisible trigger */
-  .card__trigger {
-    position: absolute;
-    inset: 0;
-    background: transparent;
+  /* ── Reveal arrow (right side, inset from the image edge) ── */
+  .card__toggle {
+    flex-shrink: 0;
+    margin-right: clamp(0.75rem, 8%, 2rem);  /* ~10% inset from the image's right edge */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: none;
     border: 0;
+    color: var(--text);
+    opacity: 0.85;
     cursor: pointer;
   }
-  .card__trigger:focus-visible {
-    outline: 2px solid var(--brand);
-    outline-offset: -2px;
+  .card__toggle:hover,
+  .card__toggle:focus-visible {
+    opacity: 1;
+    color: var(--accent);
+    outline: none;
+  }
+  .card__toggle-icon { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .card__toggle[aria-expanded="true"] .card__toggle-icon { transform: rotate(180deg); }
+
+  /* ── Slide-up testimonial panel (clipped to the image) ── */
+  .card__panel {
+    /* Same critically-damped spring the mobile menu slides on (--menu-spring in
+       Base.astro): a linear() curve that starts springy-fast, eases in, and stops
+       exactly on target — no overshoot, no bounce. Drives the body text's vertical
+       slide. (No overshoot → no bleed needed to cover a gap.) */
+    --panel-spring: linear(
+      0 0%, 0.095 6%, 0.276 11%, 0.458 17%, 0.611 22%,
+      0.728 28%, 0.814 33%, 0.875 39%, 0.917 44%, 0.946 50%,
+      0.964 56%, 0.977 61%, 0.985 67%, 0.991 72%, 0.994 78%,
+      0.996 83%, 0.998 89%, 1 100%
+    );
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: #000;
+    color: var(--text);
+    overflow: hidden;
+    translate: 0 100%;
+    visibility: hidden;
+    transition: translate 0.44s var(--panel-spring), visibility 0s 0.44s;
+  }
+  .card.is-panel-open .card__panel {
+    translate: 0 0;
+    visibility: visible;
+    transition: translate 0.44s var(--panel-spring), visibility 0s 0s;
   }
 
-  /* ── Popup ──────────────────────────────────────── */
-  .popup {
-    position: fixed;
-    z-index: 200;
-    background: var(--bg);
-    border: 1.5px solid var(--line);
-    padding: 1.25rem;
-    max-width: min(380px, calc(100vw - 24px));
-    max-height: min(60vh, 480px);
+  .card__panel-body {
+    height: 100%;
     overflow-y: auto;
     overscroll-behavior: contain;
+    padding: 1.25rem;
+    padding-top: 2.75rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+  /* Paragraph gap (global reset zeroes <p> margins); the first one stays flush.
+     :global() is required because these <p> come from set:html and so don't carry
+     Astro's scope attribute — a plain scoped selector wouldn't match them. */
+  .card__panel-body :global(p + p) { margin-top: 0.9em; }
+
+  /* Links inside the body use the site-wide inline-link treatment (Base.astro's
+     `a:not([class])`): underline at rest, accent highlight on hover. Nothing to
+     override here — keeping it consistent with links everywhere else on the site. */
+
+  /* Desktop's default scrollbar is far too chunky inside this small panel; slim it.
+     Touch devices keep their native auto-hiding overlay scrollbar (already fine). */
+  @media (hover: hover) and (pointer: fine) {
+    .card__panel-body {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(226, 226, 226, 0.35) transparent;
+    }
+    .card__panel-body::-webkit-scrollbar { width: 6px; }
+    .card__panel-body::-webkit-scrollbar-track { background: transparent; }
+    .card__panel-body::-webkit-scrollbar-thumb {
+      background: rgba(226, 226, 226, 0.3);
+      border-radius: 3px;
+    }
+    .card__panel-body::-webkit-scrollbar-thumb:hover {
+      background: rgba(226, 226, 226, 0.5);
+    }
   }
 
-  .popup__close {
+  .card__panel-close {
     display: flex;
     align-items: center;
     justify-content: center;
     position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
+    top: 0.6rem;
+    right: 0.6rem;
+    z-index: 3;
     width: 2rem;
     height: 2rem;
     background: none;
     border: none;
     color: var(--text);
     cursor: pointer;
-    opacity: 0.6;
+    opacity: 0.7;
     transition: opacity 150ms ease;
   }
-  .popup__close:hover,
-  .popup__close:focus-visible {
+  .card__panel-close:hover,
+  .card__panel-close:focus-visible {
     opacity: 1;
     outline: none;
   }
-
-  .popup__name {
-    font-family: "Fraunces", Georgia, serif;
-    font-size: 1.25rem;
-    font-weight: 400;
-    letter-spacing: -0.02em;
-    margin-bottom: 0.75rem;
-    padding-right: 2rem;
-  }
-
-  .popup__body {
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    font-weight: 300;
-    color: var(--text);
-  }
-  .popup__body a {
-    color: inherit;
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
-  }
-  .popup__body a:hover { color: var(--accent); }
 </style>
 
 <script>
   import EmblaCarousel from 'embla-carousel';
-  import { computePosition, flip, shift, offset } from '@floating-ui/dom';
 
   document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((section) => {
     const enablePopup = section.dataset.enablePopup === 'true';
@@ -369,16 +438,8 @@ function renderInfo(img: ImageMetadata) {
     // Desktop hover is handled by pure CSS :hover — no JS tracking needed.
     let committedIndex = -1;
 
-    type PopupState = {
-      isOpen: boolean;
-      sourceIndex: number;
-      downX: number; downY: number; downCandidate: boolean;
-    };
-    const ps: PopupState = { isOpen: false, sourceIndex: -1, downX: 0, downY: 0, downCandidate: false };
-
     function applyActive() {
-      const shown = ps.isOpen ? ps.sourceIndex : committedIndex;
-      slides.forEach((s, i) => s.classList.toggle('is-active', i === shown));
+      slides.forEach((s, i) => s.classList.toggle('is-active', i === committedIndex));
     }
 
     applyActive();
@@ -401,100 +462,81 @@ function renderInfo(img: ImageMetadata) {
     section.querySelector('[data-dir=prev]')?.addEventListener('click', () => embla.scrollPrev());
     section.querySelector('[data-dir=next]')?.addEventListener('click', () => embla.scrollNext());
 
-    // ── Popup ────────────────────────────────────────
+    // ── Testimonial panel ────────────────────────────
     if (!enablePopup) return;
 
-    const popup      = section.querySelector<HTMLElement>('.popup')!;
-    const popupName  = popup.querySelector<HTMLElement>('.popup__name')!;
-    const popupBody  = popup.querySelector<HTMLElement>('.popup__body')!;
-    const popupClose = popup.querySelector<HTMLButtonElement>('.popup__close')!;
+    function panelOf(slide: HTMLElement) {
+      return slide.querySelector<HTMLElement>('.card__panel');
+    }
 
-    // Track pointer type from last pointerdown (MouseEvent.pointerType not available on click)
-    let lastPointerType = 'mouse';
-    viewport.addEventListener('pointerdown', (e: PointerEvent) => {
-      lastPointerType = e.pointerType;
-    }, { passive: true });
+    function closeAllPanels(except: HTMLElement | null) {
+      slides.forEach((s) => {
+        if (s === except || !s.classList.contains('is-panel-open')) return;
+        closePanel(s);
+      });
+    }
+
+    function openPanel(slide: HTMLElement) {
+      closeAllPanels(slide);
+      const panel = panelOf(slide);
+      if (panel) {
+        panel.removeAttribute('hidden');
+        // Commit the resting (translate: 100%) state NOW — a bare rAF can batch the
+        // unhide + class change into one style pass, so the panel snaps in with no
+        // slide. Forcing layout here guarantees it animates from 100% → 0%.
+        void panel.offsetHeight;
+      }
+      slide.classList.add('is-panel-open');
+      slide.querySelector('.card__toggle')?.setAttribute('aria-expanded', 'true');
+
+      // Keep the source card visually "committed" (colored) while its panel is open
+      committedIndex = parseInt(slide.dataset.index ?? '-1', 10);
+      applyActive();
+    }
+
+    function closePanel(slide: HTMLElement) {
+      slide.classList.remove('is-panel-open');
+      slide.querySelector('.card__toggle')?.setAttribute('aria-expanded', 'false');
+
+      // Re-apply `hidden` once the slide-out finishes (matches the 0.4s visibility delay)
+      const panel = panelOf(slide);
+      panel?.addEventListener('transitionend', function h(e) {
+        if (e.propertyName === 'translate' && !slide.classList.contains('is-panel-open')) {
+          panel.setAttribute('hidden', '');
+          panel.removeEventListener('transitionend', h);
+        }
+      });
+    }
 
     // Embla stopPropagation()s click in capture phase after drags,
     // so this only fires on genuine taps/clicks (< dragThreshold movement).
     section.addEventListener('click', (e: MouseEvent) => {
-      const trigger = (e.target as HTMLElement).closest<HTMLElement>('.card__trigger');
-      if (!trigger) return;
-      const slide = trigger.closest<HTMLElement>('.embla__slide');
-      if (!slide || slide.dataset.hasPopup !== 'true') return;
+      const target = e.target as HTMLElement;
 
-      const index      = parseInt(slide.dataset.index ?? '0', 10);
-      const fromKeyboard = e.detail === 0;
-
-      // Touch/pen tap or keyboard: make the highlight sticky
-      if (lastPointerType !== 'mouse' || fromKeyboard) {
-        committedIndex = index;
-        applyActive();
+      // Whole caption box (name + quote + arrow) toggles the panel.
+      const caption = target.closest<HTMLElement>('.card__caption');
+      if (caption) {
+        const slide = caption.closest<HTMLElement>('.embla__slide');
+        if (!slide || !panelOf(slide)) return;
+        slide.classList.contains('is-panel-open') ? closePanel(slide) : openPanel(slide);
+        return;
       }
 
-      // Keyboard: anchor to card rect; pointer: anchor to pointer position
-      const rect   = trigger.getBoundingClientRect();
-      const anchorX = fromKeyboard ? rect.left   : e.clientX;
-      const anchorY = fromKeyboard ? rect.bottom : e.clientY;
-      openPopup(index, anchorX, anchorY, fromKeyboard, slide);
+      const close = target.closest<HTMLElement>('.card__panel-close');
+      if (close) {
+        const slide = close.closest<HTMLElement>('.embla__slide');
+        if (slide) {
+          closePanel(slide);
+          slide.querySelector<HTMLElement>('.card__toggle')?.focus();
+        }
+      }
     });
 
-    function openPopup(index: number, anchorX: number, anchorY: number, fromKeyboard: boolean, cardEl: HTMLElement) {
-      popupName.textContent = slides[index].dataset.name ?? '';
-      const tpl = slides[index].querySelector<HTMLElement>('.card__tpl');
-      popupBody.innerHTML = tpl?.innerHTML ?? '';
-      popup.style.visibility = 'hidden';
-      popup.removeAttribute('hidden');
-      ps.isOpen = true;
-      ps.sourceIndex = index;
-      applyActive();
-
-      const reference = fromKeyboard
-        ? cardEl
-        : { getBoundingClientRect: () => ({ x: anchorX, y: anchorY, width: 0, height: 0, left: anchorX, right: anchorX, top: anchorY, bottom: anchorY }) };
-
-      computePosition(reference as Element, popup, {
-        strategy: 'fixed',
-        placement: 'right-start',
-        middleware: [offset(8), flip(), shift({ padding: 12 })],
-      }).then(({ x, y }) => {
-        Object.assign(popup.style, { position: 'fixed', left: `${x}px`, top: `${y}px`, visibility: '' });
-        popupClose.focus();
-      });
-    }
-
-    function closePopup() {
-      if (!ps.isOpen) return;
-      const prev = ps.sourceIndex;
-      ps.isOpen = false;
-      ps.sourceIndex = -1;
-      popup.setAttribute('hidden', '');
-      applyActive();
-      slides[prev]?.querySelector<HTMLElement>('.card__trigger')?.focus();
-    }
-
-    popupClose.addEventListener('click', closePopup);
-
+    // Close on Escape and whenever the carousel settles on another slide
+    // (swipe, drag, and the prev/next arrows all fire 'select').
     document.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && ps.isOpen) closePopup();
+      if (e.key === 'Escape') closeAllPanels(null);
     });
-
-    // Outside-tap dismiss (not on scroll: cancel if moved > 10px before pointerup)
-    document.addEventListener('pointerdown', (e: PointerEvent) => {
-      if (!ps.isOpen) { ps.downCandidate = false; return; }
-      const t = e.target as HTMLElement;
-      if (popup.contains(t) || t.closest('.embla__slide')) { ps.downCandidate = false; return; }
-      ps.downX = e.clientX; ps.downY = e.clientY; ps.downCandidate = true;
-    });
-    document.addEventListener('pointermove', (e: PointerEvent) => {
-      if (!ps.downCandidate) return;
-      if (Math.hypot(e.clientX - ps.downX, e.clientY - ps.downY) > 10) ps.downCandidate = false;
-    });
-    document.addEventListener('pointerup', (e: PointerEvent) => {
-      if (!ps.isOpen || !ps.downCandidate) { ps.downCandidate = false; return; }
-      ps.downCandidate = false;
-      const t = e.target as HTMLElement;
-      if (!popup.contains(t) && !t.closest('.embla__slide')) closePopup();
-    });
+    embla.on('select', () => closeAllPanels(null));
   });
 </script>
