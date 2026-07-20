@@ -1,5 +1,5 @@
-import type { ImageMetadata } from 'astro';
-import sharp from 'sharp';
+import type { ImageMetadata } from "astro";
+import sharp from "sharp";
 
 /**
  * Build-time Low-Quality Image Placeholder (LQIP) generator.
@@ -42,28 +42,28 @@ function sourcePath(img: ImageMetadata): string | undefined {
 
 async function build(img: ImageMetadata): Promise<string> {
   const fsPath = sourcePath(img);
-  if (!fsPath) return '';
+  if (!fsPath) return "";
 
   const preview = await sharp(fsPath)
-    .resize(PLACEHOLDER_SIZE, PLACEHOLDER_SIZE, { fit: 'inside' })
+    .resize(PLACEHOLDER_SIZE, PLACEHOLDER_SIZE, { fit: "inside" })
     .webp({ quality: 40 })
     .toBuffer();
-  const href = `data:image/webp;base64,${preview.toString('base64')}`;
+  const href = `data:image/webp;base64,${preview.toString("base64")}`;
 
   // viewBox uses the real pixel dimensions so `background-size: cover` maps the
   // SVG 1:1 onto the photo box. `stdDeviation='20'` matches Next.js/Figma.
   const { width: w, height: h } = img;
   const svg =
     `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${w} ${h}'>` +
-      `<filter id='b' color-interpolation-filters='sRGB'>` +
-        `<feGaussianBlur stdDeviation='20'/>` +
-        `<feColorMatrix values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 100 -1' result='s'/>` +
-        `<feFlood x='0' y='0' width='100%' height='100%'/>` +
-        `<feComposite operator='out' in='s'/>` +
-        `<feComposite in2='SourceGraphic'/>` +
-        `<feGaussianBlur stdDeviation='20'/>` +
-      `</filter>` +
-      `<image width='100%' height='100%' x='0' y='0' preserveAspectRatio='none' style='filter: url(#b);' href='${href}'/>` +
+    `<filter id='b' color-interpolation-filters='sRGB'>` +
+    `<feGaussianBlur stdDeviation='20'/>` +
+    `<feColorMatrix values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 100 -1' result='s'/>` +
+    `<feFlood x='0' y='0' width='100%' height='100%'/>` +
+    `<feComposite operator='out' in='s'/>` +
+    `<feComposite in2='SourceGraphic'/>` +
+    `<feGaussianBlur stdDeviation='20'/>` +
+    `</filter>` +
+    `<image width='100%' height='100%' x='0' y='0' preserveAspectRatio='none' style='filter: url(#b);' href='${href}'/>` +
     `</svg>`;
 
   // Minimal percent-encoding for an inline `url()` data-URI, matching Next.js'
@@ -71,10 +71,10 @@ async function build(img: ImageMetadata): Promise<string> {
   // then the angle brackets and the fragment `#`. Spaces and single quotes are
   // valid unencoded inside a quoted url(); base64 has none of these characters.
   const encoded = svg
-    .replace(/%/g, '%25')
-    .replace(/#/g, '%23')
-    .replace(/</g, '%3C')
-    .replace(/>/g, '%3E');
+    .replace(/%/g, "%25")
+    .replace(/#/g, "%23")
+    .replace(/</g, "%3C")
+    .replace(/>/g, "%3E");
 
   return `data:image/svg+xml;charset=utf-8,${encoded}`;
 }
@@ -82,7 +82,7 @@ async function build(img: ImageMetadata): Promise<string> {
 /** Returns a blur-up `background-image` data-URI for an imported image, or ''. */
 export function lqip(img: ImageMetadata): Promise<string> {
   const key = sourcePath(img);
-  if (!key) return Promise.resolve('');
+  if (!key) return Promise.resolve("");
   let cached = cache.get(key);
   if (!cached) {
     cached = build(img);

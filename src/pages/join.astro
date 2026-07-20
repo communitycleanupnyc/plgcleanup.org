@@ -1,88 +1,187 @@
 ---
 import Base from "../layouts/Base.astro";
-import {
-    CLEANUP_ISO,
-    CLEANUP_TIME,
-    CLEANUP_CORNER,
-    CLEANUP_MAPS_URL,
-} from "../data/event";
+import { CLEANUP_ISO, CLEANUP_TIME, CLEANUP_CORNER, CLEANUP_MAPS_URL } from "../data/event";
 import { getCountdown } from "../data/countdown";
 
 const cleanupDate = new Date(CLEANUP_ISO);
 const state = getCountdown(new Date());
 
 const countdownLine =
-    state.tag === "past"         ? ""
-    : state.tag === "now"        ? "Is happening right now!"
-    : state.tag === "minutes"    ? `Is starting in ${state.n} minute${state.n === 1 ? "" : "s"}!`
-    : state.tag === "hours"      ? `Is starting in ${state.n} hour${state.n === 1 ? "" : "s"}!`
-    : state.tag === "tomorrow"   ? "is tomorrow!"
-    : state.tag === "this-weekend"  ? `Is this ${state.dayName}!`
-    : state.tag === "next-weekend"  ? `Is next ${state.dayName}.`
-    : `That's in ${state.word} days.`;
+  state.tag === "past"
+    ? ""
+    : state.tag === "now"
+      ? "Is happening right now!"
+      : state.tag === "minutes"
+        ? `Is starting in ${state.n} minute${state.n === 1 ? "" : "s"}!`
+        : state.tag === "hours"
+          ? `Is starting in ${state.n} hour${state.n === 1 ? "" : "s"}!`
+          : state.tag === "tomorrow"
+            ? "is tomorrow!"
+            : state.tag === "this-weekend"
+              ? `Is this ${state.dayName}!`
+              : state.tag === "next-weekend"
+                ? `Is next ${state.dayName}.`
+                : `That's in ${state.word} days.`;
 
 const joinDisplayDate = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York",
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
+  timeZone: "America/New_York",
+  weekday: "long",
+  month: "long",
+  day: "numeric",
+  year: "numeric",
 }).format(cleanupDate);
 ---
 
 <Base
-    title="Volunteer with Community Cleanup PLG"
-    description="There's no registration — just show up. Here's where and when."
-    navMode="static"
+  title="Volunteer with Community Cleanup PLG"
+  description="There's no registration — just show up. Here's where and when."
+  navMode="static"
 >
-    <div class="join-page">
-        <h1>Our next cleanup...</h1>
-        {countdownLine && <p class="join-countdown">{countdownLine}</p>}
-        <p class="join-sub">Zero registration needed, and we provide the supplies—just show up. Look for the shopping cart with trash grabbers to find your squad leader and say hi. </p>
+  <div class="join-page">
+    <h1>Our next cleanup...</h1>
+    {countdownLine && <p class="join-countdown">{countdownLine}</p>}
+    <p class="join-sub">
+      Zero registration needed, and we provide the supplies—just show up. Look for the shopping cart
+      with trash grabbers to find your squad leader and say hi.
+    </p>
 
-        <div class="join-details">
-            <div class="join-detail">
-                <p class="join-detail-label">When</p>
-                <p class="join-detail-value">
-                    {joinDisplayDate}<br />{CLEANUP_TIME}
-                </p>
-            </div>
-            <div class="join-cart-cell">
-                <img
-                    src="/images/cart.webp"
-                    alt=""
-                    class="join-cart"
-                    aria-hidden="true"
-                    width="640"
-                    height="634"
-                />
-            </div>
-            <div class="join-detail join-where">
-                <p class="join-detail-label">Where</p>
-                <p class="join-detail-value">
-                    <a
-                        href={CLEANUP_MAPS_URL}
-                        target="_blank"
-                        rel="noopener noreferrer">{CLEANUP_CORNER}</a><br />
-                    Prospect Lefferts Gardens<br />Brooklyn, New York
-                </p>
-            </div>
-            <div class="join-map-cell">
-                <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3026.8582257313747!2d-73.95630969999999!3d40.6550555!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25b6bab08ac97%3A0xe80edeed014b4db4!2sBedford%20Ave%20%26%20Clarkson%20Ave%2C%20Brooklyn%2C%20NY%2011226!5e0!3m2!1sen!2sus!4v1781812407063!5m2!1sen!2sus"
-                    class="join-map"
-                    title="Map: Clarkson Ave & Bedford Ave, Brooklyn, NY"
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"
-                    allowfullscreen
-                ></iframe>
-            </div>
-            <div class="join-detail join-questions">
-                <p class="join-detail-label">Questions</p>
-                <p class="join-detail-value">
-                    Can't find your team? Let us know you're waiting on <a href="https://discord.com/invite/H9her7r8N2">Discord</a> by sending a message in the #general channel. For all other inquiries, see the <a href="/faq">FAQ</a>.
-                </p>
-            </div>
-        </div>
+    <div class="join-details">
+      <div class="join-detail">
+        <p class="join-detail-label">When</p>
+        <p class="join-detail-value">
+          {joinDisplayDate}<br />{CLEANUP_TIME}
+        </p>
+      </div>
+      <div class="join-cart-cell">
+        <img
+          src="/images/cart.webp"
+          alt=""
+          class="join-cart"
+          aria-hidden="true"
+          width="640"
+          height="634"
+        />
+      </div>
+      <div class="join-detail join-where">
+        <p class="join-detail-label">Where</p>
+        <p class="join-detail-value">
+          <a href={CLEANUP_MAPS_URL} target="_blank" rel="noopener noreferrer">{CLEANUP_CORNER}</a
+          ><br />
+          Prospect Lefferts Gardens<br />Brooklyn, New York
+        </p>
+      </div>
+      <div class="join-map-cell">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3026.8582257313747!2d-73.95630969999999!3d40.6550555!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25b6bab08ac97%3A0xe80edeed014b4db4!2sBedford%20Ave%20%26%20Clarkson%20Ave%2C%20Brooklyn%2C%20NY%2011226!5e0!3m2!1sen!2sus!4v1781812407063!5m2!1sen!2sus"
+          class="join-map"
+          title="Map: Clarkson Ave & Bedford Ave, Brooklyn, NY"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          allowfullscreen></iframe>
+      </div>
+      <div class="join-detail join-questions">
+        <p class="join-detail-label">Questions</p>
+        <p class="join-detail-value">
+          Can't find your team? Let us know you're waiting on <a
+            href="https://discord.com/invite/H9her7r8N2">Discord</a
+          > by sending a message in the #general channel. For all other inquiries, see the <a
+            href="/faq">FAQ</a
+          >.
+        </p>
+      </div>
     </div>
+  </div>
 </Base>
+
+<style>
+  /* /join page details grid. */
+  .join-page {
+    position: relative;
+    width: var(--site-w);
+    margin-left: var(--site-ml);
+    padding-top: clamp(3rem, 8vw, 5rem);
+    padding-bottom: clamp(2rem, 7vw, 3rem);
+  }
+
+  .join-cart-cell {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+  }
+
+  .join-cart {
+    display: block;
+    width: clamp(100px, 18vw, 240px);
+    height: auto;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .join-map {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1.618;
+    border: 0;
+    filter: invert(100%) hue-rotate(180deg);
+  }
+
+  .join-page h1 {
+    margin-bottom: 1.25rem;
+  }
+
+  .join-countdown {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 1.25rem;
+  }
+
+  .join-sub {
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--text);
+    margin-bottom: clamp(2rem, 5vw, 3rem);
+  }
+
+  .join-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    margin-bottom: clamp(2rem, 5vw, 3rem);
+  }
+
+  @media (max-width: 540px) {
+    .join-where {
+      grid-column: 1 / -1;
+    }
+    .join-map-cell {
+      grid-column: 1 / -1;
+    }
+    .join-questions {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .join-detail-label {
+    font-size: 1.5rem;
+    font-weight: 400;
+    letter-spacing: 0em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  .join-detail-value {
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    font-weight: 300;
+    line-height: 1.45;
+  }
+
+  .join-reassurance {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text);
+    opacity: 0.6;
+  }
+</style>

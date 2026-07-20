@@ -1,0 +1,30 @@
+# Keeps dependencies current with minimal oversight: Dependabot opens grouped,
+# reviewable PRs on a weekly cadence. Merge them after CI (see ci.yml) passes.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # One PR for all non-major updates keeps the review burden low.
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # TypeScript 7 (the native compiler) doesn't yet expose the API that
+      # `astro check` needs. Stay on the 5.x line until Astro supports it.
+      # Track: https://github.com/withastro/roadmap/discussions/1321
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+    commit-message:
+      prefix: "deps"
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "ci"

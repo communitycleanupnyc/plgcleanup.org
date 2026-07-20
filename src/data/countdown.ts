@@ -1,8 +1,16 @@
 import { CLEANUP_ISO, CLEANUP_END_ISO, etDateParts } from "./event";
 
 const NUMBER_WORDS = [
-  "zero", "one", "two", "three", "four",
-  "five", "six", "seven", "eight", "nine",
+  "zero",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
 ];
 
 export type CountdownState =
@@ -17,18 +25,18 @@ export type CountdownState =
 
 export function getCountdown(now: Date): CountdownState {
   const startMs = new Date(CLEANUP_ISO).getTime();
-  const endMs   = new Date(CLEANUP_END_ISO).getTime();
-  const nowMs   = now.getTime();
+  const endMs = new Date(CLEANUP_END_ISO).getTime();
+  const nowMs = now.getTime();
 
   if (nowMs >= startMs && nowMs < endMs) return { tag: "now" };
-  if (nowMs >= endMs)                    return { tag: "past" };
+  if (nowMs >= endMs) return { tag: "past" };
 
   // Cleanup is in the future. Check if it's the same calendar day in ET.
   const cleanupParts = etDateParts(new Date(CLEANUP_ISO));
-  const nowParts     = etDateParts(now);
-  const isSameDay    =
-    cleanupParts.y   === nowParts.y &&
-    cleanupParts.m   === nowParts.m &&
+  const nowParts = etDateParts(now);
+  const isSameDay =
+    cleanupParts.y === nowParts.y &&
+    cleanupParts.m === nowParts.m &&
     cleanupParts.day === nowParts.day;
 
   if (isSameDay) {
@@ -38,15 +46,15 @@ export function getCountdown(now: Date): CountdownState {
   }
 
   // Day-level labels
-  const todayMs      = Date.UTC(nowParts.y, nowParts.m - 1, nowParts.day);
+  const todayMs = Date.UTC(nowParts.y, nowParts.m - 1, nowParts.day);
   const cleanupDayMs = Date.UTC(cleanupParts.y, cleanupParts.m - 1, cleanupParts.day);
-  const N            = Math.round((cleanupDayMs - todayMs) / 86_400_000);
+  const N = Math.round((cleanupDayMs - todayMs) / 86_400_000);
 
   if (N === 1) return { tag: "tomorrow" };
 
-  const todayDow   = new Date(todayMs).getUTCDay();
-  const thisSatMs  = todayMs + ((6 - todayDow + 7) % 7) * 86_400_000;
-  const nextSatMs  = thisSatMs + 7 * 86_400_000;
+  const todayDow = new Date(todayMs).getUTCDay();
+  const thisSatMs = todayMs + ((6 - todayDow + 7) % 7) * 86_400_000;
+  const nextSatMs = thisSatMs + 7 * 86_400_000;
 
   const dayName = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/New_York",

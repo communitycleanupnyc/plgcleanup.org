@@ -1,0 +1,44 @@
+# Pages CMS (https://pagescms.org) — gives non-technical editors a form-based UI
+# backed by the Markdown files in src/content/. Everything stays plain Markdown +
+# git, so there is no lock-in. Event date/time/place live in src/data/event.ts and
+# are edited via GitHub's web editor (that file documents how).
+media:
+  - name: testimonial-photos
+    label: Testimonial photos
+    input: src/assets/testimonials
+    output: ../../assets/testimonials
+    extensions: [jpg, jpeg, png, webp]
+
+content:
+  - name: pages
+    label: Pages
+    type: collection
+    path: src/content/pages
+    view:
+      fields: [title, navMode]
+    fields:
+      - { name: title, label: Browser title, type: string }
+      - { name: description, label: Social description, type: text }
+      - name: navMode
+        label: Nav style
+        type: select
+        default: static
+        options:
+          values: [ticker, static]
+      - { name: body, label: Page content, type: rich-text }
+
+  - name: testimonials
+    label: Testimonials
+    type: collection
+    path: src/content/testimonials
+    view:
+      fields: [name, quote, order]
+      sort: [order]
+    fields:
+      - { name: name, label: Name, type: string }
+      - { name: quote, label: Pull quote, type: string }
+      - { name: alt, label: Photo alt text, type: string }
+      - { name: image, label: Photo, type: image, media: testimonial-photos }
+      - { name: order, label: Display order, type: number }
+      - { name: focusPosition, label: Photo focus (e.g. 50% 30%), type: string, required: false }
+      - { name: body, label: Full testimonial, type: rich-text }

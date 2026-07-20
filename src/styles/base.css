@@ -1,0 +1,167 @@
+/* Fonts, reset, base typography, links, and site-wide button styles.
+   Loaded first so page/chrome styles can override cleanly. */
+
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/Fraunces.woff2") format("woff2");
+  font-weight: 300 900;
+  font-display: block;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter.woff2") format("woff2");
+  font-weight: 200 700;
+  font-display: block;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: var(--bg);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+::-moz-selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+mark {
+  background: var(--select);
+  color: var(--bg);
+  padding: 0 0.15em;
+}
+
+body {
+  font-family: var(--font-body);
+  font-variant-numeric: slashed-zero;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: clip;
+}
+
+/* Inline links (no class) — underline flush with bg bottom, smooth hover */
+a:not([class]) {
+  color: inherit;
+  text-decoration: none;
+  box-shadow: inset 0 -1.25px 0 0 var(--text);
+  transition:
+    background-color 225ms ease,
+    color 225ms ease,
+    box-shadow 225ms ease;
+}
+a:not([class]):hover,
+a:not([class]):focus-visible {
+  background-color: var(--accent);
+  color: var(--bg);
+  box-shadow: inset 0 -1.25px 0 0 var(--accent);
+  outline: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Main content column */
+/* ── Main ───────────────────────────────────────── */
+
+main {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin-inline: auto;
+  /* padding-top removed — site-chrome is in-flow sticky */
+}
+
+/* Base heading */
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-optical-sizing: auto;
+  font-variation-settings:
+    "SOFT" 75,
+    "WONK" 1;
+}
+
+/* ── Shared CTA buttons (home + mobile menu) ── */
+/* ── CTA buttons (full site width, stacked) ─────── */
+
+.cta-actions {
+  width: var(--site-w);
+  margin-left: var(--site-ml);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: clamp(2rem, 7vw, 3rem);
+}
+
+.cta-primary {
+  display: block;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 1.1rem 1.5rem;
+  font-family: var(--font-body);
+  font-size: clamp(1.75rem, 2vw, 1.25rem);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  color: var(--bg);
+  background: var(--btn-light);
+  text-decoration: none;
+  border-radius: var(--hover-radius);
+  transition:
+    background-color 225ms ease,
+    color 225ms ease;
+}
+.cta-primary:hover,
+.cta-primary:focus-visible {
+  background: var(--accent);
+  color: var(--bg);
+  outline: none;
+}
+
+.cta-secondary {
+  display: block;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 1.1rem 1.5rem;
+  font-family: var(--font-body);
+  font-size: clamp(1.75rem, 2vw, 1.25rem);
+  letter-spacing: -0.04em;
+  font-weight: 400;
+  color: var(--text);
+  background: var(--muted);
+  text-decoration: none;
+  border-radius: var(--hover-radius);
+  transition:
+    background-color 225ms ease,
+    color 225ms ease;
+}
+.cta-secondary:hover,
+.cta-secondary:focus-visible {
+  background: var(--accent);
+  color: var(--bg);
+  outline: none;
+}

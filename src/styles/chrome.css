@@ -1,0 +1,708 @@
+/* Site chrome: the scrolling ticker, top nav, footer, and mobile menu.
+   Kept together because the scroll-behavior script coordinates these states. */
+
+/* ── Ticker + site chrome + nav ── */
+/* ── Ticker ─────────────────────────────────────── */
+
+/* ── Site chrome: static by default, scrolls with page ── */
+.site-chrome {
+  background: var(--bg);
+  z-index: 50;
+}
+/* Revealed state: fixed at top, slides in on scroll-up past threshold */
+.site-chrome.is-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  transform: translateY(-100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.site-chrome.is-fixed.is-revealed {
+  transform: translateY(0);
+}
+.site-chrome.no-transition {
+  transition: none !important;
+}
+/* Spacer holds layout height while chrome is position:fixed (out of flow).
+   Swap is net-zero: chrome exits flow (-nav-h) + spacer appears (+nav-h). */
+#chrome-spacer {
+  height: 0;
+}
+.site-chrome.is-fixed ~ #chrome-spacer {
+  height: var(--nav-h);
+}
+
+/* Static nav (join, about, faq, …): fixed at top, visible by default,
+   slides away on scroll-down and back on scroll-up.
+   Chrome spans full viewport (left:0/right:0) for bg bleed; .nav inside
+   uses its own width+margin-inline:auto — same centering path as page content. */
+.site-chrome.static-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  transform: translateY(0);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.site-chrome.static-nav.is-hidden {
+  transform: translateY(-100%);
+}
+.site-chrome.static-nav .ticker-bar {
+  display: none;
+}
+.site-chrome.static-nav ~ #chrome-spacer {
+  height: var(--nav-h);
+}
+
+/* Compact (at page top): ticker fills the left half, nav links flush right.
+   Uses width+margin-inline:auto (same mechanism as is-fixed ticker/nav and
+   content below) so all three share one centering path — no 100vw/scrollbar
+   mismatch that padding-inline would introduce. Background fills body behind it. */
+.site-chrome.compact {
+  display: flex;
+  align-items: stretch;
+  height: var(--nav-h);
+  background: var(--bg);
+  width: var(--site-w);
+  margin-inline: auto;
+}
+.site-chrome.compact .ticker-bar {
+  flex: 0 0 50%;
+  min-width: 0;
+  background: none;
+}
+.site-chrome.compact .ticker {
+  width: 100%;
+  margin: 0;
+  padding-left: 0;
+  border-bottom: none;
+  height: 100%;
+}
+.site-chrome.compact .nav {
+  flex: 0 0 50%;
+  height: var(--nav-h);
+  padding: 0;
+  justify-content: flex-end;
+  background: none;
+}
+.site-chrome.compact .nav-home {
+  display: none;
+}
+
+/* Full-bleed ticker wrapper (non-compact) */
+.ticker-bar {
+  width: 100%;
+  background: transparent;
+}
+
+.ticker {
+  width: var(--site-w);
+  margin-inline: auto;
+  height: var(--ticker-h);
+  display: flex;
+  align-items: center;
+}
+
+.ticker__viewport {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 1.926rem;
+}
+
+.ticker__track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums slashed-zero;
+  white-space: nowrap;
+  animation: ticker-rtl var(--ticker-duration) linear infinite;
+  animation-play-state: paused;
+}
+
+.ticker__segment {
+  flex-shrink: 0;
+  padding-right: clamp(2rem, 8vw, 6rem);
+}
+
+/* Continuous band: bg lives on the viewport (always fills full width) */
+.ticker__viewport {
+  background: var(--muted);
+  transition: background 0ms ease;
+  cursor: pointer;
+}
+.ticker__viewport:hover {
+  background: var(--accent);
+}
+.ticker__viewport:hover .ticker__link {
+  color: var(--bg);
+}
+.ticker__link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text);
+  padding: 0.447rem 0.75em;
+}
+
+.ticker.is-playing .ticker__track {
+  animation-play-state: running;
+}
+
+@keyframes ticker-rtl {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-1 * var(--seg-w, 0px)));
+  }
+}
+
+/* Control sits on the right, outside the scrolling area.
+   height = 1.926rem (= nav-link box) so it matches the ticker band in all states.
+   width = icon(1.926rem) + 2×gap(0.385rem) = 2.696rem so the gap to
+   the ticker band matches the original 30%-reduced target. */
+.ticker__toggle {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.696rem;
+  height: 1.926rem;
+  margin-left: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color 100ms ease;
+}
+.ticker__toggle:hover,
+.ticker__toggle:focus-visible {
+  color: var(--accent);
+}
+.ticker__toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  color: var(--accent);
+  outline-offset: 2px;
+  border-radius: 0;
+}
+
+/* On touch devices, accent is sticky after first interaction */
+@media (hover: none) and (pointer: coarse) {
+  .ticker__toggle.is-activated {
+    color: var(--accent);
+  }
+  .ticker__toggle.is-activated .ticker__icon--play path + path {
+    fill: var(--accent);
+  }
+  .ticker__toggle.is-activated .ticker__icon--pause path + path {
+    stroke: var(--accent);
+  }
+}
+
+/* Icon swap: show play-circle when paused, pause-circle when playing */
+.ticker__icon {
+  width: 1.926rem;
+  height: 1.926rem;
+}
+.ticker__icon--play path + path {
+  fill: var(--text);
+  transition: fill 225ms ease;
+}
+.ticker__icon--pause path + path {
+  stroke: var(--text);
+  stroke-width: 2.75;
+  transition: stroke 225ms ease;
+}
+.ticker__toggle:hover .ticker__icon--play path + path,
+.ticker__toggle:focus-visible .ticker__icon--play path + path {
+  fill: var(--accent);
+}
+.ticker__toggle:hover .ticker__icon--pause path + path,
+.ticker__toggle:focus-visible .ticker__icon--pause path + path {
+  stroke: var(--accent);
+}
+.ticker__icon--pause {
+  display: none;
+}
+.ticker.is-playing .ticker__icon--play {
+  display: none;
+}
+.ticker.is-playing .ticker__icon--pause {
+  display: block;
+}
+
+/* ── Nav ────────────────────────────────────────── */
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: var(--site-w);
+  margin-inline: auto;
+  padding: 0;
+  height: var(--nav-h);
+  background: transparent;
+}
+
+.nav-home {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text);
+  transition: color 225ms ease;
+}
+.nav-home:hover,
+.nav-home:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+
+.nav-wordmark {
+  font-size: 1.1rem;
+  font-weight: 300;
+  letter-spacing: 0.05rem;
+  margin-left: 0.6rem;
+}
+
+.site-logo {
+  height: 2.75rem;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.nav-divider {
+  display: block;
+  width: 1px;
+  height: 1.926rem;
+  background: var(--line);
+  flex-shrink: 0;
+  margin: 0 0.75rem;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  font-size: 1.1rem;
+  font-weight: 350;
+  letter-spacing: 0rem;
+  text-transform: uppercase;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: var(--hover-radius);
+  padding: 0.413rem 0.963rem;
+  transition:
+    background-color 225ms ease,
+    color 225ms ease;
+}
+.nav-link:hover,
+.nav-link:focus-visible {
+  background: var(--accent);
+  color: var(--bg);
+  outline: none;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  font-size: 1.1rem;
+  font-weight: 350;
+  letter-spacing: 0rem;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--btn-light);
+  text-decoration: none;
+  padding: 0.413rem 0.963rem;
+  margin-left: 0;
+  border-radius: 0;
+  transition: background-color 225ms ease;
+}
+.nav-btn:hover,
+.nav-btn:focus-visible {
+  background: var(--accent);
+  outline: none;
+}
+
+/* ── Footer ── */
+/* ── Footer ─────────────────────────────────────── */
+
+.site-footer {
+  border-top: 1.5px solid var(--line);
+  margin-top: auto;
+  padding-top: clamp(2rem, 5vw, 3rem);
+}
+
+.footer-grid {
+  width: var(--site-w);
+  margin-left: var(--site-ml);
+  padding-bottom: var(--edge);
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: clamp(1.5rem, 5vw, 3rem);
+  align-items: end;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-items: flex-start;
+}
+
+.footer-col a {
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text);
+  text-decoration: none;
+  box-shadow: none;
+  border-radius: var(--hover-radius);
+  padding: 0.5625rem 0.5rem;
+  transition:
+    background-color 225ms ease,
+    color 225ms ease;
+}
+.footer-col a:hover,
+.footer-col a:focus-visible {
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: none;
+  outline: none;
+}
+
+.footer-right {
+  font-size: 1rem;
+  font-weight: 200;
+  letter-spacing: 0em;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.625rem;
+}
+
+.footer-copyright {
+  /*font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--text);*/
+  /*opacity: 0.3;*/
+}
+
+@media (max-width: 600px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .footer-right {
+    text-align: left;
+    align-items: flex-start;
+  }
+}
+
+/* ── Mobile nav ── */
+/* ── Mobile nav ─────────────────────────────────── */
+
+.nav-menu-btn {
+  /* Sits in its own fixed layer above the mobile menu so it's always reachable */
+  display: none;
+  position: fixed;
+  top: 0;
+  right: calc((100vw - var(--site-w)) / 2);
+  height: var(--nav-h);
+  z-index: 400;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 0;
+  transition:
+    color 225ms ease,
+    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* JS sets this class to keep button in sync with chrome show/hide */
+.nav-menu-btn.is-nav-hidden {
+  transform: translateY(-100%);
+}
+/* State 2: G = (nav-h − 1.926rem) / 2 = 0.797rem (same gap in compact).
+   Ticker row = G + T = (nav-h + 1.926rem) / 2 ≈ 2.723rem.
+   Viewport at flex-end → sits at the bottom of the ticker row, so there
+   is exactly G of black above the band. Nav links center in their nav-h
+   row (G above/below). Result: three equal G gaps throughout the chrome. */
+.site-chrome.is-fixed .ticker {
+  height: calc((var(--nav-h) + 1.926rem) / 2);
+}
+.site-chrome.is-fixed .ticker__viewport {
+  align-self: flex-end;
+}
+.site-chrome.is-fixed .ticker__toggle {
+  align-self: flex-end;
+}
+.site-chrome.is-fixed ~ .nav-menu-btn {
+  top: calc((var(--nav-h) + 1.926rem) / 2);
+}
+.site-chrome.is-fixed ~ .nav-menu-btn.is-nav-hidden {
+  transform: translateY(-200%);
+}
+.nav-menu-btn:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+@media (hover: hover) {
+  .nav-menu-btn:hover {
+    color: var(--accent);
+    outline: none;
+  }
+}
+/* Morphing hamburger ↔ ✕ */
+.menu-icon {
+  position: relative;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+.menu-icon__bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: currentColor;
+  border-radius: 0px;
+  transform-origin: center;
+  transition:
+    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.menu-icon__bar--top {
+  top: 0.25rem;
+}
+.menu-icon__bar--btm {
+  bottom: 0.25rem;
+}
+.nav-menu-btn[aria-expanded="true"] .menu-icon__bar--top {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+.nav-menu-btn[aria-expanded="true"] .menu-icon__bar--btm {
+  bottom: 50%;
+  transform: translateY(50%) rotate(-45deg);
+}
+
+.mobile-menu {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--bg);
+  flex-direction: column;
+  visibility: hidden;
+}
+.mobile-menu.is-open {
+  visibility: visible;
+}
+
+/* Touch devices only: slide in/out from the right with a spring feel.
+   --menu-spring is a CSS linear() easing reproducing a *critically
+   damped* physics spring (stiffness 500, mass 1): quick, springy start
+   that eases in and stops exactly on target — no overshoot, no bounce
+   back and forth. This matches how Figma's Config menu is tuned.
+   Baseline-supported since 2023 (Chrome 113+, Safari 17.4+, FF 112+);
+   older engines fall back to a straight-line ease. No JS, no library. */
+@media (hover: none) and (pointer: coarse) {
+  .mobile-menu {
+    --menu-spring: linear(
+      0 0%,
+      0.095 6%,
+      0.276 11%,
+      0.458 17%,
+      0.611 22%,
+      0.728 28%,
+      0.814 33%,
+      0.875 39%,
+      0.917 44%,
+      0.946 50%,
+      0.964 56%,
+      0.977 61%,
+      0.985 67%,
+      0.991 72%,
+      0.994 78%,
+      0.996 83%,
+      0.998 89%,
+      1 100%
+    );
+    translate: 100%;
+    transition:
+      translate 0.44s var(--menu-spring),
+      visibility 0s 0.44s;
+  }
+  .mobile-menu.is-open {
+    translate: 0%;
+    transition:
+      translate 0.44s var(--menu-spring),
+      visibility 0s 0s;
+  }
+}
+
+/* Honor reduced-motion: skip the slide, just show/hide. */
+@media (hover: none) and (pointer: coarse) and (prefers-reduced-motion: reduce) {
+  .mobile-menu,
+  .mobile-menu.is-open {
+    transition: visibility 0s;
+  }
+}
+
+.mobile-menu-links {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.mobile-menu-link {
+  font-size: clamp(2.5rem, 10vw, 3.5rem);
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+  text-decoration: none;
+  line-height: 1.25;
+  padding: 0.25rem 1rem;
+  border-radius: var(--hover-radius);
+  transition:
+    background-color 225ms ease,
+    color 225ms ease;
+}
+.mobile-menu-link:hover,
+.mobile-menu-link:focus-visible {
+  background: var(--accent);
+  color: var(--bg);
+  outline: none;
+}
+
+.mobile-menu-ctas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+.mobile-menu-ctas .cta-primary {
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 1.5rem;
+  transition:
+    background-color 225ms ease,
+    color 225ms ease;
+}
+.mobile-menu-ctas .cta-primary:hover,
+.mobile-menu-ctas .cta-primary:focus-visible {
+  background: var(--btn-light);
+  color: var(--bg);
+  outline: none;
+}
+.mobile-menu-ctas .cta-secondary {
+  background: var(--muted);
+  color: var(--text);
+  font-size: 1.5rem;
+  transition:
+    background-color 225ms ease,
+    color 225ms ease;
+}
+.mobile-menu-ctas .cta-secondary:hover,
+.mobile-menu-ctas .cta-secondary:focus-visible {
+  background: var(--accent);
+  color: var(--bg);
+  outline: none;
+}
+
+@media (max-width: 1024px) {
+  .nav-wordmark {
+    display: none;
+  }
+  .nav-links {
+    display: none;
+  }
+
+  /* In compact mode the button is sticky (in-flow) so it participates in
+       iOS rubber-band bounce alongside the compact chrome. It overlaps the
+       chrome row via negative margin-top and aligns to the content column
+       right edge via align-self + margin-right. */
+  .nav-menu-btn {
+    display: flex;
+    position: static;
+    right: auto;
+    margin-top: calc(-1 * var(--nav-h));
+    align-self: flex-end;
+    margin-right: calc((100% - var(--site-w)) / 2);
+  }
+  /* Restore fixed when chrome is fixed — sticky no longer needed. */
+  .site-chrome.is-fixed ~ .nav-menu-btn,
+  .site-chrome.static-nav ~ .nav-menu-btn {
+    position: fixed;
+    right: calc((100vw - var(--site-w)) / 2);
+    margin-top: 0;
+  }
+
+  /* Ticker expands to fill; nav is a fixed-width spacer for the button. */
+  .site-chrome.compact .ticker-bar {
+    flex: 1;
+    min-width: 0;
+  }
+  .site-chrome.compact .nav {
+    flex: 0 0 2.75rem;
+  }
+}
+
+/* Touch devices: instant tap response + persistent highlight.
+   hover:none = no hover capability (finger); pointer:coarse = imprecise input.
+   Kills transitions so bg-color is immediate, then :focus keeps the accent
+   on the tapped element until navigation replaces the page. */
+@media (hover: none) and (pointer: coarse) {
+  a,
+  button {
+    transition: none !important;
+  }
+  /* Preserve the layout slide-in/out transition on the menu button
+       so it tracks the nav bar on scroll. Only colour transitions are killed. */
+  .nav-menu-btn {
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  .footer-col a:focus,
+  .nav-link:focus,
+  .nav-btn:focus,
+  .cta-primary:focus,
+  .cta-secondary:focus,
+  .mobile-menu-link:focus {
+    background-color: var(--accent);
+    color: var(--bg);
+    box-shadow: none;
+    outline: none;
+  }
+  a:not([class]):focus {
+    background-color: var(--accent);
+    color: var(--bg);
+    box-shadow: inset 0 -1.25px 0 0 var(--accent);
+    outline: none;
+  }
+}

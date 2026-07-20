@@ -1,0 +1,9 @@
+dist/
+.astro/
+package-lock.json
+public/fonts/
+*.woff2
+*.webp
+*.jpg
+*.png
+*.svg

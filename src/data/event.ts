@@ -37,7 +37,7 @@ export const CLEANUP_DATE = "2026-06-20";
 // The start and end times. Write them the friendly way, with "am" or "pm".
 //   Examples: "10:00am"   "9:30am"   "2pm"   "2:30pm"
 export const CLEANUP_START_TIME = "10:00am";
-export const CLEANUP_END_TIME   = "11:00am";
+export const CLEANUP_END_TIME = "11:00am";
 
 // The street corner where everyone meets. Write it the way you'd say it aloud.
 //   Example: "Clarkson Ave & Bedford Ave"
@@ -56,7 +56,6 @@ export const SUBSCRIBER_COUNT = 327;
 // How many volunteers have joined so far. A plain number, no quotes.
 export const VOLUNTEER_COUNT = 876;
 
-
 // ============================================================================
 //  Everything below is code that builds the site from the values above.
 //  Please don't edit it.
@@ -68,10 +67,10 @@ const TIME_ZONE = "America/New_York";
 
 /** The start and end as full timestamps, inferred from the date + times above. */
 const START_DATE = easternDate(CLEANUP_DATE, CLEANUP_START_TIME, "CLEANUP_START_TIME");
-const END_DATE   = easternDate(CLEANUP_DATE, CLEANUP_END_TIME,   "CLEANUP_END_TIME");
+const END_DATE = easternDate(CLEANUP_DATE, CLEANUP_END_TIME, "CLEANUP_END_TIME");
 
 /** Standard ISO timestamps other parts of the site read. */
-export const CLEANUP_ISO     = START_DATE.toISOString();
+export const CLEANUP_ISO = START_DATE.toISOString();
 export const CLEANUP_END_ISO = END_DATE.toISOString();
 
 /** The time as readers see it, e.g. "10–11am" — built from the start/end. */
@@ -86,13 +85,17 @@ export const CLEANUP_CALENDAR_URL = buildCalendarUrl();
 /** Read "2026-06-20" into its year, month, and day, or explain the mistake. */
 function parseDate(value: string) {
   const m = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!m) throw new Error(`CLEANUP_DATE is "${value}". Write it like "2026-07-18" (year-month-day).`);
+  if (!m)
+    throw new Error(`CLEANUP_DATE is "${value}". Write it like "2026-07-18" (year-month-day).`);
   return { year: +m[1], month: +m[2], day: +m[3] };
 }
 
 /** Read "10:00am" / "2pm" into 24-hour hour+minute, or explain the mistake. */
 function parseTime(value: string, field: string) {
-  const m = value.trim().toLowerCase().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/);
+  const m = value
+    .trim()
+    .toLowerCase()
+    .match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/);
   if (!m) throw new Error(`${field} is "${value}". Write it like "10:00am", "9:30am", or "2pm".`);
   let hour = +m[1];
   const minute = m[2] ? +m[2] : 0;
@@ -122,7 +125,14 @@ function easternDate(dateStr: string, timeStr: string, field: string) {
     second: "2-digit",
   }).formatToParts(guess);
   const get = (type: string) => +(shown.find((p) => p.type === type)?.value ?? "0");
-  const asUTC = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour") % 24, get("minute"), get("second"));
+  const asUTC = Date.UTC(
+    get("year"),
+    get("month") - 1,
+    get("day"),
+    get("hour") % 24,
+    get("minute"),
+    get("second"),
+  );
   return new Date(guess.getTime() * 2 - asUTC);
 }
 
