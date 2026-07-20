@@ -1,13 +1,17 @@
 import { getCollection } from "astro:content";
+import cycle from "../data/og-cycle.json";
 
 // Social share image (Open Graph / Twitter) for iMessage, WhatsApp, SMS, etc.
 //
-// Pick one testimonial at random. The selection happens once here at module
-// load, so every page in a single build features the same volunteer, and each
-// new build re-rolls which one. Base.astro renders the actual image from
-// `featured.image` with Astro's build-time Sharp pipeline.
+// The featured volunteer is chosen by a shuffle bag persisted in og-cycle.json
+// and advanced by scripts/rotate-og.mjs (see that file). Here we just read the
+// current pick; if the state is missing or stale (e.g. the volunteer was
+// removed), fall back to a random one so the build never breaks.
 const testimonials = await getCollection("testimonials");
-const pick = testimonials[Math.floor(Math.random() * testimonials.length)];
+
+const pick =
+  testimonials.find((t) => t.id === cycle.featured) ??
+  testimonials[Math.floor(Math.random() * testimonials.length)];
 
 export const featured = {
   image: pick.data.image,

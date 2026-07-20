@@ -1,0 +1,41 @@
+# Rotates the featured social-share volunteer by advancing the shuffle bag
+# (src/data/og-cycle.json) and committing it. The push triggers a Cloudflare
+# rebuild, which bakes the new image into the share tags. Runs daily and on
+# demand; does not trigger on push, so it never loops.
+name: Rotate share image
+
+on:
+  schedule:
+    - cron: "0 13 * * *" # ~9am ET daily
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rotate-og
+  cancel-in-progress: false
+
+jobs:
+  rotate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Advance the shuffle bag
+        run: node scripts/rotate-og.mjs
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet -- src/data/og-cycle.json; then
+            echo "Bag unchanged — nothing to push."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(og): rotate featured volunteer" -- src/data/og-cycle.json
+          git push

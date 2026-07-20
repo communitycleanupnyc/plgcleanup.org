@@ -1,6 +1,7 @@
 dist/
 .astro/
 package-lock.json
+src/data/og-cycle.json
 public/fonts/
 *.woff2
 *.webp
