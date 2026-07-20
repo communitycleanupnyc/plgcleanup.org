@@ -5,6 +5,21 @@ import "../styles/chrome.css";
 import SiteHeader from "../components/SiteHeader.astro";
 import MobileMenu from "../components/MobileMenu.astro";
 import SiteFooter from "../components/SiteFooter.astro";
+import { getImage } from "astro:assets";
+import { featured, OG_SIZE } from "../lib/og";
+
+// Render this build's randomly-featured testimonial into a high-res square share
+// image (Sharp, build-time), and resolve it to an absolute URL for the meta tags.
+const ogRendered = await getImage({
+  src: featured.image,
+  width: OG_SIZE,
+  height: OG_SIZE,
+  fit: "cover",
+  position: "attention",
+  format: "jpeg",
+  quality: 80,
+});
+const ogImageUrl = new URL(ogRendered.src, Astro.site).href;
 
 interface Props {
   title?: string;
@@ -33,10 +48,14 @@ const {
     <meta property="og:site_name" content="Community Cleanup PLG" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="https://plgcleanup.org/images/og.png" />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content={String(OG_SIZE)} />
+    <meta property="og:image:height" content={String(OG_SIZE)} />
+    <meta property="og:image:alt" content="A Community Cleanup PLG volunteer" />
     <meta property="og:url" content="https://plgcleanup.org" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://plgcleanup.org/images/og.png" />
+    <meta name="twitter:image" content={ogImageUrl} />
     <link rel="preload" href="/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/Fraunces.woff2" as="font" type="font/woff2" crossorigin />
   </head>
