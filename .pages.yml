@@ -1,7 +1,23 @@
-# Pages CMS (https://pagescms.org) — gives non-technical editors a form-based UI
-# backed by the Markdown files in src/content/. Everything stays plain Markdown +
-# git, so there is no lock-in. Event date/time/place live in src/data/event.ts and
-# are edited via GitHub's web editor (that file documents how).
+# Pages CMS (https://pagescms.org) — a form-based editing UI for non-technical
+# editors, backed by the plain Markdown in src/content/ and the event data in
+# src/data/event.json. Everything stays plain files + git, validated by Astro at
+# build time, so there is no lock-in.
+#
+# This config is a THIN ADAPTER over those files: another Astro-compatible CMS
+# (Decap, Sveltia) could replace Pages CMS by writing its own config against the
+# same files — no content migration. Keep it that way; don't let CMS-specific
+# shapes leak into the content.
+
+settings:
+  # Merge mode: when saving, preserve any keys already in a file that aren't
+  # modeled below, instead of rewriting the file from this schema alone. Cheap
+  # insurance against dropping a field a future edit adds here but not there.
+  content: true
+  commit:
+    create: "Add {filename} (via Pages CMS)"
+    update: "Update {filename} (via Pages CMS)"
+    delete: "Delete {filename} (via Pages CMS)"
+
 media:
   - name: testimonial-photos
     label: Testimonial photos
@@ -17,8 +33,8 @@ content:
     view:
       fields: [title, navMode]
     fields:
-      - { name: title, label: Browser title, type: string }
-      - { name: description, label: Social description, type: text }
+      - { name: title, label: Browser title, type: string, required: true }
+      - { name: description, label: Social description, type: text, required: true }
       - name: navMode
         label: Nav style
         type: select
@@ -31,14 +47,48 @@ content:
     label: Testimonials
     type: collection
     path: src/content/testimonials
+    filename: "{fields.name}.md"
     view:
       fields: [name, quote, order]
       sort: [order]
     fields:
-      - { name: name, label: Name, type: string }
-      - { name: quote, label: Pull quote, type: string }
-      - { name: alt, label: Photo alt text, type: string }
+      - { name: name, label: Name, type: string, required: true }
+      - { name: quote, label: Pull quote, type: string, required: true }
+      - { name: alt, label: Photo alt text, type: string, required: true }
       - { name: image, label: Photo, type: image, media: testimonial-photos }
       - { name: order, label: Display order, type: number }
-      - { name: focusPosition, label: Photo focus (e.g. 50% 30%), type: string, required: false }
+      - name: focusPosition
+        label: Photo focus (e.g. 50% 30%)
+        type: string
+        required: false
+        description: Optional. Which part of the photo to keep centered when cropped, e.g. "50% 30%".
       - { name: body, label: Full testimonial, type: rich-text }
+
+  - name: event
+    label: Event details
+    type: file
+    path: src/data/event.json
+    format: json
+    fields:
+      - name: date
+        label: Date (year-month-day)
+        type: string
+        description: "e.g. 2026-07-18"
+        pattern:
+          regex: "^\\d{4}-\\d{2}-\\d{2}$"
+          message: Write it like 2026-07-18 (year-month-day).
+      - {
+          name: startTime,
+          label: Start time,
+          type: string,
+          description: "e.g. 10:00am, 9:30am, 2pm",
+        }
+      - { name: endTime, label: End time, type: string, description: "e.g. 11:00am" }
+      - name: corner
+        label: Street corner
+        type: string
+        description: "e.g. Clarkson Ave & Bedford Ave"
+      - { name: title, label: Calendar event name, type: string }
+      - { name: details, label: Calendar note, type: text }
+      - { name: subscriberCount, label: Subscriber count, type: number }
+      - { name: volunteerCount, label: Volunteer count, type: number }

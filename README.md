@@ -16,16 +16,38 @@ Everything an organizer normally changes is plain text you can edit on GitHub (c
 click the ✏️ pencil, change the words, **Commit changes** — the site rebuilds itself). If an
 edit has a mistake, the build fails and nothing broken goes live.
 
-| To change…                                                       | Edit this                                                                                                                                                      |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The next cleanup's **date, time, place, counts**                 | `src/data/event.ts` — the top "EDIT THESE" block. That file explains exactly how, in plain English.                                                            |
-| **FAQ / About / Terms / Agreements / Schedule** page text        | The matching file in `src/content/pages/` (e.g. `faq.md`). Write normal Markdown.                                                                              |
-| **Testimonials** in the home-page carousel                       | One file per person in `src/content/testimonials/` (e.g. `jaan.md`): the top block holds their name, quote, and photo; the text below is the full testimonial. |
-| A testimonial **photo**                                          | Add the image to `src/assets/testimonials/` and point the person's `image:` at it.                                                                             |
-| **Site settings** (e.g. randomize the carousel order each build) | `src/config.ts` — flip a `true`/`false` toggle; each is documented in the file.                                                                                |
+| To change…                                                       | Edit this                                                                                                                                                                       |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The next cleanup's **date, time, place, counts**                 | In [Pages CMS](#pages-cms-form-based-editing), open **Event details** — or edit `src/data/event.json` directly. Bad dates/times fail the build with a message naming the field. |
+| **FAQ / About / Terms / Agreements / Schedule** page text        | The matching file in `src/content/pages/` (e.g. `faq.md`). Write normal Markdown.                                                                                               |
+| **Testimonials** in the home-page carousel                       | One file per person in `src/content/testimonials/` (e.g. `jaan.md`): the top block holds their name, quote, and photo; the text below is the full testimonial.                  |
+| A testimonial **photo**                                          | Add the image to `src/assets/testimonials/` and point the person's `image:` at it.                                                                                              |
+| **Site settings** (e.g. randomize the carousel order each build) | `src/config.ts` — flip a `true`/`false` toggle; each is documented in the file.                                                                                                 |
 
-Prefer a form-based editor? The repo is wired for [Pages CMS](https://pagescms.org) (see
-`.pages.yml`) — it edits the same Markdown files behind a friendly UI.
+Prefer a form-based editor? See Pages CMS below — it edits these same files behind a friendly UI.
+
+---
+
+## Pages CMS (form-based editing)
+
+[Pages CMS](https://pagescms.org) gives non-technical editors a form UI for the **testimonials**,
+the **prose pages**, and the **event details** — all backed by the same plain files git already
+tracks (`src/content/**` and `src/data/event.json`). It's configured in `.pages.yml`.
+
+**Activate it (one-time):**
+
+1. Sign in at [app.pagescms.org](https://app.pagescms.org) with GitHub.
+2. Install the Pages CMS **GitHub App**, and scope the install to **only this repository** — the
+   app requests broad permissions, so don't grant it your whole account.
+3. Open the repo in Pages CMS; it reads `.pages.yml` and shows the editing forms.
+
+Edits commit straight to `main` and Cloudflare Pages redeploys (see [Deployment & CI](#deployment--ci)).
+A bad edit fails the build, so the last good site stays live.
+
+**Not locked in.** `.pages.yml` is a thin adapter over the content — the files stay plain
+Markdown + JSON validated by Astro at build time. Swapping to another Astro-friendly CMS
+(e.g. [Decap](https://decapcms.org), [Sveltia](https://github.com/sveltia/sveltia-cms)) means
+writing that CMS's config against the same files; no content migration.
 
 ---
 
@@ -70,7 +92,8 @@ src/
     pages/*.md             ← FAQ, About, Terms, Agreements, Schedule (prose pages)
     testimonials/*.md       ← one per person, shown in the home carousel
   data/
-    event.ts               ← THE event: date/time/place + derived map & calendar links
+    event.json             ← the editable event facts (date/time/place/counts) — Pages CMS writes this
+    event.ts               ← reads event.json; derives map & calendar links, times, ISO stamps
     countdown.ts           ← "in 3 days / tomorrow / right now" state machine
   lib/
     lqip.ts                ← build-time blur-up image placeholders
@@ -105,9 +128,10 @@ or component; only genuinely shared styles are global (`src/styles/`).
 
 - **Content Collections** (`src/content.config.ts`) validate every page and testimonial at
   build time — a missing photo or malformed field fails the build instead of shipping broken.
-- **`event.ts`** is the single source of truth for the event. It parses the friendly date/time
-  you type, handles New York daylight saving, and builds the "Get directions" and
-  "Add to calendar" links. `countdown.ts` turns the event time into the live "in N days" copy.
+- **`event.ts`** is the single source of truth for the event. The editable facts live in
+  `event.json` (edited via Pages CMS); `event.ts` validates them, parses the friendly date/time,
+  handles New York daylight saving, and builds the "Get directions" and "Add to calendar" links.
+  `countdown.ts` turns the event time into the live "in N days" copy.
 - **Carousel** — Embla owns the scroll physics; a small state machine keeps exactly one slide
   highlighted ("last interaction wins"). Testimonial bodies are Markdown, rendered server-side.
 - **Site chrome** — `SiteHeader` and `MobileMenu` render as siblings so the general-sibling CSS
@@ -123,7 +147,19 @@ or component; only genuinely shared styles are global (`src/styles/`).
 ## Deployment & CI
 
 - **Cloudflare Pages**: build command `npm run build`, output dir `dist/`. Every push to `main`
-  deploys.
+  deploys. **Build cache is enabled** (project → Settings → Build → Build cache), which persists
+  `node_modules` between deploys. This skips reinstalling Sharp and — because Astro caches every
+  processed image in `node_modules/.astro` — only _changed_ photos are re-encoded. Adding one
+  testimonial re-processes one image instead of all of them, so steady-state builds stay a few
+  seconds rather than ~40. The source photos are 2000×3000, matching the largest variant we
+  generate, so they're already right-sized — don't downscale them or the retina output softens.
+- **Branch protection** (`main`): **block force pushes** and **block deletions** — the two things
+  git can't easily recover from — are on. We deliberately do **not** require pull requests or
+  reviews: Pages CMS and the GitHub web editor commit straight to `main`, and a review gate would
+  add friction for non-technical editors without adding real safety. The safety net is layered
+  instead: the content schema fails the build on a bad edit (so the last good site stays live),
+  every edit is a revertable commit, and Cloudflare Pages keeps a one-click deployment rollback in
+  its dashboard for the rare "that looks wrong, undo it now" moment.
 - **CI** (`.github/workflows/ci.yml`): on each push/PR, runs Prettier check, `astro check`, and
   `astro build` — a broken change can't merge.
 - **Git hooks** (`.githooks/`, zero-dependency, activated by `npm install` via the `prepare`

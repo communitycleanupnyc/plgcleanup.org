@@ -1,73 +1,76 @@
 // ============================================================================
-//  EVENT DETAILS — edit this file to change the cleanup date, time, and place
+//  EVENT DETAILS
 // ============================================================================
 //
-//  This file holds every fact about the next cleanup. Change a value in the
-//  "EDIT THESE" section below and the whole website updates — the on-screen
-//  time, the "Get directions" map link, and the "Add to calendar" link all
-//  rebuild themselves. You never edit a web link, a time zone, or a date code
-//  by hand.
+//  The facts about the next cleanup — date, time, place, and counts — live in
+//  src/data/event.json. Edit them the easy way in Pages CMS (the "Event details"
+//  form), or edit event.json directly on GitHub. Everything else on the site —
+//  the on-screen time, the "Get directions" map link, and the "Add to calendar"
+//  link — rebuilds itself from those values.
 //
-//  Everything happens in New York (Eastern) time. Daylight saving is handled
-//  for you — you never type a time zone.
+//  Times are New York (Eastern); daylight saving is handled for you. If a date
+//  or time is mistyped, the site refuses to build and names the field to fix, so
+//  a typo can never go live.
 //
-//  ── How to edit on GitHub (no software needed) ──────────────────────────────
-//    1. Click the pencil icon (top-right of this file) to start editing.
-//    2. Change ONLY the text inside the "quotes" or the number after the `=`.
-//    3. Keep every quote, comma, and semicolon exactly where it is.
-//    4. Scroll down, click "Commit changes", and write a short note like
-//       "Update cleanup to July 18". The site rebuilds on its own.
-//
-//    If you mistype a date or time, the site refuses to build and shows a
-//    message telling you which line to fix — so a typo can never go live.
-//
-//  ── The one rule ────────────────────────────────────────────────────────────
-//    Text sits inside "quotes". Numbers have no quotes. Match what you see.
-//      Right:  "10:00am"     Right:  327
-//      Wrong:  10:00am       Wrong:  "327"
-//
-// ============================================================================
-//  EDIT THESE
+//  Everything below is code that builds the site from those values — please
+//  don't edit it.
 // ============================================================================
 
-// The day of the cleanup, written year-month-day.
-//   Example: "2026-07-18"  means July 18, 2026.
-export const CLEANUP_DATE = "2026-06-20";
+import { z } from "astro/zod";
+import eventData from "./event.json";
 
-// The start and end times. Write them the friendly way, with "am" or "pm".
-//   Examples: "10:00am"   "9:30am"   "2pm"   "2:30pm"
-export const CLEANUP_START_TIME = "10:00am";
-export const CLEANUP_END_TIME = "11:00am";
+// Validate the editable values up front, so a missing or wrong-typed field fails
+// the build with a clear message naming the field — the same safety net the
+// content collections give the Markdown files.
+const filled = (field: string) => z.string().trim().min(1, `${field} must not be empty.`);
+const count = (field: string) =>
+  z
+    .number({ error: `${field} must be a plain number, e.g. 327 (no quotes).` })
+    .int()
+    .nonnegative();
 
-// The street corner where everyone meets. Write it the way you'd say it aloud.
-//   Example: "Clarkson Ave & Bedford Ave"
-export const CLEANUP_CORNER = "Clarkson Ave & Bedford Ave";
+const event = z
+  .object({
+    date: filled("The cleanup date"),
+    startTime: filled("The start time"),
+    endTime: filled("The end time"),
+    corner: filled("The street corner"),
+    title: filled("The calendar event name"),
+    details: filled("The calendar note"),
+    subscriberCount: count("The subscriber count"),
+    volunteerCount: count("The volunteer count"),
+  })
+  .parse(eventData);
 
-// The event name, as it appears in someone's calendar after they add it.
-export const CLEANUP_TITLE = "Community Cleanup PLG";
+/** The day of the cleanup, "YYYY-MM-DD". */
+export const CLEANUP_DATE = event.date;
 
-// The note that fills the calendar entry. One sentence or two.
-export const CLEANUP_DETAILS =
-  "No registration, all supplies included. Just show up! https://plgcleanup.org";
+/** The start and end times, written the friendly way ("10:00am", "2pm"). */
+export const CLEANUP_START_TIME = event.startTime;
+export const CLEANUP_END_TIME = event.endTime;
 
-// How many people subscribe to updates. A plain number, no quotes.
-export const SUBSCRIBER_COUNT = 327;
+/** The street corner where everyone meets. */
+export const CLEANUP_CORNER = event.corner;
 
-// How many volunteers have joined so far. A plain number, no quotes.
-export const VOLUNTEER_COUNT = 876;
+/** The event name, as it appears in someone's calendar. */
+export const CLEANUP_TITLE = event.title;
 
-// ============================================================================
-//  Everything below is code that builds the site from the values above.
-//  Please don't edit it.
-// ============================================================================
+/** The note that fills the calendar entry. */
+export const CLEANUP_DETAILS = event.details;
+
+/** How many people subscribe to updates. */
+export const SUBSCRIBER_COUNT = event.subscriberCount;
+
+/** How many volunteers have joined so far. */
+export const VOLUNTEER_COUNT = event.volunteerCount;
 
 // Every cleanup is in Brooklyn, in New York (Eastern) time.
 const CLEANUP_CITY = "Brooklyn, NY";
 const TIME_ZONE = "America/New_York";
 
 /** The start and end as full timestamps, inferred from the date + times above. */
-const START_DATE = easternDate(CLEANUP_DATE, CLEANUP_START_TIME, "CLEANUP_START_TIME");
-const END_DATE = easternDate(CLEANUP_DATE, CLEANUP_END_TIME, "CLEANUP_END_TIME");
+const START_DATE = easternDate(CLEANUP_DATE, CLEANUP_START_TIME, "The start time");
+const END_DATE = easternDate(CLEANUP_DATE, CLEANUP_END_TIME, "The end time");
 
 /** Standard ISO timestamps other parts of the site read. */
 export const CLEANUP_ISO = START_DATE.toISOString();
@@ -86,7 +89,7 @@ export const CLEANUP_CALENDAR_URL = buildCalendarUrl();
 function parseDate(value: string) {
   const m = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!m)
-    throw new Error(`CLEANUP_DATE is "${value}". Write it like "2026-07-18" (year-month-day).`);
+    throw new Error(`The cleanup date is "${value}". Write it like "2026-07-18" (year-month-day).`);
   return { year: +m[1], month: +m[2], day: +m[3] };
 }
 
