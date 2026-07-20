@@ -88,7 +88,18 @@ content:
         label: Street corner
         type: string
         description: "e.g. Clarkson Ave & Bedford Ave"
-      - { name: title, label: Calendar event name, type: string }
-      - { name: details, label: Calendar note, type: text }
-      - { name: subscriberCount, label: Subscriber count, type: number }
-      - { name: volunteerCount, label: Volunteer count, type: number }
+
+  - name: stats
+    label: Statistics
+    type: file
+    path: src/data/stats.json
+    format: json
+    fields:
+      - name: poundsCollected
+        label: Pounds collected
+        type: number
+        description: Total pounds of trash collected this year. Plain number, no commas (e.g. 2972.55).
+      - name: volunteerCount
+        label: Volunteer count
+        type: number
+        description: How many volunteers have joined so far.

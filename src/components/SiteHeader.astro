@@ -2,9 +2,10 @@
 interface Props {
   navMode?: "ticker" | "static";
 }
+import { POUNDS_COLLECTED_DISPLAY } from "../data/stats";
 const { navMode = "ticker" } = Astro.props;
 
-const TICKER_TEXT = "2,972.55 pounds and counting, this year alone! See which block is up next. →";
+const TICKER_TEXT = `${POUNDS_COLLECTED_DISPLAY} pounds and counting, this year alone! See which block is up next. →`;
 ---
 
 <div class={`site-chrome ${navMode === "ticker" ? "compact" : "static-nav"}`} id="site-chrome">

@@ -2,11 +2,11 @@
 //  EVENT DETAILS
 // ============================================================================
 //
-//  The facts about the next cleanup — date, time, place, and counts — live in
+//  The facts about the next cleanup — date, time, and place — live in
 //  src/data/event.json. Edit them the easy way in Pages CMS (the "Event details"
-//  form), or edit event.json directly on GitHub. Everything else on the site —
-//  the on-screen time, the "Get directions" map link, and the "Add to calendar"
-//  link — rebuilds itself from those values.
+//  form), or edit event.json directly on GitHub. The on-screen time and the
+//  "Get directions" map link rebuild themselves from those values.
+//  (Running totals like pounds collected and volunteers live in src/data/stats.ts.)
 //
 //  Times are New York (Eastern); daylight saving is handled for you. If a date
 //  or time is mistyped, the site refuses to build and names the field to fix, so
@@ -23,11 +23,6 @@ import eventData from "./event.json";
 // the build with a clear message naming the field — the same safety net the
 // content collections give the Markdown files.
 const filled = (field: string) => z.string().trim().min(1, `${field} must not be empty.`);
-const count = (field: string) =>
-  z
-    .number({ error: `${field} must be a plain number, e.g. 327 (no quotes).` })
-    .int()
-    .nonnegative();
 
 const event = z
   .object({
@@ -35,10 +30,6 @@ const event = z
     startTime: filled("The start time"),
     endTime: filled("The end time"),
     corner: filled("The street corner"),
-    title: filled("The calendar event name"),
-    details: filled("The calendar note"),
-    subscriberCount: count("The subscriber count"),
-    volunteerCount: count("The volunteer count"),
   })
   .parse(eventData);
 
@@ -51,18 +42,6 @@ export const CLEANUP_END_TIME = event.endTime;
 
 /** The street corner where everyone meets. */
 export const CLEANUP_CORNER = event.corner;
-
-/** The event name, as it appears in someone's calendar. */
-export const CLEANUP_TITLE = event.title;
-
-/** The note that fills the calendar entry. */
-export const CLEANUP_DETAILS = event.details;
-
-/** How many people subscribe to updates. */
-export const SUBSCRIBER_COUNT = event.subscriberCount;
-
-/** How many volunteers have joined so far. */
-export const VOLUNTEER_COUNT = event.volunteerCount;
 
 // Every cleanup is in Brooklyn, in New York (Eastern) time.
 const CLEANUP_CITY = "Brooklyn, NY";
@@ -81,9 +60,6 @@ export const CLEANUP_TIME = formatTimeRange(START_DATE, END_DATE);
 
 /** The "Get directions" link — built from the corner and city. */
 export const CLEANUP_MAPS_URL = buildMapsUrl(CLEANUP_CORNER, CLEANUP_CITY);
-
-/** The "Add to calendar" link — built from the date, place, and details. */
-export const CLEANUP_CALENDAR_URL = buildCalendarUrl();
 
 /** Read "2026-06-20" into its year, month, and day, or explain the mistake. */
 function parseDate(value: string) {
@@ -168,37 +144,6 @@ function formatTimeRange(start: Date, end: Date) {
 function buildMapsUrl(corner: string, city: string) {
   const query = encodeURIComponent(`${corner.replace(/ & /g, " and ")}, ${city}`);
   return `https://www.google.com/maps/search/?api=1&query=${query}`;
-}
-
-/** Stamp an instant as Google Calendar wants it: "YYYYMMDDThhmmss" in New York. */
-function etCalendarStamp(d: Date) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  }).formatToParts(d);
-  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
-  const hour = get("hour") === "24" ? "00" : get("hour"); // some engines return "24" at midnight
-  return `${get("year")}${get("month")}${get("day")}T${hour}${get("minute")}${get("second")}`;
-}
-
-/** Build the "Add to calendar" link from the values above. */
-function buildCalendarUrl() {
-  const dates = `${etCalendarStamp(START_DATE)}/${etCalendarStamp(END_DATE)}`;
-  const params = new URLSearchParams({
-    action: "TEMPLATE",
-    text: CLEANUP_TITLE,
-    ctz: TIME_ZONE,
-    location: `${CLEANUP_CORNER}, ${CLEANUP_CITY}`,
-    details: CLEANUP_DETAILS,
-  });
-  // Append dates unencoded so the "/" between start and end survives.
-  return `https://calendar.google.com/calendar/render?${params}&dates=${dates}`;
 }
 
 /** Parse a Date into year/month/day parts in America/New_York. */

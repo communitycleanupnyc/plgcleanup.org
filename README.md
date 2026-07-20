@@ -18,7 +18,8 @@ edit has a mistake, the build fails and nothing broken goes live.
 
 | To change…                                                       | Edit this                                                                                                                                                                       |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The next cleanup's **date, time, place, counts**                 | In [Pages CMS](#pages-cms-form-based-editing), open **Event details** — or edit `src/data/event.json` directly. Bad dates/times fail the build with a message naming the field. |
+| The next cleanup's **date, time, place**                         | In [Pages CMS](#pages-cms-form-based-editing), open **Event details** — or edit `src/data/event.json` directly. Bad dates/times fail the build with a message naming the field. |
+| **Statistics** (pounds collected, volunteer count)               | In [Pages CMS](#pages-cms-form-based-editing), open **Statistics** — or edit `src/data/stats.json` directly. Plain numbers, no commas.                                          |
 | **FAQ / About / Terms / Agreements / Schedule** page text        | The matching file in `src/content/pages/` (e.g. `faq.md`). Write normal Markdown.                                                                                               |
 | **Testimonials** in the home-page carousel                       | One file per person in `src/content/testimonials/` (e.g. `jaan.md`): the top block holds their name, quote, and photo; the text below is the full testimonial.                  |
 | A testimonial **photo**                                          | Add the image to `src/assets/testimonials/` and point the person's `image:` at it.                                                                                              |
@@ -31,8 +32,9 @@ Prefer a form-based editor? See Pages CMS below — it edits these same files be
 ## Pages CMS (form-based editing)
 
 [Pages CMS](https://pagescms.org) gives non-technical editors a form UI for the **testimonials**,
-the **prose pages**, and the **event details** — all backed by the same plain files git already
-tracks (`src/content/**` and `src/data/event.json`). It's configured in `.pages.yml`.
+the **prose pages**, the **event details**, and the **statistics** — all backed by the same plain
+files git already tracks (`src/content/**`, `src/data/event.json`, `src/data/stats.json`). It's
+configured in `.pages.yml`.
 
 **Activate it (one-time):**
 
@@ -92,8 +94,10 @@ src/
     pages/*.md             ← FAQ, About, Terms, Agreements, Schedule (prose pages)
     testimonials/*.md       ← one per person, shown in the home carousel
   data/
-    event.json             ← the editable event facts (date/time/place/counts) — Pages CMS writes this
-    event.ts               ← reads event.json; derives map & calendar links, times, ISO stamps
+    event.json             ← the editable event facts (date/time/place) — Pages CMS writes this
+    event.ts               ← reads event.json; derives the map link, times, ISO stamps
+    stats.json             ← editable running totals (pounds collected, volunteers) — Pages CMS writes this
+    stats.ts               ← reads stats.json; validates + formats the numbers for display
     countdown.ts           ← "in 3 days / tomorrow / right now" state machine
   lib/
     lqip.ts                ← build-time blur-up image placeholders
@@ -130,8 +134,9 @@ or component; only genuinely shared styles are global (`src/styles/`).
   build time — a missing photo or malformed field fails the build instead of shipping broken.
 - **`event.ts`** is the single source of truth for the event. The editable facts live in
   `event.json` (edited via Pages CMS); `event.ts` validates them, parses the friendly date/time,
-  handles New York daylight saving, and builds the "Get directions" and "Add to calendar" links.
-  `countdown.ts` turns the event time into the live "in N days" copy.
+  handles New York daylight saving, and builds the "Get directions" map link. `countdown.ts` turns
+  the event time into the live "in N days" copy. Running totals (pounds, volunteers) live in
+  `stats.ts` / `stats.json`.
 - **Carousel** — Embla owns the scroll physics; a small state machine keeps exactly one slide
   highlighted ("last interaction wins"). Testimonial bodies are Markdown, rendered server-side.
 - **Site chrome** — `SiteHeader` and `MobileMenu` render as siblings so the general-sibling CSS
