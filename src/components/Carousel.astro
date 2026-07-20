@@ -340,9 +340,19 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     color: inherit;
     transition: color 225ms ease;
   }
-  .card__caption:hover .card__name,
-  .card__caption:hover .card__quote,
-  .card__caption:hover .card__quote-more {
+  /* Hover only on hover-capable devices — on touch, :hover sticks after a tap, so the
+     name/quote/[…] would stay green while the panel is open. Touch gets :active, which
+     flashes during the press and clears the instant the finger lifts. */
+  @media (hover: hover) {
+    .card__caption:hover .card__name,
+    .card__caption:hover .card__quote,
+    .card__caption:hover .card__quote-more {
+      color: var(--accent);
+    }
+  }
+  .card__caption:active .card__name,
+  .card__caption:active .card__quote,
+  .card__caption:active .card__quote-more {
     color: var(--accent);
   }
 
@@ -361,13 +371,22 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     cursor: pointer;
     transition: color 225ms ease, opacity 225ms ease;
   }
-  /* Greens on direct hover/focus and when the whole caption is hovered. */
-  .card__toggle:hover,
+  /* Greens on keyboard focus, on hover (hover-capable devices only, so a tap doesn't
+     leave it stuck), and — via :active — a press flash on touch that clears on release. */
   .card__toggle:focus-visible,
-  .card__caption:hover .card__toggle {
+  .card__toggle:active,
+  .card__caption:active .card__toggle {
     opacity: 1;
     color: var(--accent);
     outline: none;
+  }
+  @media (hover: hover) {
+    .card__toggle:hover,
+    .card__caption:hover .card__toggle {
+      opacity: 1;
+      color: var(--accent);
+      outline: none;
+    }
   }
   .card__toggle-icon { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
   /* Negative angle → rotates down toward the inside of the carousel item (leftward),
