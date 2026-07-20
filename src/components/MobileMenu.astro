@@ -33,6 +33,17 @@
   const menuBtn = document.getElementById("nav-menu-btn") as HTMLButtonElement | null;
   const mobileMenu = document.getElementById("mobile-menu") as HTMLElement | null;
 
+  // Enable the slide transition only after load, so the menu's off-screen resting
+  // state is applied with no transition and never animates on load/refresh (a
+  // Firefox flash-of-open-menu). Tied to `load` rather than a rAF because Firefox
+  // resolves the pointer/hover media query a frame late, which a rAF raced.
+  // See .mobile-menu.is-ready in CSS.
+  if (mobileMenu) {
+    const enableSlide = () => mobileMenu.classList.add("is-ready");
+    if (document.readyState === "complete") enableSlide();
+    else window.addEventListener("load", enableSlide, { once: true });
+  }
+
   function openMobileMenu() {
     mobileMenu!.classList.add("is-open");
     menuBtn!.setAttribute("aria-expanded", "true");
