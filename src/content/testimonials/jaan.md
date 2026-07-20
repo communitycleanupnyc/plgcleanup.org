@@ -3,7 +3,7 @@ name: "Jaan"
 quote: "Trash club helped my mental health"
 alt: "help me"
 image: ../../assets/testimonials/jaan.jpg
-order: 2
+order: 3
 ---
 
 When I first moved here, I didn't know anyone and was experiencing depression. I forced myself to return week after week, and thanks to everyone being so open and welcoming I started to be invited to other social clubs (this neighborhood also has a walking club, film club, article club, knitting club, book clubs, and more - just ask at a cleanup!). Things slowly improved, even if I felt awkward at first and wasn't sure how to contribute or socialize - people were so welcoming.

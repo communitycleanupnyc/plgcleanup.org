@@ -10,6 +10,15 @@ import { getCountdown } from "../data/countdown";
 // The image() schema validates every photo at build time, so a missing or
 // misnamed image fails the build loudly — no hand-rolled checks needed.
 const entries = (await getCollection("testimonials")).sort((a, b) => a.data.order - b.data.order);
+
+// The schema can't see the Markdown body, so guard it here: a blank testimonial
+// would render an empty reveal panel. Fail the build loudly instead.
+for (const entry of entries) {
+  if (!entry.body?.trim()) {
+    throw new Error(`[testimonials] "${entry.id}.md" has an empty body. Add the testimonial text.`);
+  }
+}
+
 const items: CarouselItem[] = await Promise.all(
   entries.map(async (entry) => {
     const { Content } = await render(entry);

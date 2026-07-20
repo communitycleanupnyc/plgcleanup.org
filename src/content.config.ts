@@ -2,6 +2,10 @@ import { defineCollection } from "astro:content";
 import { z } from "astro/zod";
 import { glob } from "astro/loaders";
 
+// Non-empty, whitespace-trimmed string — so a blank CMS field fails the build
+// loudly instead of shipping empty text. The message names the offending field.
+const filled = (field: string) => z.string().trim().min(1, `${field} must not be empty`);
+
 // Prose pages (about, faq, terms, community-agreements, schedule). Each is a
 // Markdown file in src/content/pages/ — the filename is the URL (faq.md → /faq).
 // Non-technical editors change the heading/body in Markdown; the frontmatter
@@ -9,8 +13,8 @@ import { glob } from "astro/loaders";
 const pages = defineCollection({
   loader: glob({ pattern: "*.md", base: "./src/content/pages" }),
   schema: z.object({
-    title: z.string(),
-    description: z.string(),
+    title: filled("title"),
+    description: filled("description"),
     navMode: z.enum(["ticker", "static"]).default("static"),
   }),
 });
@@ -22,14 +26,14 @@ const testimonials = defineCollection({
   loader: glob({ pattern: "*.md", base: "./src/content/testimonials" }),
   schema: ({ image }) =>
     z.object({
-      name: z.string(),
-      quote: z.string(),
-      alt: z.string(),
+      name: filled("name"),
+      quote: filled("quote"),
+      alt: filled("alt"),
       // Optional CSS object-position for the cropped photo, e.g. "50% 30%".
-      focusPosition: z.string().optional(),
+      focusPosition: z.string().trim().min(1).optional(),
       image: image(),
       // Lower numbers sort first; the 2nd entry is the default carousel highlight.
-      order: z.number().default(100),
+      order: z.number().int().nonnegative().default(100),
     }),
 });
 

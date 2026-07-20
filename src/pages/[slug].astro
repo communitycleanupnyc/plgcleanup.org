@@ -15,6 +15,11 @@ export async function getStaticPaths() {
 }
 
 const { page } = Astro.props;
+// Guard the Markdown body (not covered by the frontmatter schema): a blank page
+// would render just a title. Fail the build loudly instead.
+if (!page.body?.trim()) {
+  throw new Error(`[pages] "${page.id}.md" has an empty body. Add the page content.`);
+}
 const { Content } = await render(page);
 ---
 
