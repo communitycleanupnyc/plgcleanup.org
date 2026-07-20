@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import type { CarouselProps } from './carousel.types';
+import { lqip } from '../lib/lqip';
 
 const {
   items,
@@ -45,6 +46,10 @@ function renderInfo(img: ImageMetadata) {
   if (widths.length === 0) widths = [img.width];
   return { sizes, widths };
 }
+
+// Blur-up placeholders (Next.js/Figma technique), generated once at build time.
+// Parallel to `items`; an empty string means "no placeholder for this image".
+const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
 ---
 
 {N > 0 && (
@@ -75,6 +80,15 @@ function renderInfo(img: ImageMetadata) {
       <ul class="embla__container" role="list">
         {items.map((item, index) => {
           const info = renderInfo(item.img);
+          const blur = placeholders[index];
+          // Blur-up: paint the LQIP as the img's own background under a cover fit,
+          // matching object-position so a cropped (square) photo lines up. The
+          // decoded photo paints over it; `color:transparent` hides the alt text
+          // while it loads. Cleared on load by the script below.
+          const blurStyle = blur
+            ? `color:transparent;background-image:url("${blur}");background-size:cover;` +
+              `background-position:${item.focusPosition ?? '50% 50%'};background-repeat:no-repeat`
+            : undefined;
           return (
             <li
               class="embla__slide card"
@@ -92,6 +106,8 @@ function renderInfo(img: ImageMetadata) {
                   loading={index === 0 ? 'eager' : 'lazy'}
                   decoding="async"
                   layout="none"
+                  data-blur-up
+                  style={blurStyle}
                 />
                 {enablePopup && item.body && (
                   <div class="card__panel" hidden>
@@ -212,17 +228,20 @@ function renderInfo(img: ImageMetadata) {
 
   .embla__container {
     display: flex;
-    gap: 0.15rem;
     align-items: flex-start;
     touch-action: pan-y pinch-zoom;
   }
 
+  /* Slide spacing lives on the slide (margin), not the container (gap): Embla's loop
+     measures each slide's box, so a per-slide margin keeps the wrap-around seam gap
+     identical to every other gap — flex `gap` leaves no gap at the loop seam. */
   .embla__slide {
     flex: 0 0 auto;
     position: relative;
     display: flex;
     flex-direction: column;
     user-select: none;
+    margin-right: 0.15rem;
   }
 
   /* ── Media box ─────────────────────────────────── */
@@ -230,16 +249,26 @@ function renderInfo(img: ImageMetadata) {
     position: relative;
     overflow: hidden;
   }
-  /* Resting state: B&W. Transition to full color on hover/active. */
+  /* Resting: grayscale + slightly dimmed. The active slide (exactly one at a time,
+     driven by JS via .is-active) goes full colour + full opacity. The opacity shift
+     means an image that is *already* black-and-white still visibly "highlights" —
+     no per-image colour detection needed. Highlight is applied ONLY through
+     .is-active (no CSS :hover), which is what guarantees a single highlight. */
   .card__media img {
     display: block;
     filter: grayscale(1);
-    transition: filter 225ms cubic-bezier(.6, 0, .4, 1);
+    opacity: 0.7;
+    /* --hl-dur is set per interaction in JS: 0ms for taps / advance-swipes / pressing
+       the next image, a smooth crossfade for hover, back-swipes and (extra-smooth) the
+       arrow buttons. Defaults to a smooth 225ms. */
+    transition:
+      filter var(--hl-dur, 225ms) cubic-bezier(.6, 0, .4, 1),
+      opacity var(--hl-dur, 225ms) cubic-bezier(.6, 0, .4, 1);
   }
-  /* Full color: hover (pure CSS, no JS) + keyboard focus + committed active card */
-  .embla__slide:hover .card__media img,
-  .embla__slide:focus-within .card__media img,
-  .embla__slide.is-active .card__media img { filter: grayscale(0); }
+  .embla__slide.is-active .card__media img {
+    filter: grayscale(0);
+    opacity: 1;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .card__media img,
@@ -428,6 +457,16 @@ function renderInfo(img: ImageMetadata) {
 <script>
   import EmblaCarousel from 'embla-carousel';
 
+  // ── Blur-up cleanup ─────────────────────────────
+  // Once a photo has painted, drop its LQIP background so the placeholder bytes
+  // are freed. Progressive enhancement: opaque cover photos already occlude the
+  // blur, so the effect works with JS disabled — this just tidies up after.
+  document.querySelectorAll<HTMLImageElement>('img[data-blur-up]').forEach((img) => {
+    const clear = () => { img.style.backgroundImage = 'none'; };
+    if (img.complete && img.naturalWidth > 0) clear();
+    else img.addEventListener('load', clear, { once: true });
+  });
+
   document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((section) => {
     const enablePopup = section.dataset.enablePopup === 'true';
 
@@ -457,33 +496,95 @@ function renderInfo(img: ImageMetadata) {
     embla.on('pointerUp',   () => viewport.classList.remove('is-dragging'));
 
     // ── Highlight model ─────────────────────────────
-    // -1 = no card colored at load; color appears on first hover (CSS) or navigation (.is-active).
-    // Desktop hover is handled by pure CSS :hover — no JS tracking needed.
-    let committedIndex = -1;
+    // Exactly one slide is highlighted at a time (or none at load). A single sticky
+    // index, "last interaction wins":
+    //   • desktop hover / keyboard focus → that slide (stays put after the mouse
+    //     leaves, until another slide is hovered);
+    //   • arrow button → the slide it lands on;
+    //   • mobile swipe → the settled slide.
+    // A desktop drag leaves it alone (so it never jumps to the first card). Applied
+    // ONLY here via `.is-active` (no CSS :hover), which enforces the single highlight.
+    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    let activeIndex = -1;   // -1 = nothing highlighted (the load state)
+    let arrowNav = false;   // true only while an arrow-button move is settling
+    let swipeDir = 0;       // +1 = images scrolled left (advance), -1 = scrolled right (back)
 
-    function applyActive() {
-      slides.forEach((s, i) => s.classList.toggle('is-active', i === committedIndex));
+    function setActive(i: number) {
+      activeIndex = i;
+      slides.forEach((s, idx) => s.classList.toggle('is-active', idx === activeIndex));
+    }
+    setActive(-1);
+
+    // Mobile highlight speed (desktop keeps its fixed 225ms in CSS): advancing — images
+    // scrolled LEFT — snaps in instantly; going back — scrolled RIGHT — fades smoothly.
+    // --hl-dur feeds the touch `transition-duration` in the stylesheet.
+    function setHighlightSpeed() {
+      section.style.setProperty('--hl-dur', swipeDir > 0 ? '0ms' : '225ms');
     }
 
-    applyActive();
+    // Physical swipe direction that feeds setHighlightSpeed().
+    let downX = 0;
+    viewport.addEventListener('pointerdown', (e: PointerEvent) => {
+      downX = e.clientX;
+      // Touch advance: the instant a finger lands on an image to the RIGHT of the
+      // currently highlighted one (the gesture that scrolls images left), move the
+      // highlight onto it immediately — don't wait for the swipe to settle. Pressing
+      // the current/left image (a back-swipe) is left to settle smoothly on `select`.
+      if (e.pointerType !== 'touch') return;
+      const slide = (e.target as HTMLElement).closest<HTMLElement>('.embla__slide');
+      if (!slide) return;
+      const cur = activeIndex >= 0 ? slides[activeIndex] : null;
+      if (!cur || slide.getBoundingClientRect().left > cur.getBoundingClientRect().left + 1) {
+        section.style.setProperty('--hl-dur', '0ms');
+        setActive(parseInt(slide.dataset.index ?? '-1', 10));
+      }
+    }, { passive: true });
+    viewport.addEventListener('pointermove', (e: PointerEvent) => {
+      const dx = e.clientX - downX;
+      if (Math.abs(dx) > 2) { swipeDir = dx < 0 ? 1 : -1; downX = e.clientX; }
+    }, { passive: true });
+
+    // Desktop hover / keyboard focus set the sticky highlight. Gated to the mouse
+    // pointer and non-touch so a tap never sets a stuck highlight on touch devices.
+    slides.forEach((slide, i) => {
+      slide.addEventListener('pointerenter', (e: PointerEvent) => {
+        if (e.pointerType !== 'mouse') return;
+        section.style.setProperty('--hl-dur', '225ms');   // hover is always a smooth crossfade
+        setActive(i);
+      });
+      if (!isTouch) slide.addEventListener('focusin', () => setActive(i));
+    });
 
     // ── Counter ─────────────────────────────────────
     function updateCounter() {
       if (counter) counter.textContent = `${embla.selectedScrollSnap() + 1} of ${N}`;
     }
 
-    // After user navigates, committed follows Embla's snap
     embla.on('select', () => {
-      committedIndex = embla.selectedScrollSnap();
-      applyActive();
       updateCounter();
+      const idx = embla.selectedScrollSnap();
+      if (arrowNav) {
+        // Desktop: an extra-smooth crossfade. Mobile: match the swipe feel (advance
+        // instant, back smooth) — a long crossfade there leaves the old highlight
+        // lingering during the fade, which reads as a stuck/double highlight.
+        if (isTouch) setHighlightSpeed();
+        else section.style.setProperty('--hl-dur', '350ms');
+        setActive(idx);
+        arrowNav = false;
+      } else if (isTouch) {
+        setHighlightSpeed();                              // swipe: advance instant, back smooth
+        setActive(idx);
+      }
+      // desktop drag: leave the sticky highlight where it is
     });
     embla.on('reInit', updateCounter);
     updateCounter();
 
     // ── Arrow buttons ────────────────────────────────
-    section.querySelector('[data-dir=prev]')?.addEventListener('click', () => embla.scrollPrev());
-    section.querySelector('[data-dir=next]')?.addEventListener('click', () => embla.scrollNext());
+    // Flag the move as arrow-driven (so `select` commits its highlight) and record the
+    // direction: next = advance (instant), prev = back (smooth).
+    section.querySelector('[data-dir=prev]')?.addEventListener('click', () => { arrowNav = true; swipeDir = -1; embla.scrollPrev(); });
+    section.querySelector('[data-dir=next]')?.addEventListener('click', () => { arrowNav = true; swipeDir = 1; embla.scrollNext(); });
 
     // ── Testimonial panel ────────────────────────────
     if (!enablePopup) return;
@@ -512,9 +613,8 @@ function renderInfo(img: ImageMetadata) {
       slide.classList.add('is-panel-open');
       slide.querySelector('.card__toggle')?.setAttribute('aria-expanded', 'true');
 
-      // Keep the source card visually "committed" (colored) while its panel is open
-      committedIndex = parseInt(slide.dataset.index ?? '-1', 10);
-      applyActive();
+      // Highlight the source card while its panel is open
+      setActive(parseInt(slide.dataset.index ?? '-1', 10));
     }
 
     function closePanel(slide: HTMLElement) {
@@ -551,6 +651,18 @@ function renderInfo(img: ImageMetadata) {
         if (slide) {
           closePanel(slide);
           slide.querySelector<HTMLElement>('.card__toggle')?.focus();
+        }
+        return;
+      }
+
+      // A plain tap on the image highlights that slide — on touch there's no hover to
+      // do it. (Suppressed after a drag by Embla, so only genuine taps get here.)
+      const media = target.closest<HTMLElement>('.card__media');
+      if (media && !target.closest('.card__panel')) {
+        const slide = media.closest<HTMLElement>('.embla__slide');
+        if (slide) {
+          section.style.setProperty('--hl-dur', '0ms');  // a direct tap highlights instantly
+          setActive(parseInt(slide.dataset.index ?? '-1', 10));
         }
       }
     });
