@@ -210,7 +210,17 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     cursor: pointer;
     transition: background-color 225ms ease, color 225ms ease;
   }
-  .carousel-arrow:hover,
+  /* Hover only on hover-capable devices — on touch, :hover sticks after a tap,
+     leaving the arrow green until you tap elsewhere. Touch gets :active instead,
+     which flashes during the press and clears the instant the finger lifts. */
+  @media (hover: hover) {
+    .carousel-arrow:hover {
+      background: var(--accent);
+      color: var(--bg);
+      outline: none;
+    }
+  }
+  .carousel-arrow:active,
   .carousel-arrow:focus-visible {
     background: var(--accent);
     color: var(--bg);

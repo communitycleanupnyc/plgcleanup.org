@@ -36,8 +36,8 @@ export const testimonials: TestimonialData[] = [
 
     In short, there's a reason this trash club is listed on <a href="https://www.socialfabric.nyc/">Social Fabric NYC</a> as a 'portal' of sorts through which you can become connected to other communities. It is about deep hanging out, doing the very human thing of futile goal directed activity, virtue signaling to ourselves and neighbors - which can create long term change in society, and indeed having fun and making meaning along the way through the connections we form. Recommended, would 100% be trashy again in every timeline. These are the kinds of people you want to get uploaded with.`, alt: "help me"
   },
-  { file: "albert.jpg", name: "Albert …", quote: "…", body: "…", alt: "…" },
-  { file: "chelsie.jpg", name: "Albert …", quote: "…", body: "…", alt: "…" },
+  { file: "albert.jpg", name: "xyz …", quote: "…", body: "…", alt: "…" },
+  { file: "chelsie.jpg", name: "xyz …", quote: "…", body: "…", alt: "…" },
   { file: "crosby.jpg", name: "xyz", quote: "...", body: "...", alt: "..." },
   { file: "eddie.jpg", name: "xyz", quote: "...", body: "...", alt: "..." },
   { file: "elana.jpg", name: "xyz", quote: "...", body: "...", alt: "..." },
@@ -45,7 +45,7 @@ export const testimonials: TestimonialData[] = [
   { file: "isaiah.jpg", name: "xyz", quote: "...", body: "...", alt: "..." },
   { file: "jess.jpg", name: "xyz", quote: "...", body: "...", alt: "..." },
   { file: "kevin.jpg", name: "xyz", quote: "...", body: "...", alt: "..." },
-  { file: "mariana.jpg", name: "xyz", quote: "...", body: "...", alt: "..." },
+  { file: "marianna.jpg", name: "xyz", quote: "...", body: "...", alt: "..." },
   { file: "megan.jpg", name: "xyz", quote: "...", body: "...", alt: "..." },
   { file: "michelle.jpg", name: "xyz", quote: "...", body: "...", alt: "..." },
   { file: "molly.jpg", name: "xyz", quote: "...", body: "...", alt: "..." },
