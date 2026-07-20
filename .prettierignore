@@ -1,6 +1,11 @@
 dist/
 .astro/
 package-lock.json
+
+# Content collections are authored by non-technical editors (GitHub web editor /
+# Pages CMS). Don't format-check their Markdown — a deploy must never fail over
+# content whitespace. Astro validates these files' frontmatter at build instead.
+src/content/
 public/fonts/
 *.woff2
 *.webp
