@@ -1,5 +1,5 @@
 ---
-name: "xyz"
+name: "Michelle"
 quote: "Meet the friendlist neighbors!"
 alt: "..."
 image: ../../assets/testimonials/michelle.jpg
