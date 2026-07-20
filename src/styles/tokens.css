@@ -1,0 +1,27 @@
+/* Design tokens — the single place to change colors, spacing, fonts, and the
+   content-column width. Referenced with var(--…) throughout the site. */
+:root {
+  --bg: #000;
+  --text: #e2e2e2;
+  --muted: #292929;
+  --line: #3d3d3d;
+  --brand: #63c9ea;
+  --accent: #24cb71;
+  --select: #eeb408;
+
+  --edge: clamp(1.25rem, 5vw, 3rem);
+  --ticker-bg: rgba(255, 255, 255, 0.75);
+  --ticker-h: 3.3rem;
+  --nav-h: 3.52rem;
+  --btn-light: var(--text);
+  --hover-radius: 0;
+  --ticker-duration: 12s;
+
+  /* Content column: width + derived left-offset for the 95→90vw breakout */
+  --site-w: 94vw;
+  --site-ml: calc(50% - var(--site-w) / 2);
+
+  /* Typefaces — change here to switch fonts site-wide */
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+}

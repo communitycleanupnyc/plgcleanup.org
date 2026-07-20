@@ -1,12 +1,12 @@
 ---
-import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
-import type { CarouselProps } from './carousel.types';
-import { lqip } from '../lib/lqip';
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import type { CarouselProps } from "./carousel.types";
+import { lqip } from "../lib/lqip";
 
 const {
   items,
-  variant = 'natural',
+  variant = "natural",
   grayscale = false,
   enablePopup = true,
   heading,
@@ -18,31 +18,13 @@ const headingId = `ch-${Math.random().toString(36).slice(2, 9)}`;
 
 const DENSITIES = [1, 2, 3];
 
-// Testimonial bodies are trusted, first-party text. Authors write prose with real
-// line breaks — a blank line starts a new paragraph, a single newline is a line
-// break — plus optional inline <a href="…">…</a> links. This renders that to HTML:
-// paragraphs from blank lines, <br> from single newlines, and every link made to
-// open safely in a new tab (so target/rel never have to be repeated in the data).
-function formatBody(raw: string): string {
-  const html = raw
-    .replace(/\r\n?/g, '\n')
-    .trim()
-    .split(/\n[ \t]*\n+/)                                        // blank line → paragraph
-    .map((block) => `<p>${block.split('\n').map((l) => l.trim()).join('<br>')}</p>`)  // newline → <br>
-    .join('');
-  return html.replace(                                           // links open in a new tab
-    /<a\b(?![^>]*\btarget=)/gi,
-    '<a target="_blank" rel="noopener noreferrer"',
-  );
-}
-
 function renderInfo(img: ImageMetadata) {
   const ar = img.width / img.height;
-  const wMobile  = Math.round(variant === 'square' ? sizePx.mobile  : sizePx.mobile  * ar);
-  const wDesktop = Math.round(variant === 'square' ? sizePx.desktop : sizePx.desktop * ar);
+  const wMobile = Math.round(variant === "square" ? sizePx.mobile : sizePx.mobile * ar);
+  const wDesktop = Math.round(variant === "square" ? sizePx.desktop : sizePx.desktop * ar);
   const sizes = `(max-width: 599px) ${wMobile}px, ${wDesktop}px`;
   const maxRendered = Math.max(wMobile, wDesktop);
-  let widths = DENSITIES.map(d => Math.round(maxRendered * d)).filter(w => w <= img.width);
+  let widths = DENSITIES.map((d) => Math.round(maxRendered * d)).filter((w) => w <= img.width);
   if (widths.length === 0) widths = [img.width];
   return { sizes, widths };
 }
@@ -52,100 +34,161 @@ function renderInfo(img: ImageMetadata) {
 const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
 ---
 
-{N > 0 && (
-<section
-  class="carousel-section"
-  aria-labelledby={headingId}
-  data-carousel
-  data-variant={variant}
-  data-grayscale={String(grayscale)}
-  data-enable-popup={String(enablePopup)}
-  style={`--size-d:${sizePx.desktop}px; --size-m:${sizePx.mobile}px`}
->
-  <header class="carousel-header">
-    {heading && <h2 id={headingId} class="carousel-heading">{heading}</h2>}
-    <p class="carousel-counter" aria-live="polite"></p>
-    <div class="carousel-controls">
-      <button class="carousel-arrow" data-dir="prev" aria-label="Previous">
-        <svg xmlns="http://www.w3.org/2000/svg" width="34" height="24" fill="none" viewBox="0 0 34 24"><path fill="currentColor" fill-rule="evenodd" d="M11.478 19.75 4 12l7.478-7.75.733.709-6.302 6.53H30v1.021H5.91l6.301 6.531z" clip-rule="evenodd"/></svg>
-      </button>
-      <button class="carousel-arrow" data-dir="next" aria-label="Next">
-        <svg xmlns="http://www.w3.org/2000/svg" width="34" height="24" fill="none" viewBox="0 0 34 24"><path fill="currentColor" fill-rule="evenodd" d="M22.522 4.25 30 12l-7.478 7.75-.733-.709 6.302-6.53H4V11.49h24.09L21.79 4.959z" clip-rule="evenodd"/></svg>
-      </button>
-    </div>
-  </header>
-
-  <div class="embla">
-    <div class="embla__viewport">
-      <ul class="embla__container" role="list">
-        {items.map((item, index) => {
-          const info = renderInfo(item.img);
-          const blur = placeholders[index];
-          // Blur-up: paint the LQIP as the img's own background under a cover fit,
-          // matching object-position so a cropped (square) photo lines up. The
-          // decoded photo paints over it; `color:transparent` hides the alt text
-          // while it loads. Cleared on load by the script below.
-          const blurStyle = blur
-            ? `color:transparent;background-image:url("${blur}");background-size:cover;` +
-              `background-position:${item.focusPosition ?? '50% 50%'};background-repeat:no-repeat`
-            : undefined;
-          return (
-            <li
-              class="embla__slide card"
-              data-index={index}
-              style={item.focusPosition ? `--pos:${item.focusPosition}` : undefined}
+{
+  N > 0 && (
+    <section
+      class="carousel-section"
+      aria-labelledby={headingId}
+      data-carousel
+      data-variant={variant}
+      data-grayscale={String(grayscale)}
+      data-enable-popup={String(enablePopup)}
+      style={`--size-d:${sizePx.desktop}px; --size-m:${sizePx.mobile}px`}
+    >
+      <header class="carousel-header">
+        {heading && (
+          <h2 id={headingId} class="carousel-heading">
+            {heading}
+          </h2>
+        )}
+        <p class="carousel-counter" aria-live="polite" />
+        <div class="carousel-controls">
+          <button class="carousel-arrow" data-dir="prev" aria-label="Previous">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="34"
+              height="24"
+              fill="none"
+              viewBox="0 0 34 24"
             >
-              <div class="card__media">
-                <Image
-                  src={item.img}
-                  alt={item.alt}
-                  widths={info.widths}
-                  sizes={info.sizes}
-                  format="webp"
-                  quality={75}
-                  loading={index === 0 ? 'eager' : 'lazy'}
-                  decoding="async"
-                  layout="none"
-                  data-blur-up
-                  style={blurStyle}
-                />
-                {enablePopup && item.body && (
-                  <div class="card__panel" hidden>
-                    <button class="card__panel-close" aria-label="Close testimonial">
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                        <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                      </svg>
-                    </button>
-                    <div class="card__panel-body" set:html={formatBody(item.body)} />
-                  </div>
-                )}
-              </div>
-              <div class="card__caption">
-                <div class="card__caption-text">
-                  <p class="card__name">{item.name}</p>
-                  <p class="card__quote">“{item.quote}{enablePopup && item.body && <span class="card__quote-more"> […]</span>}”</p>
-                </div>
-                {enablePopup && item.body && (
-                  <button
-                    class="card__toggle"
-                    aria-expanded="false"
-                    aria-label={`Read ${item.name}'s testimonial`}
-                  >
-                    <svg class="card__toggle-icon" width="20" height="20" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                      <path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter"/>
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  </div>
+              <path
+                fill="currentColor"
+                fill-rule="evenodd"
+                d="M11.478 19.75 4 12l7.478-7.75.733.709-6.302 6.53H30v1.021H5.91l6.301 6.531z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+          <button class="carousel-arrow" data-dir="next" aria-label="Next">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="34"
+              height="24"
+              fill="none"
+              viewBox="0 0 34 24"
+            >
+              <path
+                fill="currentColor"
+                fill-rule="evenodd"
+                d="M22.522 4.25 30 12l-7.478 7.75-.733-.709 6.302-6.53H4V11.49h24.09L21.79 4.959z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
 
-</section>
-)}
+      <div class="embla">
+        <div class="embla__viewport">
+          <ul class="embla__container" role="list">
+            {items.map((item, index) => {
+              const info = renderInfo(item.img);
+              const blur = placeholders[index];
+              const Body = item.Body;
+              // Blur-up: paint the LQIP as the img's own background under a cover fit,
+              // matching object-position so a cropped (square) photo lines up. The
+              // decoded photo paints over it; `color:transparent` hides the alt text
+              // while it loads. Cleared on load by the script below.
+              const blurStyle = blur
+                ? `color:transparent;background-image:url("${blur}");background-size:cover;` +
+                  `background-position:${item.focusPosition ?? "50% 50%"};background-repeat:no-repeat`
+                : undefined;
+              return (
+                <li
+                  class="embla__slide card"
+                  data-index={index}
+                  style={item.focusPosition ? `--pos:${item.focusPosition}` : undefined}
+                >
+                  <div class="card__media">
+                    <Image
+                      src={item.img}
+                      alt={item.alt}
+                      widths={info.widths}
+                      sizes={info.sizes}
+                      format="webp"
+                      quality={75}
+                      loading={index === 0 ? "eager" : "lazy"}
+                      decoding="async"
+                      layout="none"
+                      data-blur-up
+                      style={blurStyle}
+                    />
+                    {enablePopup && Body && (
+                      <div class="card__panel" hidden>
+                        <button class="card__panel-close" aria-label="Close testimonial">
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M5 5L15 15M15 5L5 15"
+                              stroke="currentColor"
+                              stroke-width="1.5"
+                              stroke-linecap="round"
+                            />
+                          </svg>
+                        </button>
+                        <div class="card__panel-body">
+                          <Body />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div class="card__caption">
+                    <div class="card__caption-text">
+                      <p class="card__name">{item.name}</p>
+                      <p class="card__quote">
+                        “{item.quote}
+                        {enablePopup && Body && <span class="card__quote-more"> […]</span>}”
+                      </p>
+                    </div>
+                    {enablePopup && Body && (
+                      <button
+                        class="card__toggle"
+                        aria-expanded="false"
+                        aria-label={`Read ${item.name}'s testimonial`}
+                      >
+                        <svg
+                          class="card__toggle-icon"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M4 10l4-4 4 4"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="square"
+                            stroke-linejoin="miter"
+                          />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+    </section>
+  )
+}
 
 <style>
   /* ── Section layout ─────────────────────────────── */
@@ -208,7 +251,9 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     border: none;
     color: var(--bg);
     cursor: pointer;
-    transition: background-color 225ms ease, color 225ms ease;
+    transition:
+      background-color 225ms ease,
+      color 225ms ease;
   }
   /* Hover only on hover-capable devices — on touch, :hover sticks after a tap,
      leaving the arrow green until you tap elsewhere. Touch gets :active instead,
@@ -234,7 +279,9 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     margin-right: calc(50% - 50vw);
     cursor: grab;
   }
-  .embla__viewport.is-dragging { cursor: grabbing; }
+  .embla__viewport.is-dragging {
+    cursor: grabbing;
+  }
 
   .embla__container {
     display: flex;
@@ -272,8 +319,8 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
        the next image, a smooth crossfade for hover, back-swipes and (extra-smooth) the
        arrow buttons. Defaults to a smooth 225ms. */
     transition:
-      filter var(--hl-dur, 225ms) cubic-bezier(.6, 0, .4, 1),
-      opacity var(--hl-dur, 225ms) cubic-bezier(.6, 0, .4, 1);
+      filter var(--hl-dur, 225ms) cubic-bezier(0.6, 0, 0.4, 1),
+      opacity var(--hl-dur, 225ms) cubic-bezier(0.6, 0, 0.4, 1);
   }
   .embla__slide.is-active .card__media img {
     filter: grayscale(0);
@@ -283,20 +330,39 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
   @media (prefers-reduced-motion: reduce) {
     .card__media img,
     .card__panel,
-    .card__toggle-icon { transition: none; }
+    .card__toggle-icon {
+      transition: none;
+    }
   }
 
   /* NATURAL: uniform height, auto width, no crop */
-  [data-variant="natural"] .card__media     { height: var(--size-d); }
-  [data-variant="natural"] .card__media img { height: 100%; width: auto; }
+  [data-variant="natural"] .card__media {
+    height: var(--size-d);
+  }
+  [data-variant="natural"] .card__media img {
+    height: 100%;
+    width: auto;
+  }
 
   /* SQUARE: fixed side, centered cover crop */
-  [data-variant="square"]  .card__media     { width: var(--size-d); aspect-ratio: 1 / 1; }
-  [data-variant="square"]  .card__media img { width: 100%; height: 100%; object-fit: cover; object-position: var(--pos, center); }
+  [data-variant="square"] .card__media {
+    width: var(--size-d);
+    aspect-ratio: 1 / 1;
+  }
+  [data-variant="square"] .card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--pos, center);
+  }
 
   @media (max-width: 599px) {
-    [data-variant="natural"] .card__media { height: var(--size-m); }
-    [data-variant="square"]  .card__media { width: var(--size-m); }
+    [data-variant="natural"] .card__media {
+      height: var(--size-m);
+    }
+    [data-variant="square"] .card__media {
+      width: var(--size-m);
+    }
   }
 
   /* ── Card caption (below the image) ─────────────────
@@ -315,7 +381,7 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
   }
 
   .card__name {
-    font-family: "Fraunces", Georgia, serif;
+    font-family: var(--font-display);
     font-optical-sizing: auto;
     font-size: 1.0625rem;
     font-weight: 500;
@@ -359,7 +425,7 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
   /* ── Reveal arrow (right side, inset from the image edge) ── */
   .card__toggle {
     flex-shrink: 0;
-    margin-right: clamp(0.75rem, 8%, 2rem);  /* ~10% inset from the image's right edge */
+    margin-right: clamp(0.75rem, 8%, 2rem); /* ~10% inset from the image's right edge */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -369,7 +435,9 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     color: var(--text);
     opacity: 0.85;
     cursor: pointer;
-    transition: color 225ms ease, opacity 225ms ease;
+    transition:
+      color 225ms ease,
+      opacity 225ms ease;
   }
   /* Greens on keyboard focus, on hover (hover-capable devices only, so a tap doesn't
      leave it stuck), and — via :active — a press flash on touch that clears on release. */
@@ -388,10 +456,14 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
       outline: none;
     }
   }
-  .card__toggle-icon { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .card__toggle-icon {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
   /* Negative angle → rotates down toward the inside of the carousel item (leftward),
      not toward the outer edge. */
-  .card__toggle[aria-expanded="true"] .card__toggle-icon { transform: rotate(-180deg); }
+  .card__toggle[aria-expanded="true"] .card__toggle-icon {
+    transform: rotate(-180deg);
+  }
 
   /* ── Slide-up testimonial panel (clipped to the image) ── */
   .card__panel {
@@ -400,10 +472,24 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
        exactly on target — no overshoot, no bounce. Drives the body text's vertical
        slide. (No overshoot → no bleed needed to cover a gap.) */
     --panel-spring: linear(
-      0 0%, 0.095 6%, 0.276 11%, 0.458 17%, 0.611 22%,
-      0.728 28%, 0.814 33%, 0.875 39%, 0.917 44%, 0.946 50%,
-      0.964 56%, 0.977 61%, 0.985 67%, 0.991 72%, 0.994 78%,
-      0.996 83%, 0.998 89%, 1 100%
+      0 0%,
+      0.095 6%,
+      0.276 11%,
+      0.458 17%,
+      0.611 22%,
+      0.728 28%,
+      0.814 33%,
+      0.875 39%,
+      0.917 44%,
+      0.946 50%,
+      0.964 56%,
+      0.977 61%,
+      0.985 67%,
+      0.991 72%,
+      0.994 78%,
+      0.996 83%,
+      0.998 89%,
+      1 100%
     );
     position: absolute;
     inset: 0;
@@ -413,12 +499,16 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     overflow: hidden;
     translate: 0 100%;
     visibility: hidden;
-    transition: translate 0.44s var(--panel-spring), visibility 0s 0.44s;
+    transition:
+      translate 0.44s var(--panel-spring),
+      visibility 0s 0.44s;
   }
   .card.is-panel-open .card__panel {
     translate: 0 0;
     visibility: visible;
-    transition: translate 0.44s var(--panel-spring), visibility 0s 0s;
+    transition:
+      translate 0.44s var(--panel-spring),
+      visibility 0s 0s;
   }
 
   .card__panel-body {
@@ -434,7 +524,9 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
   /* Paragraph gap (global reset zeroes <p> margins); the first one stays flush.
      :global() is required because these <p> come from set:html and so don't carry
      Astro's scope attribute — a plain scoped selector wouldn't match them. */
-  .card__panel-body :global(p + p) { margin-top: 0.9em; }
+  .card__panel-body :global(p + p) {
+    margin-top: 0.9em;
+  }
 
   /* Links inside the body use the site-wide inline-link treatment (Base.astro's
      `a:not([class])`): underline at rest, accent highlight on hover. Nothing to
@@ -447,8 +539,12 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
       scrollbar-width: thin;
       scrollbar-color: rgba(226, 226, 226, 0.35) transparent;
     }
-    .card__panel-body::-webkit-scrollbar { width: 6px; }
-    .card__panel-body::-webkit-scrollbar-track { background: transparent; }
+    .card__panel-body::-webkit-scrollbar {
+      width: 6px;
+    }
+    .card__panel-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
     .card__panel-body::-webkit-scrollbar-thumb {
       background: rgba(226, 226, 226, 0.3);
       border-radius: 3px;
@@ -473,7 +569,9 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     color: var(--text);
     cursor: pointer;
     opacity: 0.7;
-    transition: opacity 150ms ease, color 150ms ease;
+    transition:
+      opacity 150ms ease,
+      color 150ms ease;
   }
   .card__panel-close:hover,
   .card__panel-close:focus-visible {
@@ -484,223 +582,5 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
 </style>
 
 <script>
-  import EmblaCarousel from 'embla-carousel';
-
-  // ── Blur-up cleanup ─────────────────────────────
-  // Once a photo has painted, drop its LQIP background so the placeholder bytes
-  // are freed. Progressive enhancement: opaque cover photos already occlude the
-  // blur, so the effect works with JS disabled — this just tidies up after.
-  document.querySelectorAll<HTMLImageElement>('img[data-blur-up]').forEach((img) => {
-    const clear = () => { img.style.backgroundImage = 'none'; };
-    if (img.complete && img.naturalWidth > 0) clear();
-    else img.addEventListener('load', clear, { once: true });
-  });
-
-  document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((section) => {
-    const enablePopup = section.dataset.enablePopup === 'true';
-
-    const viewport = section.querySelector<HTMLElement>('.embla__viewport');
-    const slides   = Array.from(section.querySelectorAll<HTMLElement>('.embla__slide'));
-    const counter  = section.querySelector<HTMLElement>('.carousel-counter');
-
-    if (!viewport || slides.length === 0) return;
-    const N = slides.length;
-
-    const embla = EmblaCarousel(viewport, {
-      align: 'start',
-      containScroll: false,
-      loop: true,
-      slidesToScroll: 1,
-    });
-
-    // Re-measure after images are sized at load
-    if (document.readyState === 'complete') {
-      embla.reInit();
-    } else {
-      window.addEventListener('load', () => embla.reInit(), { once: true });
-    }
-
-    // ── Drag cursor ─────────────────────────────────
-    embla.on('pointerDown', () => viewport.classList.add('is-dragging'));
-    embla.on('pointerUp',   () => viewport.classList.remove('is-dragging'));
-
-    // ── Highlight model ─────────────────────────────
-    // Exactly one slide is highlighted at a time (or none at load). A single sticky
-    // index, "last interaction wins":
-    //   • desktop hover / keyboard focus → that slide (stays put after the mouse
-    //     leaves, until another slide is hovered);
-    //   • arrow button → the slide it lands on;
-    //   • mobile swipe → the settled slide.
-    // A desktop drag leaves it alone (so it never jumps to the first card). Applied
-    // ONLY here via `.is-active` (no CSS :hover), which enforces the single highlight.
-    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-    let activeIndex = -1;   // -1 = nothing highlighted (the load state)
-    let arrowNav = false;   // true only while an arrow-button move is settling
-    let swipeDir = 0;       // +1 = images scrolled left (advance), -1 = scrolled right (back)
-
-    function setActive(i: number) {
-      activeIndex = i;
-      slides.forEach((s, idx) => s.classList.toggle('is-active', idx === activeIndex));
-    }
-    setActive(-1);
-
-    // Mobile highlight speed (desktop keeps its fixed 225ms in CSS): advancing — images
-    // scrolled LEFT — snaps in instantly; going back — scrolled RIGHT — fades smoothly.
-    // --hl-dur feeds the touch `transition-duration` in the stylesheet.
-    function setHighlightSpeed() {
-      section.style.setProperty('--hl-dur', swipeDir > 0 ? '0ms' : '225ms');
-    }
-
-    // Physical swipe direction that feeds setHighlightSpeed().
-    let downX = 0;
-    viewport.addEventListener('pointerdown', (e: PointerEvent) => {
-      downX = e.clientX;
-      // Touch advance: the instant a finger lands on an image to the RIGHT of the
-      // currently highlighted one (the gesture that scrolls images left), move the
-      // highlight onto it immediately — don't wait for the swipe to settle. Pressing
-      // the current/left image (a back-swipe) is left to settle smoothly on `select`.
-      if (e.pointerType !== 'touch') return;
-      const slide = (e.target as HTMLElement).closest<HTMLElement>('.embla__slide');
-      if (!slide) return;
-      const cur = activeIndex >= 0 ? slides[activeIndex] : null;
-      if (!cur || slide.getBoundingClientRect().left > cur.getBoundingClientRect().left + 1) {
-        section.style.setProperty('--hl-dur', '0ms');
-        setActive(parseInt(slide.dataset.index ?? '-1', 10));
-      }
-    }, { passive: true });
-    viewport.addEventListener('pointermove', (e: PointerEvent) => {
-      const dx = e.clientX - downX;
-      if (Math.abs(dx) > 2) { swipeDir = dx < 0 ? 1 : -1; downX = e.clientX; }
-    }, { passive: true });
-
-    // Desktop hover / keyboard focus set the sticky highlight. Gated to the mouse
-    // pointer and non-touch so a tap never sets a stuck highlight on touch devices.
-    slides.forEach((slide, i) => {
-      slide.addEventListener('pointerenter', (e: PointerEvent) => {
-        if (e.pointerType !== 'mouse') return;
-        section.style.setProperty('--hl-dur', '225ms');   // hover is always a smooth crossfade
-        setActive(i);
-      });
-      if (!isTouch) slide.addEventListener('focusin', () => setActive(i));
-    });
-
-    // ── Counter ─────────────────────────────────────
-    function updateCounter() {
-      if (counter) counter.textContent = `${embla.selectedScrollSnap() + 1} of ${N}`;
-    }
-
-    embla.on('select', () => {
-      updateCounter();
-      const idx = embla.selectedScrollSnap();
-      if (arrowNav) {
-        // Desktop: an extra-smooth crossfade. Mobile: match the swipe feel (advance
-        // instant, back smooth) — a long crossfade there leaves the old highlight
-        // lingering during the fade, which reads as a stuck/double highlight.
-        if (isTouch) setHighlightSpeed();
-        else section.style.setProperty('--hl-dur', '350ms');
-        setActive(idx);
-        arrowNav = false;
-      } else if (isTouch) {
-        setHighlightSpeed();                              // swipe: advance instant, back smooth
-        setActive(idx);
-      }
-      // desktop drag: leave the sticky highlight where it is
-    });
-    embla.on('reInit', updateCounter);
-    updateCounter();
-
-    // ── Arrow buttons ────────────────────────────────
-    // Flag the move as arrow-driven (so `select` commits its highlight) and record the
-    // direction: next = advance (instant), prev = back (smooth).
-    section.querySelector('[data-dir=prev]')?.addEventListener('click', () => { arrowNav = true; swipeDir = -1; embla.scrollPrev(); });
-    section.querySelector('[data-dir=next]')?.addEventListener('click', () => { arrowNav = true; swipeDir = 1; embla.scrollNext(); });
-
-    // ── Testimonial panel ────────────────────────────
-    if (!enablePopup) return;
-
-    function panelOf(slide: HTMLElement) {
-      return slide.querySelector<HTMLElement>('.card__panel');
-    }
-
-    function closeAllPanels(except: HTMLElement | null) {
-      slides.forEach((s) => {
-        if (s === except || !s.classList.contains('is-panel-open')) return;
-        closePanel(s);
-      });
-    }
-
-    function openPanel(slide: HTMLElement) {
-      closeAllPanels(slide);
-      const panel = panelOf(slide);
-      if (panel) {
-        panel.removeAttribute('hidden');
-        // Commit the resting (translate: 100%) state NOW — a bare rAF can batch the
-        // unhide + class change into one style pass, so the panel snaps in with no
-        // slide. Forcing layout here guarantees it animates from 100% → 0%.
-        void panel.offsetHeight;
-      }
-      slide.classList.add('is-panel-open');
-      slide.querySelector('.card__toggle')?.setAttribute('aria-expanded', 'true');
-
-      // Highlight the source card while its panel is open
-      setActive(parseInt(slide.dataset.index ?? '-1', 10));
-    }
-
-    function closePanel(slide: HTMLElement) {
-      slide.classList.remove('is-panel-open');
-      slide.querySelector('.card__toggle')?.setAttribute('aria-expanded', 'false');
-
-      // Re-apply `hidden` once the slide-out finishes (matches the 0.4s visibility delay)
-      const panel = panelOf(slide);
-      panel?.addEventListener('transitionend', function h(e) {
-        if (e.propertyName === 'translate' && !slide.classList.contains('is-panel-open')) {
-          panel.setAttribute('hidden', '');
-          panel.removeEventListener('transitionend', h);
-        }
-      });
-    }
-
-    // Embla stopPropagation()s click in capture phase after drags,
-    // so this only fires on genuine taps/clicks (< dragThreshold movement).
-    section.addEventListener('click', (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-
-      // Whole caption box (name + quote + arrow) toggles the panel.
-      const caption = target.closest<HTMLElement>('.card__caption');
-      if (caption) {
-        const slide = caption.closest<HTMLElement>('.embla__slide');
-        if (!slide || !panelOf(slide)) return;
-        slide.classList.contains('is-panel-open') ? closePanel(slide) : openPanel(slide);
-        return;
-      }
-
-      const close = target.closest<HTMLElement>('.card__panel-close');
-      if (close) {
-        const slide = close.closest<HTMLElement>('.embla__slide');
-        if (slide) {
-          closePanel(slide);
-          slide.querySelector<HTMLElement>('.card__toggle')?.focus();
-        }
-        return;
-      }
-
-      // A plain tap on the image highlights that slide — on touch there's no hover to
-      // do it. (Suppressed after a drag by Embla, so only genuine taps get here.)
-      const media = target.closest<HTMLElement>('.card__media');
-      if (media && !target.closest('.card__panel')) {
-        const slide = media.closest<HTMLElement>('.embla__slide');
-        if (slide) {
-          section.style.setProperty('--hl-dur', '0ms');  // a direct tap highlights instantly
-          setActive(parseInt(slide.dataset.index ?? '-1', 10));
-        }
-      }
-    });
-
-    // Close on Escape and whenever the carousel settles on another slide
-    // (swipe, drag, and the prev/next arrows all fire 'select').
-    document.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeAllPanels(null);
-    });
-    embla.on('select', () => closeAllPanels(null));
-  });
+  import "./carousel.client.ts";
 </script>

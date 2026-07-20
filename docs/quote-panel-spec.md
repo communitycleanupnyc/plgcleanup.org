@@ -22,13 +22,23 @@ This part is **decided as in-flow** (the panel is real page content that pushes 
 
 ```css
 .card__disclosure {
-  display: flex; flex-direction: column; gap: .25rem;
-  text-align: left; width: 100%;
-  background: none; border: 0; padding: 0; cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+  width: 100%;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
 }
-.card__name  { font-weight: 600; }
+.card__name {
+  font-weight: 600;
+}
 .card__disclosure:hover .card__name,
-.card__disclosure:focus-visible .card__name { text-decoration: underline; } /* affordance */
+.card__disclosure:focus-visible .card__name {
+  text-decoration: underline;
+} /* affordance */
 ```
 
 ---
@@ -43,14 +53,19 @@ Placed **after** the Embla viewport, inside a `position: relative` section wrapp
 
   <div class="embla">
     … viewport / slides; each slide contains:
-      <button class="card__disclosure" aria-controls="quote-panel" aria-expanded="false">
-        <span class="card__name">{name}</span>
-        <span class="card__quote">{quote}</span>
-      </button>
+    <button class="card__disclosure" aria-controls="quote-panel" aria-expanded="false">
+      <span class="card__name">{name}</span>
+      <span class="card__quote">{quote}</span>
+    </button>
   </div>
 
-  <section class="quote-panel" id="quote-panel" role="region"
-           aria-labelledby="quote-panel-name" hidden>
+  <section
+    class="quote-panel"
+    id="quote-panel"
+    role="region"
+    aria-labelledby="quote-panel-name"
+    hidden
+  >
     <button class="quote-panel__close nav-menu-btn" aria-label="Close"></button>
     <h3 id="quote-panel-name"></h3>
     <div class="quote-panel__body"><!-- full body via set:html, left-aligned --></div>
@@ -77,26 +92,27 @@ The panel is an **in-flow block** below the carousel row. Opening it pushes subs
 ```js
 function openPanel(item, index, slideEl, triggerEl) {
   panelName.textContent = item.name;
-  panelBody.innerHTML  = item.body;                  // trusted first-party HTML
+  panelBody.innerHTML = item.body; // trusted first-party HTML
 
-  if (isCompact()) {                                 // ≤599px / <2 cards fit
-    panel.style.marginLeft = '0';
-    panel.style.width = '100%';
+  if (isCompact()) {
+    // ≤599px / <2 cards fit
+    panel.style.marginLeft = "0";
+    panel.style.width = "100%";
   } else {
-    const a    = slideEl.getBoundingClientRect();
+    const a = slideEl.getBoundingClientRect();
     const next = slideEl.nextElementSibling?.getBoundingClientRect();
-    const contentLeft = getContentLeftPx();          // from Base.astro container inset
+    const contentLeft = getContentLeftPx(); // from Base.astro container inset
     panel.style.marginLeft = `${a.left - contentLeft}px`;
     panel.style.width = next ? `${next.right - a.left}px` : `${a.width}px`;
   }
 
   panel.hidden = false;
-  const top = panel.getBoundingClientRect().top;     // fill-to-bottom
+  const top = panel.getBoundingClientRect().top; // fill-to-bottom
   panel.style.minHeight = `calc(100dvh - ${Math.max(0, top)}px - 24px)`;
 
-  triggerEl.setAttribute('aria-expanded', 'true');
-  setActive(index);                                  // tint the source card
-  panel.querySelector('.quote-panel__close').focus();
+  triggerEl.setAttribute("aria-expanded", "true");
+  setActive(index); // tint the source card
+  panel.querySelector(".quote-panel__close").focus();
 }
 ```
 
@@ -106,7 +122,7 @@ Recompute on each open. Closing on any carousel movement (§4) keeps the measure
 
 ## 4. Open / close behavior
 
-- **Open — instant** (no height animation; reads as "the page expanded"). Sets `aria-expanded=true`, moves focus to the close button, makes the source card the active/tinted one. *(Optional nicety: a ≤180ms grid-rows `0fr→1fr` reveal; reduced-motion = instant.)*
+- **Open — instant** (no height animation; reads as "the page expanded"). Sets `aria-expanded=true`, moves focus to the close button, makes the source card the active/tinted one. _(Optional nicety: a ≤180ms grid-rows `0fr→1fr` reveal; reduced-motion = instant.)_
 - **Close — immediate** (no animation): set `hidden`, `aria-expanded=false`, return focus to the trigger.
 - **Toggle:** the active trigger closes; a different trigger switches (close → recompute → open).
 - **Dismissal — all close immediately:**
@@ -135,11 +151,26 @@ embla.on('pointerDown', closePanel); arrowPrev/Next click → closePanel() then 
 - **Close button: prominent, high-contrast** against `var(--bg)`, pinned top-right (reuse `nav-menu-btn`), always visible without scrolling.
 
 ```css
-.quote-panel { position: relative; background: var(--bg); padding: 2rem; }
-.quote-panel[hidden] { display: none; }
-.quote-panel__body { max-width: 64ch; text-align: left; }
-.quote-panel__close { position: absolute; top: 1rem; right: 1rem; }
-@media (prefers-reduced-motion: reduce) { /* no open animation */ }
+.quote-panel {
+  position: relative;
+  background: var(--bg);
+  padding: 2rem;
+}
+.quote-panel[hidden] {
+  display: none;
+}
+.quote-panel__body {
+  max-width: 64ch;
+  text-align: left;
+}
+.quote-panel__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* no open animation */
+}
 ```
 
 ---

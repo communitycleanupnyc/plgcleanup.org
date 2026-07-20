@@ -1,0 +1,25 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../layouts/Base.astro";
+import Prose from "../components/Prose.astro";
+
+// One static route per Markdown file in src/content/pages/. The filename is the
+// URL slug (faq.md → /faq). index.astro and join.astro are their own files and
+// take precedence over this catch-all.
+export async function getStaticPaths() {
+  const pages = await getCollection("pages");
+  return pages.map((page) => ({
+    params: { slug: page.id },
+    props: { page },
+  }));
+}
+
+const { page } = Astro.props;
+const { Content } = await render(page);
+---
+
+<Base title={page.data.title} description={page.data.description} navMode={page.data.navMode}>
+  <Prose>
+    <Content />
+  </Prose>
+</Base>

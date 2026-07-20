@@ -1,0 +1,63 @@
+---
+// Menu button + slide-over mobile menu. Rendered as siblings of the site chrome
+// (see SiteHeader) so the general-sibling CSS selectors keep matching.
+---
+
+<button
+  class="nav-menu-btn"
+  id="nav-menu-btn"
+  aria-label="Open menu"
+  aria-expanded="false"
+  aria-controls="mobile-menu"
+>
+  <div class="menu-icon" aria-hidden="true">
+    <span class="menu-icon__bar menu-icon__bar--top"></span>
+    <span class="menu-icon__bar menu-icon__bar--btm"></span>
+  </div>
+</button>
+
+<!-- Mobile menu: sibling of site-chrome so parent padding-inline can't constrain it -->
+<div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation">
+  <nav class="mobile-menu-links" aria-label="Mobile navigation">
+    <a href="/about" class="mobile-menu-link">About</a>
+    <a href="/faq" class="mobile-menu-link">FAQ</a>
+  </nav>
+  <div class="mobile-menu-ctas">
+    <a href="/join" class="cta-primary">Join us</a>
+    <a href="/schedule" class="cta-secondary">View schedule</a>
+  </div>
+</div>
+
+<script>
+  // ── Mobile menu ────────────────────────────────────────────────
+  const menuBtn = document.getElementById("nav-menu-btn") as HTMLButtonElement | null;
+  const mobileMenu = document.getElementById("mobile-menu") as HTMLElement | null;
+
+  function openMobileMenu() {
+    mobileMenu!.classList.add("is-open");
+    menuBtn!.setAttribute("aria-expanded", "true");
+    menuBtn!.setAttribute("aria-label", "Close menu");
+    document.body.style.overflow = "hidden";
+    // Keyboard users need focus moved into the dialog; touch users don't
+    if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
+      mobileMenu!.querySelector<HTMLElement>(".mobile-menu-link")?.focus();
+    }
+  }
+  function closeMobileMenu() {
+    mobileMenu!.classList.remove("is-open");
+    menuBtn!.setAttribute("aria-expanded", "false");
+    menuBtn!.setAttribute("aria-label", "Open menu");
+    document.body.style.overflow = "";
+    menuBtn!.blur();
+  }
+
+  menuBtn?.addEventListener("click", () => {
+    mobileMenu?.classList.contains("is-open") ? closeMobileMenu() : openMobileMenu();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && mobileMenu?.classList.contains("is-open")) {
+      closeMobileMenu();
+      menuBtn?.focus(); // return focus for keyboard users closing via Escape
+    }
+  });
+</script>

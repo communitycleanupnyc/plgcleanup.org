@@ -1,0 +1,33 @@
+# Runs on every push and pull request: type-checks and builds the site so a
+# broken edit can never reach Cloudflare Pages. Formatting is checked too.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Type check
+        run: npm run check
+
+      - name: Build
+        run: npm run build
