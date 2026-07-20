@@ -107,7 +107,7 @@ function renderInfo(img: ImageMetadata) {
               <div class="card__caption">
                 <div class="card__caption-text">
                   <p class="card__name">{item.name}</p>
-                  <p class="card__quote">{item.quote}</p>
+                  <p class="card__quote">{item.quote}{enablePopup && item.body && <span class="card__quote-more"> […]</span>}</p>
                 </div>
                 {enablePopup && item.body && (
                   <button
@@ -279,6 +279,7 @@ function renderInfo(img: ImageMetadata) {
     font-size: 0.9375rem;
     font-weight: 600;
     color: var(--text);
+    transition: color 225ms ease;
   }
   .card__quote {
     font-size: 0.875rem;
@@ -288,6 +289,19 @@ function renderInfo(img: ImageMetadata) {
     line-height: 1.45;
     margin-top: 0.25rem;
     max-width: 22ch;
+    transition: color 225ms ease;
+  }
+  /* Bracketed-ellipsis cue that the quote continues — same colour as the quote
+     at rest; it (and the name + quote) go accent when the caption is hovered. */
+  .card__quote-more {
+    white-space: nowrap;
+    color: inherit;
+    transition: color 225ms ease;
+  }
+  .card__caption:hover .card__name,
+  .card__caption:hover .card__quote,
+  .card__caption:hover .card__quote-more {
+    color: var(--accent);
   }
 
   /* ── Reveal arrow (right side, inset from the image edge) ── */
@@ -303,9 +317,12 @@ function renderInfo(img: ImageMetadata) {
     color: var(--text);
     opacity: 0.85;
     cursor: pointer;
+    transition: color 225ms ease, opacity 225ms ease;
   }
+  /* Greens on direct hover/focus and when the whole caption is hovered. */
   .card__toggle:hover,
-  .card__toggle:focus-visible {
+  .card__toggle:focus-visible,
+  .card__caption:hover .card__toggle {
     opacity: 1;
     color: var(--accent);
     outline: none;
@@ -393,11 +410,12 @@ function renderInfo(img: ImageMetadata) {
     color: var(--text);
     cursor: pointer;
     opacity: 0.7;
-    transition: opacity 150ms ease;
+    transition: opacity 150ms ease, color 150ms ease;
   }
   .card__panel-close:hover,
   .card__panel-close:focus-visible {
     opacity: 1;
+    color: var(--accent);
     outline: none;
   }
 </style>
