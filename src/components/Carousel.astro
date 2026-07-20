@@ -107,7 +107,7 @@ function renderInfo(img: ImageMetadata) {
               <div class="card__caption">
                 <div class="card__caption-text">
                   <p class="card__name">{item.name}</p>
-                  <p class="card__quote">{item.quote}{enablePopup && item.body && <span class="card__quote-more"> […]</span>}</p>
+                  <p class="card__quote">“{item.quote}{enablePopup && item.body && <span class="card__quote-more"> […]</span>}”</p>
                 </div>
                 {enablePopup && item.body && (
                   <button
@@ -116,7 +116,7 @@ function renderInfo(img: ImageMetadata) {
                     aria-label={`Read ${item.name}'s testimonial`}
                   >
                     <svg class="card__toggle-icon" width="20" height="20" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                      <path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter"/>
                     </svg>
                   </button>
                 )}
@@ -276,8 +276,11 @@ function renderInfo(img: ImageMetadata) {
   }
 
   .card__name {
-    font-size: 0.9375rem;
-    font-weight: 600;
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-size: 1.0625rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
     color: var(--text);
     transition: color 225ms ease;
   }
@@ -328,7 +331,9 @@ function renderInfo(img: ImageMetadata) {
     outline: none;
   }
   .card__toggle-icon { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-  .card__toggle[aria-expanded="true"] .card__toggle-icon { transform: rotate(180deg); }
+  /* Negative angle → rotates down toward the inside of the carousel item (leftward),
+     not toward the outer edge. */
+  .card__toggle[aria-expanded="true"] .card__toggle-icon { transform: rotate(-180deg); }
 
   /* ── Slide-up testimonial panel (clipped to the image) ── */
   .card__panel {
