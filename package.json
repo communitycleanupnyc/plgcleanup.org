@@ -12,7 +12,7 @@
     "prepare": "git config core.hooksPath .githooks || true"
   },
   "dependencies": {
-    "@floating-ui/dom": "^1.7.6",
+    "@floating-ui/dom": "^1.8.0",
     "astro": "^6.4.7",
     "embla-carousel": "^8.6.0"
   },
