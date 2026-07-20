@@ -16,12 +16,13 @@ Everything an organizer normally changes is plain text you can edit on GitHub (c
 click the ✏️ pencil, change the words, **Commit changes** — the site rebuilds itself). If an
 edit has a mistake, the build fails and nothing broken goes live.
 
-| To change…                                                | Edit this                                                                                                                                                      |
-| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The next cleanup's **date, time, place, counts**          | `src/data/event.ts` — the top "EDIT THESE" block. That file explains exactly how, in plain English.                                                            |
-| **FAQ / About / Terms / Agreements / Schedule** page text | The matching file in `src/content/pages/` (e.g. `faq.md`). Write normal Markdown.                                                                              |
-| **Testimonials** in the home-page carousel                | One file per person in `src/content/testimonials/` (e.g. `jaan.md`): the top block holds their name, quote, and photo; the text below is the full testimonial. |
-| A testimonial **photo**                                   | Add the image to `src/assets/testimonials/` and point the person's `image:` at it.                                                                             |
+| To change…                                                       | Edit this                                                                                                                                                      |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The next cleanup's **date, time, place, counts**                 | `src/data/event.ts` — the top "EDIT THESE" block. That file explains exactly how, in plain English.                                                            |
+| **FAQ / About / Terms / Agreements / Schedule** page text        | The matching file in `src/content/pages/` (e.g. `faq.md`). Write normal Markdown.                                                                              |
+| **Testimonials** in the home-page carousel                       | One file per person in `src/content/testimonials/` (e.g. `jaan.md`): the top block holds their name, quote, and photo; the text below is the full testimonial. |
+| A testimonial **photo**                                          | Add the image to `src/assets/testimonials/` and point the person's `image:` at it.                                                                             |
+| **Site settings** (e.g. randomize the carousel order each build) | `src/config.ts` — flip a `true`/`false` toggle; each is documented in the file.                                                                                |
 
 Prefer a form-based editor? The repo is wired for [Pages CMS](https://pagescms.org) (see
 `.pages.yml`) — it edits the same Markdown files behind a friendly UI.
@@ -63,6 +64,7 @@ npm run format    # auto-format with Prettier
 
 ```
 src/
+  config.ts                ← site settings (toggles, e.g. randomize the carousel)
   content.config.ts        ← schemas for the Markdown collections below
   content/
     pages/*.md             ← FAQ, About, Terms, Agreements, Schedule (prose pages)

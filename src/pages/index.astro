@@ -5,11 +5,27 @@ import type { CarouselItem } from "../components/carousel.types";
 import { getCollection, render } from "astro:content";
 import { VOLUNTEER_COUNT } from "../data/event";
 import { getCountdown } from "../data/countdown";
+import { RANDOMIZE_TESTIMONIALS } from "../config";
+
+// Fisher–Yates: a uniform random permutation (a fresh copy, doesn't mutate input).
+function shuffle<T>(items: readonly T[]): T[] {
+  const a = [...items];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 // Testimonials come from src/content/testimonials/*.md (see src/content.config.ts).
 // The image() schema validates every photo at build time, so a missing or
 // misnamed image fails the build loudly — no hand-rolled checks needed.
-const entries = (await getCollection("testimonials")).sort((a, b) => a.data.order - b.data.order);
+// Order is the `order` field by default; RANDOMIZE_TESTIMONIALS (src/config.ts)
+// shuffles them fresh on every build instead.
+const testimonials = await getCollection("testimonials");
+const entries = RANDOMIZE_TESTIMONIALS
+  ? shuffle(testimonials)
+  : testimonials.sort((a, b) => a.data.order - b.data.order);
 
 // The schema can't see the Markdown body, so guard it here: a blank testimonial
 // would render an empty reveal panel. Fail the build loudly instead.
