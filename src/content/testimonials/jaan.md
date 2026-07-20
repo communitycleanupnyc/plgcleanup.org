@@ -11,12 +11,16 @@ This community has been integral for me, so even though picking up trash can fee
 
 
 
+&nbsp;
+
 - A monk asked Master Joshu, 'how can I become enlightened'?
 - Master Joshu said: 'Well, have you eaten your gruel?'
 - The monk said: 'Yes'.
 - Master Joshu said: 'And then wash your bowl'.
 
 
+
+&nbsp;
 
 Apocryphally, the monk then becomes enlightened, as we might hope to become as we return, time and time again, to the rhythmic process of sanitation. We are made of spacedust, as is trash, so we are trash, and as a garbage man all I can say is 'from trash to trash, dust to dust'.
 
