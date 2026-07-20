@@ -396,7 +396,11 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     opacity: 0.7;
     line-height: 1.45;
     margin-top: 0.25rem;
-    max-width: 22ch;
+    /* A comfortable, bounded pull-quote measure (the flex row already reserves
+       space for the toggle). `balance` evens the lines so medium quotes don't
+       leave a widow like "neighborhood" on its own line. */
+    max-width: 28ch;
+    text-wrap: balance;
     transition: color 225ms ease;
   }
   /* Bracketed-ellipsis cue that the quote continues — same colour as the quote
