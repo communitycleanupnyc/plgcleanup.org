@@ -143,9 +143,9 @@ or component; only genuinely shared styles are global (`src/styles/`).
   that coordinates the scroll-aware nav keeps working; their scripts are plain (no framework).
 - **Design tokens** — restyle the whole site from `src/styles/tokens.css` (colors, fonts, the
   `--font-body`/`--font-display` pair, and the content-column width).
-- **Social share image** — the link preview on iMessage/WhatsApp/etc. features a random
-  volunteer photo, chosen per build and generated as a 1200×1200 JPEG (Sharp, face-aware crop).
-  See `src/lib/og.ts`.
+- **Social share image** — the link preview on iMessage/WhatsApp/etc. features the first
+  testimonial (by carousel order), generated as a 1200×1200 JPEG (Sharp, face-aware crop). Flip
+  `RANDOMIZE_OG_IMAGE` in `src/config.ts` to feature a random volunteer per build. See `src/lib/og.ts`.
 
 ---
 

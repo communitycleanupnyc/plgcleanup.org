@@ -11,3 +11,14 @@
  *                      carousel leads with a different volunteer each deploy.
  */
 export const RANDOMIZE_TESTIMONIALS = false;
+
+/**
+ * Feature a random volunteer photo in the social share (Open Graph) image —
+ * the picture that shows in link previews on iMessage, WhatsApp, SMS, etc.
+ *
+ *   false  (default) — the share image is the first testimonial in carousel
+ *                      order (the one with the lowest `order`), so link
+ *                      previews stay stable from build to build.
+ *   true             — a random volunteer is chosen fresh on every build.
+ */
+export const RANDOMIZE_OG_IMAGE = false;
