@@ -112,12 +112,9 @@ or component; only genuinely shared styles are global (`src/styles/`).
   that coordinates the scroll-aware nav keeps working; their scripts are plain (no framework).
 - **Design tokens** — restyle the whole site from `src/styles/tokens.css` (colors, fonts, the
   `--font-body`/`--font-display` pair, and the content-column width).
-- **Social share image** — the link preview on iMessage/WhatsApp/etc. features a volunteer
-  photo, generated at build time as a 1200×1200 JPEG (Sharp, face-aware crop). Which volunteer
-  is a **shuffle bag** (`src/data/og-cycle.json`): a random permutation of everyone, advanced one
-  per rotation so all are featured before any repeat, reshuffled when the bag empties. The
-  `rotate-og` GitHub Action advances it daily (and on manual dispatch); run `npm run rotate-og`
-  to advance it yourself. `src/lib/og.ts` reads the current pick.
+- **Social share image** — the link preview on iMessage/WhatsApp/etc. features a random
+  volunteer photo, chosen per build and generated as a 1200×1200 JPEG (Sharp, face-aware crop).
+  See `src/lib/og.ts`.
 
 ---
 

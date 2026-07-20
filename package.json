@@ -8,8 +8,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "rotate-og": "node scripts/rotate-og.mjs"
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.6",
