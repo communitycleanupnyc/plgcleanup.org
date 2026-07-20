@@ -124,6 +124,11 @@ or component; only genuinely shared styles are global (`src/styles/`).
   deploys.
 - **CI** (`.github/workflows/ci.yml`): on each push/PR, runs Prettier check, `astro check`, and
   `astro build` — a broken change can't merge.
+- **Git hooks** (`.githooks/`, zero-dependency, activated by `npm install` via the `prepare`
+  script): **pre-commit** auto-formats staged files with Prettier so commits are always clean;
+  **pre-push** runs the full CI locally (format + types + build) so `main` never goes red. Bypass
+  either with `--no-verify`. Note: hooks only run on local `git` commits — edits via the GitHub web
+  editor or Pages CMS skip them, so CI remains the real gate for content edits.
 - **Dependencies** (`.github/dependabot.yml`): weekly grouped update PRs. Merge them once CI is
   green. (TypeScript is held on the 5.x line until `astro check` supports TS 7.)
 

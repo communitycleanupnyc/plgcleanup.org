@@ -1,0 +1,12 @@
+#!/bin/sh
+# Auto-format staged files with Prettier and re-stage them, so every commit is
+# clean and CI's format check always passes — no manual `npm run format` needed.
+# Respects .prettierignore (content Markdown is skipped). Wired up by the
+# "prepare" npm script (git config core.hooksPath). Bypass once: --no-verify.
+
+files=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$files" ] && exit 0
+
+# NUL-delimit for filenames with spaces (newlines in names are unsupported).
+printf '%s\n' "$files" | tr '\n' '\0' | xargs -0 npx prettier --write --ignore-unknown
+printf '%s\n' "$files" | tr '\n' '\0' | xargs -0 git add --

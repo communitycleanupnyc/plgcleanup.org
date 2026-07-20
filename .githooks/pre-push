@@ -1,0 +1,5 @@
+#!/bin/sh
+# Mirror CI before pushing so `main` never goes red: formatting, types, build.
+# Runs only on push (not every commit), so the extra seconds are infrequent.
+# Bypass once with: git push --no-verify
+npm run format:check && npm run check && npm run build
