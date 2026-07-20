@@ -491,9 +491,11 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
       0.998 89%,
       1 100%
     );
-    /* Body text inset and desktop scrollbar width. The close button centers
-       itself in the gutter between the text and the scrollbar using these. */
+    /* Body text inset, the wider right gutter that reserves room for the close
+       button (like padding-top reserves room above the text), and the desktop
+       scrollbar width. The close button centers itself in that right gutter. */
     --panel-pad: 1.25rem;
+    --panel-gutter: 2rem;
     --panel-scrollbar-w: 6px;
     position: absolute;
     inset: 0;
@@ -521,6 +523,9 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     overscroll-behavior: contain;
     padding: var(--panel-pad);
     padding-top: 2.75rem;
+    /* Reserve a wider right gutter so the text column ends clear of the close
+       button and scrollbar. */
+    padding-right: var(--panel-gutter);
     font-size: 0.9375rem;
     line-height: 1.6;
     font-weight: 300;
@@ -565,13 +570,12 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     justify-content: center;
     position: absolute;
     top: 0.6rem;
-    /* Center the ✕ in the gutter between the body's right text edge and the
-       scrollbar's left edge. The scrollbar occupies the rightmost
-       --panel-scrollbar-w; the text ends one --panel-pad further in, so the
-       gutter midpoint sits (--panel-pad / 2 + --panel-scrollbar-w) from the edge.
-       glyph-center inset = right + --close-size / 2 → solve for right. On touch
-       (overlay scrollbar) this lands just right of the text — the same look. */
-    right: calc(var(--panel-pad) / 2 + var(--panel-scrollbar-w) - var(--close-size) / 2);
+    /* Center the ✕ in the reserved right gutter, between the text column's right
+       edge and the scrollbar's left edge. The scrollbar occupies the rightmost
+       --panel-scrollbar-w; the text ends one --panel-gutter further in, so the
+       gutter midpoint sits (--panel-gutter / 2 + --panel-scrollbar-w) from the
+       edge. glyph-center inset = right + --close-size / 2 → solve for right. */
+    right: calc(var(--panel-gutter) / 2 + var(--panel-scrollbar-w) - var(--close-size) / 2);
     z-index: 3;
     width: var(--close-size);
     height: var(--close-size);
