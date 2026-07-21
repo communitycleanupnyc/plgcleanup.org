@@ -9,9 +9,15 @@
 #  2) links — external-link check (lychee). External links rot on time, not on
 #     your commits, and the check is flaky (rate limits, bot walls), so it runs
 #     weekly and on-demand only — never gating a normal push/PR.
-#  3) redeploy — Monday-morning cron that triggers a fresh Cloudflare Pages build
-#     so the server-rendered "next cleanup is this Saturday" line and the Event
-#     JSON-LD never go stale.
+#  3) redeploy — Saturday cron, 30 min after the cleanup ends, that triggers a
+#     fresh Cloudflare Pages build so the server-rendered CTA label ("Join us
+#     this Saturday") and the Event JSON-LD flip forward to the next cleanup the
+#     moment this one is over — for no-JS visitors and crawlers. (JS visitors get
+#     it live from countdown.client.ts regardless.)
+#
+# Two crons feed this file (see `schedule` below); jobs pick their trigger with
+# `github.event.schedule` so the Monday checks and the Saturday redeploy stay
+# independent.
 #
 # Setup:
 #  - Put seo-audit.mjs in scripts/.
@@ -27,7 +33,8 @@ on:
     branches: [main]
   pull_request:
   schedule:
-    - cron: "0 12 * * 1" # Mondays 12:00 UTC (~7–8am New York)
+    - cron: "0 12 * * 1" # Mondays 12:00 UTC (~7–8am New York) — audit tripwire + links
+    - cron: "30 15 * * 6" # Saturdays 15:30 UTC (11:30am EDT) — 30 min after the cleanup ends → redeploy
   workflow_dispatch: # lets you run the weekly links check on demand
 
 env:
@@ -48,8 +55,9 @@ jobs:
         run: node scripts/seo-audit.mjs dist --site "$SITE"
 
   links:
-    # Weekly + on-demand only — keep flaky external-link checks off push/PR.
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    # Weekly (Monday cron) + on-demand only — keep flaky external-link checks off
+    # push/PR, and off the Saturday redeploy cron.
+    if: github.event.schedule == '0 12 * * 1' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -72,7 +80,9 @@ jobs:
           fail: true
 
   redeploy:
-    if: github.event_name == 'schedule'
+    # Saturday cron only — 30 min after the cleanup ends. (Cron is UTC and can't
+    # follow DST: 15:30 UTC is 11:30am EDT now; in winter EST it lands 10:30am.)
+    if: github.event.schedule == '30 15 * * 6'
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Cloudflare Pages build

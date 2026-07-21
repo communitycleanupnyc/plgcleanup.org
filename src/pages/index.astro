@@ -7,7 +7,7 @@ import type { CarouselItem } from "../components/carousel.types";
 import { getCollection, render } from "astro:content";
 import { VOLUNTEER_COUNT } from "../data/stats";
 import { CLEANUP_ISO, CLEANUP_END_ISO } from "../data/event";
-import { computeCountdown, renderHomeCountdown, renderCtaLabel } from "../data/countdown";
+import { computeCountdown, renderCtaLabel } from "../data/countdown";
 import { RANDOMIZE_TESTIMONIALS } from "../config";
 
 // Fisher–Yates: a uniform random permutation (a fresh copy, doesn't mutate input).
@@ -52,10 +52,10 @@ const items: CarouselItem[] = await Promise.all(
   }),
 );
 
-// Countdown copy is rendered at build time here and recomputed on load by
-// ../lib/countdown.client.ts (imported below) so it never goes stale.
+// The CTA label carries the countdown ("Join us this Saturday"): it's baked in
+// at build time here and recomputed on load by ../lib/countdown.client.ts
+// (imported below) so it never goes stale between deploys.
 const state = computeCountdown(new Date(), CLEANUP_ISO, CLEANUP_END_ISO);
-const countdownSentence = renderHomeCountdown(state);
 const ctaLabel = renderCtaLabel(state);
 ---
 
@@ -79,21 +79,11 @@ const ctaLabel = renderCtaLabel(state);
     />
   </div>
 
-  <p class="hero-tagline">
-    A volunteer trash cleanup crew in Prospect Lefferts Gardens, Brooklyn — every Saturday morning.
-  </p>
-
   <div class="hero-body">
     <p>
       {VOLUNTEER_COUNT} of your neighbors are helping keep trash off our streets.
     </p>
-    <p
-      data-countdown
-      data-variant="home"
-      data-start={CLEANUP_ISO}
-      data-end={CLEANUP_END_ISO}
-      set:html={countdownSentence}
-    />
+    <p>Want to see why people love volunteering with us?</p>
   </div>
 
   <div class="cta-actions">
@@ -155,18 +145,6 @@ const ctaLabel = renderCtaLabel(state);
     margin-left: var(--site-ml);
     padding-top: clamp(3rem, 8vw, 5rem);
     margin-bottom: clamp(10rem, 7vw, 3.5rem);
-  }
-
-  .hero-tagline {
-    width: var(--site-w);
-    margin-left: var(--site-ml);
-    padding-right: var(--edge);
-    max-width: 60ch;
-    margin-bottom: clamp(2rem, 6vw, 3rem);
-    font-size: clamp(1.125rem, 2vw, 1.375rem);
-    font-weight: 400;
-    line-height: 1.4;
-    color: var(--text);
   }
 
   .hero-kicker {
@@ -232,7 +210,8 @@ const ctaLabel = renderCtaLabel(state);
   }
 
   .hero-body p:last-child {
-    font-size: clamp(1.5rem, 2.25vw, 1.75rem);
+    /* Match the CTA button text size (.cta-primary / .cta-secondary) below it. */
+    font-size: clamp(1.75rem, 2vw, 1.25rem);
     font-weight: 200;
     letter-spacing: 0em;
   }

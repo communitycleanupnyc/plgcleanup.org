@@ -3,12 +3,7 @@
 // from the event's start/end timestamps so it's always right for the visitor's
 // clock — no scheduled rebuilds. Imports only the pure logic in ../data/countdown,
 // so zod/event.ts never reach the client bundle.
-import {
-  computeCountdown,
-  renderHomeCountdown,
-  renderJoinCountdown,
-  renderCtaLabel,
-} from "../data/countdown";
+import { computeCountdown, renderJoinCountdown, renderCtaLabel } from "../data/countdown";
 
 // Each countdown element carries data-start / data-end (event ISO timestamps) and
 // a data-variant selecting which copy to render.
@@ -21,9 +16,6 @@ function refresh(el: HTMLElement) {
 
   const state = computeCountdown(new Date(), start, end);
   switch (el.dataset.variant) {
-    case "home":
-      el.innerHTML = renderHomeCountdown(state); // contains a link
-      break;
     case "cta":
       el.textContent = renderCtaLabel(state);
       break;

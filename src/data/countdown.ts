@@ -93,32 +93,6 @@ export function computeCountdown(now: Date, startIso: string, endIso: string): C
 
 const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? "" : "s"}`;
 
-// Home hero sentence. Contains a link, so it's rendered with set:html; the browser
-// updater re-writes it via innerHTML.
-const HOME_SUFFIX = ". Want to see why people love volunteering with us?";
-export function renderHomeCountdown(state: CountdownState): string {
-  const lead = (inner: string) => `The next cleanup is ${inner}${HOME_SUFFIX}`;
-  const link = (text: string) => `<a href="/join">${text}</a>`;
-  switch (state.tag) {
-    case "past":
-      return `Each cleanup is only an hour${HOME_SUFFIX}`;
-    case "now":
-      return lead(link("happening right now"));
-    case "minutes":
-      return lead(`in ${link(plural(state.n, "minute"))}`);
-    case "hours":
-      return lead(`in ${link(plural(state.n, "hour"))}`);
-    case "tomorrow":
-      return lead(link("tomorrow"));
-    case "this-weekend":
-      return lead(link(`this ${state.dayName}`));
-    case "next-weekend":
-      return lead(link(`next ${state.dayName}`));
-    case "days":
-      return lead(`in ${link(`${state.word} days`)}`);
-  }
-}
-
 // /join line — plain text. "" means "show nothing" (the cleanup has passed).
 export function renderJoinCountdown(state: CountdownState): string {
   switch (state.tag) {
