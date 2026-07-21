@@ -1,14 +1,17 @@
 # .github/workflows/site-checks.yml
 #
-# Two jobs:
-#  1) audit — builds the site and runs the SEO/launch gate + external link check
-#     on every push/PR. Fails the build on shippable-bug classes (broken assets,
-#     placeholder links, missing 404, stale Event schema, sitemap drift…).
-#  2) redeploy — Monday-morning cron that triggers a fresh Cloudflare Pages
-#     build so the server-rendered "next cleanup is this Saturday" line and the
-#     Event JSON-LD never go stale. The cron ALSO runs the audit: if the event
-#     data file wasn't rolled forward, the stale-Event check fails and GitHub
-#     emails you — that's your freshness tripwire.
+# Three jobs:
+#  1) audit — builds the site and runs the SEO/launch gate on every push/PR (and
+#     on the weekly cron). Fails on shippable-bug classes: broken assets,
+#     placeholder links, missing 404, stale Event schema, sitemap drift… On the
+#     Monday cron this doubles as the freshness tripwire — if the event data
+#     wasn't rolled forward, the stale-Event check fails and GitHub emails you.
+#  2) links — external-link check (lychee). External links rot on time, not on
+#     your commits, and the check is flaky (rate limits, bot walls), so it runs
+#     weekly and on-demand only — never gating a normal push/PR.
+#  3) redeploy — Monday-morning cron that triggers a fresh Cloudflare Pages build
+#     so the server-rendered "next cleanup is this Saturday" line and the Event
+#     JSON-LD never go stale.
 #
 # Setup:
 #  - Put seo-audit.mjs in scripts/.
@@ -25,6 +28,7 @@ on:
   pull_request:
   schedule:
     - cron: "0 12 * * 1" # Mondays 12:00 UTC (~7–8am New York)
+  workflow_dispatch: # lets you run the weekly links check on demand
 
 env:
   SITE: https://plgcleanup.pages.dev # ← flip to https://plgcleanup.org at cutover
@@ -36,12 +40,25 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
           cache: npm
       - run: npm ci
       - run: npx astro build
       - name: SEO / launch gate
         run: node scripts/seo-audit.mjs dist --site "$SITE"
+
+  links:
+    # Weekly + on-demand only — keep flaky external-link checks off push/PR.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx astro build
       - name: External links (lychee)
         uses: lycheeverse/lychee-action@v2
         with:
