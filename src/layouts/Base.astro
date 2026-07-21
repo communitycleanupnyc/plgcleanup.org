@@ -31,12 +31,35 @@ interface Props {
 // so the separator and site name live in exactly one place. No title (the home
 // page) → the tab just reads the site name.
 const SITE_NAME = "Community Cleanup PLG";
-const {
-  title,
-  description = "We clean Prospect Lefferts Gardens. No registration, all supplies included. Just show up.",
-  navMode = "ticker",
-} = Astro.props;
+const SITE_DESCRIPTION =
+  "We clean Prospect Lefferts Gardens. No registration, all supplies included. Just show up.";
+const { title, description = SITE_DESCRIPTION, navMode = "ticker" } = Astro.props;
 const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
+
+// This page's own absolute URL, resolved against `site` (astro.config.mjs).
+// build.format "file" makes Astro.url.pathname the emitted file path
+// (/about.html, /index.html), but the shareable URL — and what @astrojs/sitemap
+// emits — is the clean form (/about, /). Strip the extension so canonical and
+// og:url match the sitemap exactly.
+const cleanPath = Astro.url.pathname.replace(/index\.html$/, "").replace(/\.html$/, "");
+const canonicalURL = new URL(cleanPath, Astro.site);
+
+// Sitewide organization identity for search/AI engines. Emitted once per page as
+// JSON-LD; the homepage URL + logo are absolute so they resolve off any host.
+const orgSchema = {
+  "@context": "https://schema.org",
+  "@type": "NGO",
+  name: SITE_NAME,
+  url: new URL("/", Astro.site).href,
+  logo: new URL("/images/logo.webp", Astro.site).href,
+  description: SITE_DESCRIPTION,
+  areaServed: "Prospect Lefferts Gardens, Brooklyn, NY",
+  sameAs: [
+    "https://www.instagram.com/communitycleanupplg/",
+    "https://communitycleanupplg.substack.com/",
+    "https://discord.com/invite/H9her7r8N2",
+  ],
+};
 ---
 
 <!doctype html>
@@ -47,6 +70,7 @@ const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
     <meta name="theme-color" content="#14130F" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/images/logo.webp" />
@@ -59,11 +83,14 @@ const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
     <meta property="og:image:width" content={String(OG_SIZE)} />
     <meta property="og:image:height" content={String(OG_SIZE)} />
     <meta property="og:image:alt" content="A Community Cleanup PLG volunteer" />
-    <meta property="og:url" content="https://plgcleanup.org" />
+    <meta property="og:url" content={canonicalURL} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
     <link rel="preload" href="/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/Fraunces.woff2" as="font" type="font/woff2" crossorigin />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(orgSchema)} />
   </head>
 
   <body>

@@ -6,7 +6,7 @@ import { glob } from "astro/loaders";
 // loudly instead of shipping empty text. The message names the offending field.
 const filled = (field: string) => z.string().trim().min(1, `${field} must not be empty`);
 
-// Prose pages (about, faq, terms, community-agreements, schedule). Each is a
+// Prose pages (about, faq, terms, schedule, partners, and the rest). Each is a
 // Markdown file in src/content/pages/ — the filename is the URL (faq.md → /faq).
 // Non-technical editors change the heading/body in Markdown; the frontmatter
 // below sets the browser title and social description. `title` is the short,

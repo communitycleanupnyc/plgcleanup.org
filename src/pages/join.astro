@@ -21,6 +21,39 @@ const joinDisplayDate = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
   year: "numeric",
 }).format(cleanupDate);
+
+// Event structured data — the one schema type with a visible SERP surface
+// (Google event listings). Built from the same event.ts values shown on the page.
+const eventUrl = new URL("/join", Astro.site).href;
+const eventSchema = {
+  "@context": "https://schema.org",
+  "@type": "Event",
+  name: `Community Cleanup PLG — ${CLEANUP_CORNER}`,
+  description:
+    "A one-hour volunteer street cleanup in Prospect Lefferts Gardens, Brooklyn. No registration; all supplies provided. Just show up.",
+  startDate: CLEANUP_ISO,
+  endDate: CLEANUP_END_ISO,
+  eventStatus: "https://schema.org/EventScheduled",
+  eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+  isAccessibleForFree: true,
+  url: eventUrl,
+  image: new URL("/images/logo.webp", Astro.site).href,
+  location: {
+    "@type": "Place",
+    name: CLEANUP_CORNER,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Brooklyn",
+      addressRegion: "NY",
+      addressCountry: "US",
+    },
+  },
+  organizer: {
+    "@type": "NGO",
+    name: "Community Cleanup PLG",
+    url: new URL("/", Astro.site).href,
+  },
+};
 ---
 
 <Base
@@ -93,7 +126,13 @@ const joinDisplayDate = new Intl.DateTimeFormat("en-US", {
         </p>
       </div>
     </div>
+
+    <p class="join-service-hours">
+      Need <a href="/community-service-hours">community service hours</a>? We sign school forms on
+      the spot.
+    </p>
   </div>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(eventSchema)} />
 </Base>
 
 <script>
@@ -190,5 +229,11 @@ const joinDisplayDate = new Intl.DateTimeFormat("en-US", {
     font-weight: 400;
     color: var(--text);
     opacity: 0.6;
+  }
+
+  .join-service-hours {
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--text);
   }
 </style>

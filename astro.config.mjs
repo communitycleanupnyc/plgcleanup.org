@@ -1,4 +1,5 @@
 import { defineConfig } from "astro/config";
+import sitemap from "@astrojs/sitemap";
 
 export default defineConfig({
   // Canonical production origin — used to build absolute URLs (e.g. the social
@@ -11,6 +12,10 @@ export default defineConfig({
   // `trailingSlash: "never"` enforces the same convention in dev and routing.
   trailingSlash: "never",
   build: { format: "file" },
+  // Emits sitemap-index.xml + sitemap-0.xml from `site`, listing every static
+  // route (testimonials aren't routes, so they're correctly absent). Referenced
+  // from public/robots.txt.
+  integrations: [sitemap()],
   server: {
     host: true,
   },
