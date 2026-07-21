@@ -9,7 +9,9 @@ const filled = (field: string) => z.string().trim().min(1, `${field} must not be
 // Prose pages (about, faq, terms, community-agreements, schedule). Each is a
 // Markdown file in src/content/pages/ — the filename is the URL (faq.md → /faq).
 // Non-technical editors change the heading/body in Markdown; the frontmatter
-// below sets the browser title and social description.
+// below sets the browser title and social description. `title` is the short,
+// page-specific part only (e.g. "FAQ"); Base.astro appends " | Community Cleanup
+// PLG" so the site name + separator live in one place.
 const pages = defineCollection({
   loader: glob({ pattern: "*.md", base: "./src/content/pages" }),
   schema: z.object({

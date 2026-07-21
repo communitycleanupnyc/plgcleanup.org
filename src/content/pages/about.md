@@ -1,5 +1,5 @@
 ---
-title: About — Community Cleanup PLG
+title: About
 description: About Community Cleanup PLG — organizing neighbors to clean Prospect Lefferts Gardens.
 ---
 

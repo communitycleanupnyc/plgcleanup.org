@@ -33,7 +33,15 @@ content:
     view:
       fields: [title, navMode]
     fields:
-      - { name: title, label: Browser title, type: string, required: true }
+      - name: title
+        label: Page title (browser tab)
+        type: string
+        required: true
+        description: >-
+          Short title for the browser tab and search results — e.g. "FAQ". The
+          site shows it as "FAQ | Community Cleanup PLG"; you don't type the site
+          name. This is separate from the page's on-screen heading, which you
+          write in the Page content below.
       - { name: description, label: Social description, type: text, required: true }
       - name: navMode
         label: Nav style

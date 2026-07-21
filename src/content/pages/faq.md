@@ -1,5 +1,5 @@
 ---
-title: FAQ — Community Cleanup PLG
+title: FAQ
 description: Frequently asked questions about Community Cleanup PLG cleanups.
 ---
 

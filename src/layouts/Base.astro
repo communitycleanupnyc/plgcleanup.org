@@ -26,11 +26,17 @@ interface Props {
   description?: string;
   navMode?: "ticker" | "static";
 }
+// Brand name + browser-tab title template, defined once. Pages pass only their
+// own short title (e.g. "FAQ") and the layout appends " | Community Cleanup PLG",
+// so the separator and site name live in exactly one place. No title (the home
+// page) → the tab just reads the site name.
+const SITE_NAME = "Community Cleanup PLG";
 const {
-  title = "Community Cleanup PLG",
+  title,
   description = "We clean Prospect Lefferts Gardens. No registration, all supplies included. Just show up.",
   navMode = "ticker",
 } = Astro.props;
+const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
 ---
 
 <!doctype html>
@@ -39,14 +45,14 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#14130F" />
-    <title>{title}</title>
+    <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/images/logo.webp" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Community Cleanup PLG" />
-    <meta property="og:title" content={title} />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:image:type" content="image/jpeg" />

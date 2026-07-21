@@ -1,5 +1,5 @@
 ---
-title: Upcoming cleanups — Community Cleanup PLG
+title: Upcoming cleanups
 description: The full schedule of upcoming Community Cleanup PLG events in Prospect Lefferts Gardens.
 ---
 

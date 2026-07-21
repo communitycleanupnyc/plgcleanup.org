@@ -1,5 +1,5 @@
 ---
-title: Volunteering Terms — Community Cleanup PLG
+title: Volunteering Terms
 description: Volunteering terms and conditions for Community Cleanup PLG events.
 ---
 
