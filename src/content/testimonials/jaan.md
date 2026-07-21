@@ -22,6 +22,6 @@ This community has been integral for me, and even though picking up trash can fe
 
 &nbsp;
 
-Apocryphally, the monk becomes enlightened on the spot, as we might hope to become as we return, time and time again, to the rhythmic process of sanitation. We are made of spacedust, as is trash, so we are trash, and as a garbage man all I can say is 'from trash to trash, dust to dust'.
+Apocryphally, the monk becomes enlightened on the spot, as we might hope to in returning time and time again to the rhythmic process of sanitation. We are made of spacedust, as is trash, so we are trash, and as a garbage man all I can say is 'from trash to trash, dust to dust'.
 
 There's a reason this trash club is listed on [Social Fabric NYC](https://www.socialfabric.nyc/) as a 'portal' of sorts through which you can become connected to other communities. The vibe: it's giving deep hanging out; doing the very human thing of ambiguous goal-directed activity; virtue signaling to ourselves and neighbors - which is both necessary and can actually create long term change in society. Fun and meaning-making result, week after week, as faces become familiar and conversations longer. Recommended, would 100% be trashy again in every timeline. These are the kinds of people you want to get uploaded with 🤙
