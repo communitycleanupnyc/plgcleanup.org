@@ -1,5 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
+import { Image } from "astro:assets";
+import cart from "../assets/cart.webp";
 import {
   CLEANUP_ISO,
   CLEANUP_END_ISO,
@@ -90,13 +92,17 @@ const eventSchema = {
         </p>
       </div>
       <div class="join-cart-cell">
-        <img
-          src="/images/cart.webp"
+        <Image
+          src={cart}
           alt=""
           class="join-cart"
           aria-hidden="true"
-          width="640"
-          height="634"
+          widths={[240, 480]}
+          sizes="240px"
+          format="webp"
+          layout="none"
+          loading="lazy"
+          decoding="async"
         />
       </div>
       <div class="join-detail join-where">

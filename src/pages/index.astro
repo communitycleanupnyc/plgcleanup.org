@@ -1,5 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
+import { Image } from "astro:assets";
+import raccoon from "../assets/raccoon.webp";
 import Carousel from "../components/Carousel.astro";
 import type { CarouselItem } from "../components/carousel.types";
 import { getCollection, render } from "astro:content";
@@ -63,13 +65,17 @@ const ctaLabel = renderCtaLabel(state);
 >
   <div class="hero">
     <h1>Clean Prospect Lefferts Gardens.</h1>
-    <img
-      src="/images/raccoon.webp"
+    <Image
+      src={raccoon}
       alt=""
       class="raccoon"
       aria-hidden="true"
-      width="148"
-      height="121"
+      widths={[148, 296]}
+      sizes="148px"
+      format="webp"
+      layout="none"
+      loading="lazy"
+      decoding="async"
     />
   </div>
 

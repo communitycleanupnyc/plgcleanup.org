@@ -104,15 +104,24 @@ const TICKER_TEXT = `${POUNDS_COLLECTED_DISPLAY} pounds and counting, this year 
   // seamless at any viewport width, with natural inter-segment spacing.
   function fillTicker() {
     const template = tickerTrack.children[0] as HTMLElement;
+    // Read geometry once, up front — never inside the loop below (reading a
+    // dirtied layout after each appendChild is the forced-reflow thrash).
     const segW = template.offsetWidth;
     if (!segW) return;
     const target = tickerViewport.offsetWidth * 3;
-    while (tickerTrack.scrollWidth < target) {
+    // How many segments fill 3× the viewport (+1 spare for a seamless loop),
+    // minus what's already there — so a resize re-run adds nothing.
+    const want = Math.ceil(target / segW) + 1;
+    const needed = Math.max(0, want - tickerTrack.children.length);
+    // Build the clones off-DOM, then attach in a single write (no reflow).
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < needed; i++) {
       const clone = template.cloneNode(true) as HTMLElement;
       clone.setAttribute("aria-hidden", "true");
       clone.setAttribute("tabindex", "-1");
-      tickerTrack.appendChild(clone);
+      frag.appendChild(clone);
     }
+    tickerTrack.appendChild(frag);
     tickerTrack.style.setProperty("--seg-w", segW + "px");
   }
 

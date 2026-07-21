@@ -5,13 +5,15 @@
   font-family: "Fraunces";
   src: url("/fonts/Fraunces.woff2") format("woff2");
   font-weight: 300 900;
-  font-display: block;
+  /* optional: paint immediately in the fallback serif if the font isn't ready,
+     with no swap-in shift — keeps the LCP headline off the font's critical path. */
+  font-display: optional;
 }
 @font-face {
   font-family: "Inter";
   src: url("/fonts/Inter.woff2") format("woff2");
   font-weight: 200 700;
-  font-display: block;
+  font-display: optional;
 }
 
 *,

@@ -308,13 +308,15 @@ for (const page of htmlFiles) {
   const junk = [];
   for (const im of html.matchAll(/<img\b[^>]*>/g)) {
     const tag = im[0];
-    const alt = tag.match(/alt="([^"]*)"/);
+    // Match alt="…", alt='…', or a bare `alt` (how HTML serializers, incl. Astro,
+    // emit alt=""). A bare alt is a present, empty, decorative alt — not missing.
+    const alt = tag.match(/\salt(?:=("|')([^"']*)\1)?(?=[\s/>])/);
     if (!alt) noAlt++;
     else if (
-      CFG.junkAlts.includes(alt[1].trim().toLowerCase()) ||
-      CFG.junkAlts.includes(alt[1].trim())
+      alt[2] !== undefined &&
+      (CFG.junkAlts.includes(alt[2].trim().toLowerCase()) || CFG.junkAlts.includes(alt[2].trim()))
     )
-      junk.push(alt[1]);
+      junk.push(alt[2]);
     const src = tag.match(/src="([^"]+)"/);
     const f = src
       ? pathToFile(decode(src[1]).startsWith("/") ? decode(src[1]) : "/" + decode(src[1]))
