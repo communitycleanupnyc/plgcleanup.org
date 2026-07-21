@@ -5,7 +5,8 @@ description: Frequently asked questions about Community Cleanup PLG cleanups.
 
 # FAQ
 
-More answers coming soon. In the meantime:
+The questions we hear most. Don't see yours? [Email us](mailto:communitycleanupplg@gmail.com)
+or ask in the #general channel on [Discord](https://discord.com/invite/H9her7r8N2).
 
 ## Can I earn community service hours?
 

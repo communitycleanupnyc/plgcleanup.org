@@ -16,23 +16,12 @@ cleanup](/join) in Prospect Lefferts Gardens, Brooklyn - then take the idea home
 ## Clubs around the city
 
 - **[Community Cleanup PLG](/)** — Prospect Lefferts Gardens, Brooklyn.
-<!--
-  STUB — add one line per club. Neighborhood + one sentence + link to their site
-  or Instagram. Every club listed has a reason to link this page back, which is
-  the whole point. Confirm each link before publishing.
--->
-- <!-- TODO: Greenpoint crew — neighborhood — one sentence — link -->
-- <!-- TODO: Crown Heights crew — neighborhood — one sentence — link -->
-- <!-- TODO: "the Pigeons" — neighborhood — one sentence — link -->
-- <!-- TODO: "the Legion" — neighborhood — one sentence — link -->
-- <!-- TODO: Social Fabric NYC — one sentence — link -->
 
 ## In the press
 
 Trash clubs keep making the news. A few stories worth reading about why efforts like ours are growing:
 
-- [NYC’s newest hobby is cleaning up trash and documenting the filth](https://www.washingtonpost.com/nation/2026/03/27/new-york-trash-cleanup-groups/) - Washington Post
-- 
+- [NYC’s newest hobby is cleaning up trash and documenting the filth](https://www.washingtonpost.com/nation/2026/03/27/new-york-trash-cleanup-groups/) — Washington Post
 
 Run a cleanup club we should list? [Email us](mailto:communitycleanupplg@gmail.com)
 and we'll add you.

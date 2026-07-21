@@ -1,0 +1,64 @@
+# .github/workflows/site-checks.yml
+#
+# Two jobs:
+#  1) audit — builds the site and runs the SEO/launch gate + external link check
+#     on every push/PR. Fails the build on shippable-bug classes (broken assets,
+#     placeholder links, missing 404, stale Event schema, sitemap drift…).
+#  2) redeploy — Monday-morning cron that triggers a fresh Cloudflare Pages
+#     build so the server-rendered "next cleanup is this Saturday" line and the
+#     Event JSON-LD never go stale. The cron ALSO runs the audit: if the event
+#     data file wasn't rolled forward, the stale-Event check fails and GitHub
+#     emails you — that's your freshness tripwire.
+#
+# Setup:
+#  - Put seo-audit.mjs in scripts/.
+#  - Add a Pages Deploy Hook (Cloudflare dashboard → your project → Settings →
+#    Builds & deployments → Deploy hooks) as repo secret CF_PAGES_DEPLOY_HOOK.
+#  - At domain cutover, change SITE below in the same PR that changes
+#    astro.config `site`.
+
+name: site checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 12 * * 1" # Mondays 12:00 UTC (~7–8am New York)
+
+env:
+  SITE: https://plgcleanup.pages.dev # ← flip to https://plgcleanup.org at cutover
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx astro build
+      - name: SEO / launch gate
+        run: node scripts/seo-audit.mjs dist --site "$SITE"
+      - name: External links (lychee)
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # Bot-walled hosts excluded: they 4xx for crawlers but work for humans.
+          args: >-
+            --no-progress --max-retries 2
+            --accept 200..299,301,302,308,429
+            --exclude instagram.com --exclude amazon.com --exclude discord.com
+            --exclude washingtonpost.com
+            'dist/**/*.html'
+          fail: true
+
+  redeploy:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Cloudflare Pages build
+        run: curl -fsX POST "$DEPLOY_HOOK"
+        env:
+          DEPLOY_HOOK: ${{ secrets.CF_PAGES_DEPLOY_HOOK }}
