@@ -5,11 +5,12 @@ description: The local businesses and neighborhood organizations that help keep 
 
 # Community partners
 
-Community Cleanup PLG is powered by neighbors — and by the local businesses and
-organizations who back the work. These are the Prospect Lefferts Gardens
-partners who donate supplies, host us, spread the word, or show up to clean.
+Community Cleanup PLG works with local businesses and
+organizations. These partners who donate supplies, host us, spread the word, or show up to clean.
 
 Want to partner with us? [Email us](mailto:communitycleanupplg@gmail.com).
+
+_todo: fill this in_ 
 
 ## Our partners
 

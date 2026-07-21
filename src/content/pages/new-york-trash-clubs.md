@@ -5,13 +5,12 @@ description: A guide to volunteer street-cleanup clubs across New York City and 
 
 # New York trash clubs
 
-A growing number of neighbors across New York run volunteer "trash clubs" —
-casual, no-registration street cleanups where people show up, grab a bag and a
-grabber, and leave a block better than they found it. Here are 
-the crews we know, so you can find one near you.
+New York has seen a growing trend of volunteer-run "trash clubs" like ours. Here are 
+the crews we know of, so you can find one near you.
 
-New to this? The easiest way to start is to [join a Community Cleanup PLG
-cleanup](/join) in Prospect Lefferts Gardens, Brooklyn - then take the idea home.
+Did we miss any, or curious about starting a trash club in your neighborhood? [Email us](mailto:communitycleanupplg@gmail.com)
+
+_todo: fill this out_
 
 ## Clubs around the city
 
@@ -22,6 +21,3 @@ cleanup](/join) in Prospect Lefferts Gardens, Brooklyn - then take the idea home
 Trash clubs keep making the news. A few stories worth reading about why efforts like ours are growing:
 
 - [NYC’s newest hobby is cleaning up trash and documenting the filth](https://www.washingtonpost.com/nation/2026/03/27/new-york-trash-cleanup-groups/) — Washington Post
-
-Run a cleanup club we should list? [Email us](mailto:communitycleanupplg@gmail.com)
-and we'll add you.
