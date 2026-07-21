@@ -44,7 +44,8 @@ configured in `.pages.yml`.
 3. Open the repo in Pages CMS; it reads `.pages.yml` and shows the editing forms.
 
 Edits commit straight to `main` and Cloudflare Pages redeploys (see [Deployment & CI](#deployment--ci)).
-A bad edit fails the build, so the last good site stays live.
+Give it **40–60 seconds** after saving for the change to build and go live on the site — a refresh
+before then still shows the old version. A bad edit fails the build, so the last good site stays live.
 
 **Not locked in.** `.pages.yml` is a thin adapter over the content — the files stay plain
 Markdown + JSON validated by Astro at build time. Swapping to another Astro-friendly CMS
