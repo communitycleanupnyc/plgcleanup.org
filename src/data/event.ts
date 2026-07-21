@@ -145,16 +145,3 @@ function buildMapsUrl(corner: string, city: string) {
   const query = encodeURIComponent(`${corner.replace(/ & /g, " and ")}, ${city}`);
   return `https://www.google.com/maps/search/?api=1&query=${query}`;
 }
-
-/** Parse a Date into year/month/day parts in America/New_York. */
-export function etDateParts(d: Date) {
-  // en-CA locale reliably produces YYYY-MM-DD
-  const s = new Intl.DateTimeFormat("en-CA", {
-    timeZone: TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(d);
-  const [y, m, day] = s.split("-").map(Number);
-  return { y, m, day };
-}

@@ -98,8 +98,9 @@ src/
     event.ts               ← reads event.json; derives the map link, times, ISO stamps
     stats.json             ← editable running totals (pounds collected, volunteers) — Pages CMS writes this
     stats.ts               ← reads stats.json; validates + formats the numbers for display
-    countdown.ts           ← "in 3 days / tomorrow / right now" state machine
+    countdown.ts           ← pure "in 3 days / tomorrow / right now" logic + copy (build + browser)
   lib/
+    countdown.client.ts    ← recomputes the countdown in the browser so it never goes stale
     lqip.ts                ← build-time blur-up image placeholders
   styles/
     tokens.css             ← design tokens (colors, spacing, fonts) — the one place to reskin
@@ -134,9 +135,14 @@ or component; only genuinely shared styles are global (`src/styles/`).
   build time — a missing photo or malformed field fails the build instead of shipping broken.
 - **`event.ts`** is the single source of truth for the event. The editable facts live in
   `event.json` (edited via Pages CMS); `event.ts` validates them, parses the friendly date/time,
-  handles New York daylight saving, and builds the "Get directions" map link. `countdown.ts` turns
-  the event time into the live "in N days" copy. Running totals (pounds, volunteers) live in
-  `stats.ts` / `stats.json`.
+  handles New York daylight saving, and builds the "Get directions" map link. Running totals
+  (pounds, volunteers) live in `stats.ts` / `stats.json`.
+- **Live countdown** — `countdown.ts` turns the event time into the "in N days / tomorrow / this
+  Saturday" copy (home hero, its CTA button, and `/join`). It's pure and dependency-free, so the
+  same code runs at build time _and_ in the browser: `src/lib/countdown.client.ts` recomputes it on
+  load (and every minute) from the event timestamps, so the wording is always right for the
+  visitor's clock — the static HTML never goes stale between deploys, and no scheduled rebuild is
+  needed.
 - **Carousel** — Embla owns the scroll physics; a small state machine keeps exactly one slide
   highlighted ("last interaction wins"). Testimonial bodies are Markdown, rendered server-side.
 - **Site chrome** — `SiteHeader` and `MobileMenu` render as siblings so the general-sibling CSS
@@ -174,6 +180,3 @@ or component; only genuinely shared styles are global (`src/styles/`).
   editor or Pages CMS skip them, so CI remains the real gate for content edits.
 - **Dependencies** (`.github/dependabot.yml`): weekly grouped update PRs. Merge them once CI is
   green. (TypeScript is held on the 5.x line until `astro check` supports TS 7.)
-
-> Note: the build is a snapshot, so the countdown reflects the last build. To advance it without
-> a content commit, add a scheduled GitHub Action that pings a Cloudflare deploy hook.

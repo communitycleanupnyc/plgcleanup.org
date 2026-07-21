@@ -4,7 +4,8 @@ import Carousel from "../components/Carousel.astro";
 import type { CarouselItem } from "../components/carousel.types";
 import { getCollection, render } from "astro:content";
 import { VOLUNTEER_COUNT } from "../data/stats";
-import { getCountdown } from "../data/countdown";
+import { CLEANUP_ISO, CLEANUP_END_ISO } from "../data/event";
+import { computeCountdown, renderHomeCountdown, renderCtaLabel } from "../data/countdown";
 import { RANDOMIZE_TESTIMONIALS } from "../config";
 
 // Fisher–Yates: a uniform random permutation (a fresh copy, doesn't mutate input).
@@ -49,25 +50,11 @@ const items: CarouselItem[] = await Promise.all(
   }),
 );
 
-const state = getCountdown(new Date());
-const SUFFIX = ". Want to see why people love volunteering with us?";
-
-const countdownSentence =
-  state.tag === "past"
-    ? `Each cleanup is only an hour${SUFFIX}`
-    : state.tag === "now"
-      ? `The next cleanup is <a href="/join">happening right now</a>${SUFFIX}`
-      : state.tag === "minutes"
-        ? `The next cleanup is in <a href="/join">${state.n} minute${state.n === 1 ? "" : "s"}</a>${SUFFIX}`
-        : state.tag === "hours"
-          ? `The next cleanup is in <a href="/join">${state.n} hour${state.n === 1 ? "" : "s"}</a>${SUFFIX}`
-          : state.tag === "tomorrow"
-            ? `The next cleanup is <a href="/join">tomorrow</a>${SUFFIX}`
-            : state.tag === "this-weekend"
-              ? `The next cleanup is <a href="/join">this ${state.dayName}</a>${SUFFIX}`
-              : state.tag === "next-weekend"
-                ? `The next cleanup is <a href="/join">next ${state.dayName}</a>${SUFFIX}`
-                : `The next cleanup is in <a href="/join">${state.word} days</a>${SUFFIX}`;
+// Countdown copy is rendered at build time here and recomputed on load by
+// ../lib/countdown.client.ts (imported below) so it never goes stale.
+const state = computeCountdown(new Date(), CLEANUP_ISO, CLEANUP_END_ISO);
+const countdownSentence = renderHomeCountdown(state);
+const ctaLabel = renderCtaLabel(state);
 ---
 
 <Base>
@@ -87,11 +74,24 @@ const countdownSentence =
     <p>
       {VOLUNTEER_COUNT} of your neighbors are helping keep trash off our streets.
     </p>
-    <p set:html={countdownSentence} />
+    <p
+      data-countdown
+      data-variant="home"
+      data-start={CLEANUP_ISO}
+      data-end={CLEANUP_END_ISO}
+      set:html={countdownSentence}
+    />
   </div>
 
   <div class="cta-actions">
-    <a class="cta-primary" href="/join">Join us this weekend</a>
+    <a
+      class="cta-primary"
+      href="/join"
+      data-countdown
+      data-variant="cta"
+      data-start={CLEANUP_ISO}
+      data-end={CLEANUP_END_ISO}>{ctaLabel}</a
+    >
     <a class="cta-secondary" href="/schedule">View schedule</a>
   </div>
 
@@ -129,6 +129,10 @@ const countdownSentence =
 
   <Carousel items={items} variant="natural" heading="Why trash club" />
 </Base>
+
+<script>
+  import "../lib/countdown.client.ts";
+</script>
 
 <style>
   /* Home page (hero, hero body, why-volunteer grid). */

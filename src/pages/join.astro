@@ -1,27 +1,18 @@
 ---
 import Base from "../layouts/Base.astro";
-import { CLEANUP_ISO, CLEANUP_TIME, CLEANUP_CORNER, CLEANUP_MAPS_URL } from "../data/event";
-import { getCountdown } from "../data/countdown";
+import {
+  CLEANUP_ISO,
+  CLEANUP_END_ISO,
+  CLEANUP_TIME,
+  CLEANUP_CORNER,
+  CLEANUP_MAPS_URL,
+} from "../data/event";
+import { computeCountdown, renderJoinCountdown } from "../data/countdown";
 
 const cleanupDate = new Date(CLEANUP_ISO);
-const state = getCountdown(new Date());
-
-const countdownLine =
-  state.tag === "past"
-    ? ""
-    : state.tag === "now"
-      ? "Is happening right now!"
-      : state.tag === "minutes"
-        ? `Is starting in ${state.n} minute${state.n === 1 ? "" : "s"}!`
-        : state.tag === "hours"
-          ? `Is starting in ${state.n} hour${state.n === 1 ? "" : "s"}!`
-          : state.tag === "tomorrow"
-            ? "is tomorrow!"
-            : state.tag === "this-weekend"
-              ? `Is this ${state.dayName}!`
-              : state.tag === "next-weekend"
-                ? `Is next ${state.dayName}.`
-                : `That's in ${state.word} days.`;
+// Rendered at build time and recomputed on load by ../lib/countdown.client.ts.
+const state = computeCountdown(new Date(), CLEANUP_ISO, CLEANUP_END_ISO);
+const countdownLine = renderJoinCountdown(state);
 
 const joinDisplayDate = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/New_York",
@@ -39,7 +30,19 @@ const joinDisplayDate = new Intl.DateTimeFormat("en-US", {
 >
   <div class="join-page">
     <h1>Our next cleanup...</h1>
-    {countdownLine && <p class="join-countdown">{countdownLine}</p>}
+    {
+      countdownLine && (
+        <p
+          class="join-countdown"
+          data-countdown
+          data-variant="join"
+          data-start={CLEANUP_ISO}
+          data-end={CLEANUP_END_ISO}
+        >
+          {countdownLine}
+        </p>
+      )
+    }
     <p class="join-sub">
       Zero registration needed, and we provide the supplies—just show up. Look for the shopping cart
       with trash grabbers to find your squad leader and say hi.
@@ -92,6 +95,10 @@ const joinDisplayDate = new Intl.DateTimeFormat("en-US", {
     </div>
   </div>
 </Base>
+
+<script>
+  import "../lib/countdown.client.ts";
+</script>
 
 <style>
   /* /join page details grid. */
