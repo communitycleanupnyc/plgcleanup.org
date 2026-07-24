@@ -11,7 +11,7 @@ By feeding two birds with one scone, we were able to both help clean up our neig
 
 Our volunteers help pick a different route every weekend where we pick up trash. 
 
-Once in a while, we hold _trashy hours_ and meet at a local business that we [partner](/partner) with. Dozens from our neighborhood show up. 
+Once in a while, we hold _trashy hours_ and meet at a local business that we [partner](/partners) with. Dozens from our neighborhood show up. 
 
 To learn about the next cleanup, you can:
 
