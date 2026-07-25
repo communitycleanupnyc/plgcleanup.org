@@ -32,13 +32,20 @@ on:
   push:
     branches: [main]
   pull_request:
-  schedule:
-    - cron: "0 12 * * 1" # Mondays 12:00 UTC (~7–8am New York) — audit tripwire + links
-    - cron: "30 15 * * 6" # Saturdays 15:30 UTC (11:30am EDT) — 30 min after the cleanup ends → redeploy
+  # Crons paused pre-launch (2026-07-25): the Saturday redeploy needs the
+  # CF_PAGES_DEPLOY_HOOK secret (not yet set) and there is no future event to
+  # flip to; the Monday tripwire is redundant while SEO_SKIP_FRESH relaxes the
+  # freshness gate. Restore both at launch, in the same PR that sets the secret
+  # and rolls event.json forward:
+  #   - cron: "0 12 * * 1"  # Mondays 12:00 UTC — audit tripwire + links
+  #   - cron: "30 15 * * 6" # Saturdays 15:30 UTC — 30 min post-cleanup → redeploy
   workflow_dispatch: # lets you run the weekly links check on demand
 
 env:
   SITE: https://plgcleanup.pages.dev # ← flip to https://plgcleanup.org at cutover
+  # Pre-launch: downgrade the stale-Event check from error → warning so a past
+  # event date can't fail push/PR builds. Remove at launch to re-arm the gate.
+  SEO_SKIP_FRESH: "1"
 
 jobs:
   audit:
