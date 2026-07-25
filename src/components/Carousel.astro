@@ -26,7 +26,13 @@ function renderInfo(img: ImageMetadata) {
   const maxRendered = Math.max(wMobile, wDesktop);
   let widths = DENSITIES.map((d) => Math.round(maxRendered * d)).filter((w) => w <= img.width);
   if (widths.length === 0) widths = [img.width];
-  return { sizes, widths };
+  // Fallback <img src>/intrinsic size = the 1x rung (smallest width), NOT the
+  // native-resolution image. srcset still carries the 2x/3x rungs, so retina
+  // screens (iPhone DPR-3) render crisp — but the `src` a no-srcset client (and
+  // the SEO weight budget, which sums only `src`) sees is ~20KB, not ~1.4MB.
+  const fallbackW = Math.min(...widths);
+  const fallbackH = Math.round(fallbackW / ar);
+  return { sizes, widths, fallbackW, fallbackH };
 }
 
 // Blur-up placeholders (Next.js/Figma technique), generated once at build time.
@@ -113,6 +119,8 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                     <Image
                       src={item.img}
                       alt={item.alt}
+                      width={info.fallbackW}
+                      height={info.fallbackH}
                       widths={info.widths}
                       sizes={info.sizes}
                       format="webp"
