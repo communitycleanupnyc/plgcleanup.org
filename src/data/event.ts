@@ -58,8 +58,18 @@ export const CLEANUP_END_ISO = END_DATE.toISOString();
 /** The time as readers see it, e.g. "10–11am" — built from the start/end. */
 export const CLEANUP_TIME = formatTimeRange(START_DATE, END_DATE);
 
+/** The place everyone searches for, e.g. "Rogers Ave and Fenimore St, Brooklyn, NY". */
+const MAPS_QUERY = `${CLEANUP_CORNER.replace(/ & /g, " and ")}, ${CLEANUP_CITY}`;
+
 /** The "Get directions" link — built from the corner and city. */
-export const CLEANUP_MAPS_URL = buildMapsUrl(CLEANUP_CORNER, CLEANUP_CITY);
+export const CLEANUP_MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(MAPS_QUERY)}`;
+
+/**
+ * The embeddable map (the iframe on /join) for the same corner. Uses Google's
+ * keyless embed, which takes the search text directly — so it can never drift
+ * from event.json the way a hand-pasted embed code did.
+ */
+export const CLEANUP_MAPS_EMBED_URL = `https://www.google.com/maps?q=${encodeURIComponent(MAPS_QUERY)}&output=embed`;
 
 /** Read "2026-06-20" into its year, month, and day, or explain the mistake. */
 function parseDate(value: string) {
@@ -138,10 +148,4 @@ function formatTimeRange(start: Date, end: Date) {
   const e = etClockParts(end);
   const startStr = s.period === e.period ? formatClock(s) : `${formatClock(s)}${s.period}`;
   return `${startStr}–${formatClock(e)}${e.period}`;
-}
-
-/** Build a Google Maps search link for a corner, e.g. "A & B" → "A and B, City". */
-function buildMapsUrl(corner: string, city: string) {
-  const query = encodeURIComponent(`${corner.replace(/ & /g, " and ")}, ${city}`);
-  return `https://www.google.com/maps/search/?api=1&query=${query}`;
 }
