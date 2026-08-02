@@ -28,7 +28,16 @@ export type CountdownState =
   | { tag: "tomorrow" }
   | { tag: "this-weekend"; dayName: string }
   | { tag: "next-weekend"; dayName: string }
-  | { tag: "days"; n: number; word: string };
+  | {
+      tag: "days";
+      n: number;
+      word: string;
+      // The cleanup's calendar date, used once n is over a week and we switch from
+      // "in N days" to a concrete date ("the 15th" / "the 15th of September").
+      dayOfMonth: number;
+      monthName: string;
+      sameMonth: boolean; // cleanup lands in the visitor's current month
+    };
 
 /** Parse a Date into year/month/day parts in America/New_York. */
 function etDateParts(d: Date) {
@@ -88,10 +97,38 @@ export function computeCountdown(now: Date, startIso: string, endIso: string): C
   if (cleanupDayMs === nextSatMs) return { tag: "next-weekend", dayName };
 
   const word = N >= 0 && N < NUMBER_WORDS.length ? NUMBER_WORDS[N] : String(N);
-  return { tag: "days", n: N, word };
+  const monthName = new Intl.DateTimeFormat("en-US", {
+    timeZone: TIME_ZONE,
+    month: "long",
+  }).format(new Date(startIso));
+  const sameMonth = cleanupParts.y === nowParts.y && cleanupParts.m === nowParts.m;
+  return { tag: "days", n: N, word, dayOfMonth: cleanupParts.day, monthName, sameMonth };
 }
 
 const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? "" : "s"}`;
+
+/** 1 → "1st", 2 → "2nd", 3 → "3rd", 11 → "11th", 22 → "22nd", … */
+function ordinal(n: number): string {
+  const tens = n % 100;
+  if (tens >= 11 && tens <= 13) return `${n}th`;
+  switch (n % 10) {
+    case 1:
+      return `${n}st`;
+    case 2:
+      return `${n}nd`;
+    case 3:
+      return `${n}rd`;
+    default:
+      return `${n}th`;
+  }
+}
+
+// The date phrase used when the cleanup is more than a week out: "the 15th" in the
+// current month, or "the 15th of September" once it crosses into a later month.
+function onDate(state: Extract<CountdownState, { tag: "days" }>): string {
+  const day = `the ${ordinal(state.dayOfMonth)}`;
+  return state.sameMonth ? day : `${day} of ${state.monthName}`;
+}
 
 // /join line — plain text. "" means "show nothing" (the cleanup has passed).
 export function renderJoinCountdown(state: CountdownState): string {
@@ -111,6 +148,8 @@ export function renderJoinCountdown(state: CountdownState): string {
     case "next-weekend":
       return `Is next ${state.dayName}.`;
     case "days":
+      if (state.n === 7) return "That's in a week.";
+      if (state.n > 7) return `That's on ${onDate(state)}.`;
       return `That's in ${state.word} days.`;
   }
 }
@@ -131,6 +170,8 @@ export function renderCtaLabel(state: CountdownState): string {
     case "next-weekend":
       return `Join us next ${state.dayName}`;
     case "days":
+      if (state.n === 7) return "Join us in a week";
+      if (state.n > 7) return `Join us on ${onDate(state)}`;
       return `Join us in ${state.word} days`;
   }
 }
