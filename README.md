@@ -156,6 +156,30 @@ or component; only genuinely shared styles are global (`src/styles/`).
 
 ---
 
+## Search Engine Optimization
+
+Lighthouse scores 98–99/100 in production. Test:
+[PageSpeed Insights](https://pagespeed.web.dev/analysis?url=https://plgcleanup.org) ·
+[web.dev/measure](https://web.dev/measure/?url=https://plgcleanup.org) · or Chrome DevTools →
+Lighthouse. The 98↔99 wobble is lab-run variance, not a fixable defect.
+
+Two Lighthouse diagnostics are **deliberately won't-fix** — verified, and left as-is:
+
+- **Forced reflow** — every flagged layout read is intentional. `fillTicker` (`SiteHeader.astro`)
+  reads geometry once up front, clones off-DOM in a fragment, and writes in a single append. The
+  `void el.offsetHeight` reads are the canonical "flush styles to restart a CSS transition" idiom —
+  removing them breaks the animations. No cleaner fix exists.
+- **Network dependency tree** — the critical chain is already flat (HTML → CSS → 2 fonts, both
+  `preload`ed in `Base.astro`). Lighthouse shows this panel informationally; it isn't a scored penalty.
+
+**Fonts are deliberately not subset.** Both are variable fonts (`public/fonts/`), already
+Latin-only, and the site uses every axis: weights 200–700, live `opsz` (`font-optical-sizing:
+auto`), and Fraunces `SOFT`/`WONK` at multiple values. The only safe lever (clamping the weight
+range) saves ~9 KB / 4% total — imperceptible on preloaded, brotli-served, edge-cached files — while
+adding a build step and a silent design-range footgun. Not worth it; revisit only if a font grows.
+
+---
+
 ## Deployment & CI
 
 - **Cloudflare Pages**: build command `npm run build`, output dir `dist/`. Every push to `main`
