@@ -1,9 +1,9 @@
 ---
-name: "xyz"
+name: "Jess"
 quote: "..."
 alt: "..."
 image: ../../assets/testimonials/jess.jpg
-order: 10
+order: 2
 ---
 
 ...
