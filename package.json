@@ -14,7 +14,7 @@
     "prepare": "git config core.hooksPath .githooks || true"
   },
   "dependencies": {
-    "@floating-ui/dom": "^1.7.6",
+    "@floating-ui/dom": "^1.8.0",
     "astro": "^6.4.7",
     "embla-carousel": "^8.6.0"
   },
@@ -27,10 +27,10 @@
     "sharp@0.34.5": true
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.9",
+    "@astrojs/check": "^0.9.10",
     "@astrojs/sitemap": "^3.7.3",
     "astro-delete-unused-images": "^1.0.3",
-    "prettier": "^3.9.5",
+    "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^5.9.3"
   }
