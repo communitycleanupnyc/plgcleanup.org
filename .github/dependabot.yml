@@ -33,10 +33,20 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: embla-carousel
         update-types: [version-update:semver-major]
-      # sharp additionally must stay inside the range Astro itself declares
+      # sharp must additionally stay inside the range Astro itself declares
       # (^0.34.0 as of astro 6.4.8) — see "Dependency pins" in the README.
+      #
+      # NOTE the extra semver-minor hold, which the others don't need: sharp is a
+      # 0.x package, so 0.34 → 0.35 is a *minor* bump by semver rules even though
+      # it is a breaking release. A major-only ignore does not catch it, and
+      # Dependabot duly proposed 0.35.3 in the grouped minor PR. Verified: taking
+      # it installs 0.35 at the root while npm keeps a nested 0.34 under astro —
+      # two copies of a native module, with astro's image pipeline still on the
+      # old one. Drop this line when astro's declared range reaches ^0.35.
       - dependency-name: sharp
-        update-types: [version-update:semver-major]
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor
     commit-message:
       prefix: "deps"
 

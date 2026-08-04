@@ -113,8 +113,16 @@ Two deliberate holds. Both are checked by CI, neither is Dependabot's to change:
   **Remove it when** Astro's own declared esbuild range reaches `^0.28` — verify
   with `npm ls esbuild` after deleting the block, then run the full verify loop.
 - **`sharp: "^0.34.5"`** — pinned to the range Astro itself declares (`^0.34.0`).
-  sharp 0.35+ fixes inherited libvips CVEs but leaves Astro's range; wait for
-  Astro to widen it rather than forcing a mismatch. See the TODO list below.
+  sharp 0.35 fixes inherited libvips CVEs, but taking it here **would not
+  actually fix them**: because 0.35 falls outside Astro's range, npm installs
+  0.35 at the root _and_ keeps a nested 0.34 under `astro` — so the image
+  pipeline that processes every photo stays on the old copy, and you carry two
+  builds of a heavy native module. Verified against the resolved lockfile.
+  **Remove the hold when** Astro's declared range reaches `^0.35`.
+
+  Note that sharp is held in `dependabot.yml` against **minor** bumps too, not
+  just majors: it's a `0.x` package, so `0.34 → 0.35` is a minor by semver rules
+  despite being a breaking release.
 
 ---
 
@@ -327,8 +335,10 @@ scattered comments, and delete a line when it's done.
 **Housekeeping**
 
 - [ ] **`sharp` and the libvips CVEs.** `npm audit` reports high-severity
-      advisories fixed in sharp 0.35, but Astro declares `^0.34.0` — see
-      "Dependency pins". Revisit when Astro widens its range.
+      advisories fixed in sharp 0.35, but upgrading can't resolve them until
+      Astro widens its own `^0.34.0` range — see "Dependency pins" for why.
+      Low practical exposure: sharp is build-time only and processes only the
+      photos organizers commit. Revisit when Astro moves.
 - [ ] **Astro majors.** `npm audit` also flags advisories fixed only in Astro 7.
       Held per the majors policy above; upgrade deliberately.
 - [ ] **Photo consent.** The site publishes volunteers' faces, first names, and
