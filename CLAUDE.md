@@ -103,10 +103,19 @@ The build failing is the safety net working — the previous site stays live.
 CI opens a GitHub issue on push failures, so an editor who never looks at Actions
 still finds out. See "If your edit doesn't appear" in the README.
 
+## Twice-a-year maintenance
+
+If you're asked to "do the maintenance" or the six-monthly check, the checklist
+is **"Twice a year, do this" in the README**. Follow it there rather than
+improvising. The part that falls to you is taking **one** held major upgrade at a
+time — read that project's migration guide first, and after upgrading say plainly
+that the mobile menu, carousel, and countdown still need a human to click through
+in `npm run preview`, because nothing in CI exercises client JavaScript.
+
 ## Pointers
 
 - `LAUNCH.md` — the go-live and domain-cutover runbook, and the pre-launch
   switches that are still off.
-- `README.md` — editor-facing docs, the stack, dependency pins, and the running
-  TODO list.
+- `README.md` — editor-facing docs, the stack, dependency pins, the twice-a-year
+  maintenance checklist, and the running TODO list.
 - `.github/workflows/site-checks.yml` — what the scheduled checks do and why.

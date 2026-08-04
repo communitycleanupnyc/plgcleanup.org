@@ -58,6 +58,14 @@ Two emergency levers in the Cloudflare dashboard (Workers & Pages → `plgcleanu
 
 ---
 
+## Access
+
+If you need administrator access to edit something on this website, email
+**[communitycleanupplg@gmail.com](mailto:communitycleanupplg@gmail.com)** with
+your **full name** and the **reason** you need it.
+
+---
+
 ## Pages CMS (form-based editing)
 
 [Pages CMS](https://pagescms.org) gives non-technical editors a form UI for the **testimonials**,
@@ -298,6 +306,146 @@ adding a build step and a silent design-range footgun. Not worth it; revisit onl
   countdown would arrive as an ordinary green PR. Taking one on means asking the
   Claude agent to read the migration guide and then clicking through those three
   things in `npm run preview`. Minor and patch updates still flow automatically.
+
+---
+
+## Twice a year, do this
+
+This site needs no routine attention — but a handful of things rot on a calendar
+rather than on your commits, and each one is quiet until it isn't. Put a repeating
+reminder somewhere real (June and December work) and spend twenty minutes:
+
+1. **Take one held major update.** `astro`, `embla-carousel`, `sharp` and
+   `typescript` never upgrade themselves (see Deployment & CI). Ask the Claude
+   agent to read the migration guide and do one of them, then run
+   `npm run preview` and click through the **mobile menu**, the **carousel**
+   (open a testimonial, use the arrows, swipe) and the **countdown copy** — CI
+   builds the site but never clicks it, so those three are what a bad major
+   breaks silently. One at a time, not all four at once.
+2. **Check the Node version.** `.nvmrc` pins the Node release Cloudflare builds
+   with. If that version is near end-of-life, bump it and confirm a deploy
+   succeeds. Skipping this for years is how a site becomes unbuildable.
+3. **Check that the alarms still reach someone.** Repo → **Watch** should show
+   more than one person receiving Issues. GitHub also disables scheduled
+   workflows in public repos after 60 days of no activity: repo → **Actions** →
+   "site checks" → **Enable workflow** if it's off.
+4. **Confirm the accounts are still in reach.** The domain registration (is
+   auto-renew on, and on a card that hasn't expired?), the Cloudflare account,
+   and the Google Search Console property. At least two people should be able to
+   get into each. A lapsed domain ends the site in a way no code can prevent.
+5. **Skim the TODO list below** and delete anything already done.
+
+Steps 1 and 2 are the only ones that need Claude Code. If you've never used it,
+the walkthrough below starts from nothing.
+
+### Running Claude Code for the first time
+
+Claude Code is an AI assistant that works on this website's files with you. You
+describe what you want in plain English; it does the work and shows you before
+changing anything. This walkthrough assumes no prior experience. Budget an hour
+the first time and about ten minutes on every visit after that.
+
+The official quickstart lives at
+**<https://code.claude.com/docs/en/quickstart>** — if anything below has drifted,
+that page is correct and this one isn't.
+
+**Before you start, you need:**
+
+- **A paid Claude plan** — Pro, Max, Team, or Enterprise. The free Claude.ai plan
+  does **not** include Claude Code.
+- **macOS 13 or newer, or Windows 10 or newer**, with at least 4 GB of RAM.
+- **A GitHub account** that has access to this repository (see [Access](#access)).
+
+**Step 1 — Install the tools this website needs.** Two free downloads, both
+"next, next, finish" installers:
+
+- **Node.js** from <https://nodejs.org> — choose the version matching `.nvmrc` in
+  this repo (currently **v24**). This is what builds the site.
+- **Git** from <https://git-scm.com/downloads> — this is what downloads the code
+  and sends your changes back. On Windows, accept the default options; one of
+  them ("Git Bash") is used by Claude Code.
+
+**Step 2 — Install Claude Code.** Two ways; pick one.
+
+_The easier way — the desktop app (no terminal at all):_ download it from
+<https://claude.com/download>, install it, and sign in with your Claude account.
+This is the better choice if typing commands makes you nervous.
+
+_The terminal way:_ open **Terminal** (macOS: press ⌘+Space, type "Terminal") or
+**PowerShell** (Windows: press the Start key, type "PowerShell"), then paste one
+line and press Enter.
+
+On **macOS**:
+
+```sh
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+On **Windows**, in PowerShell:
+
+```powershell
+irm https://claude.ai/install.ps1 | iex
+```
+
+Check that it worked by typing `claude --version`. You should see a number
+followed by `(Claude Code)`. If instead you see "command not found", close the
+terminal window, open a fresh one, and try again.
+
+**Step 3 — Download this website's code.** In the same terminal, one line at a
+time:
+
+```sh
+cd ~/Documents
+git clone https://github.com/communitycleanupnyc/plgcleanup.org.git
+cd plgcleanup.org
+npm install
+```
+
+That puts the site in a `plgcleanup.org` folder inside your Documents. You only
+do this once — next time, just `cd ~/Documents/plgcleanup.org`.
+
+**Step 4 — Start Claude Code.** From inside that folder, type:
+
+```sh
+claude
+```
+
+The first time, it opens your browser to sign in. After that it remembers you.
+(If you installed the desktop app instead, open it and point it at the
+`plgcleanup.org` folder.)
+
+**Step 5 — Ask for what you need.** Type in plain English and press Enter. For
+the twice-a-year checklist above, these work well, one at a time:
+
+```text
+read CLAUDE.md and the README, then do the twice-a-year maintenance
+```
+
+```text
+upgrade astro to the next major version, read the migration guide first
+```
+
+```text
+is the node version in .nvmrc still supported?
+```
+
+**What to expect, so nothing is alarming:**
+
+- It **asks before changing any file** and shows you exactly what it wants to
+  change. Read it; say no if it looks wrong.
+- **Nothing reaches the live website** until changes are committed and pushed to
+  GitHub — ask it to do that explicitly when you're happy, and it will.
+- If a change is broken, **the site refuses to rebuild and the current version
+  stays live**. See "If your edit doesn't appear after 2 minutes" above.
+- After a dependency upgrade, ask it to run `npm run preview`, then open the
+  address it prints in your browser and click the **mobile menu**, the
+  **carousel**, and check the **countdown text**. Nothing automatic tests those,
+  so this is the one part a person has to do.
+- Type `/help` for commands, and `/exit` (or Ctrl+D twice) to quit.
+
+**If you get stuck**, paste the error you're seeing straight into Claude Code and
+ask what it means — that is genuinely the fastest route. For installation
+problems specifically, see <https://code.claude.com/docs/en/troubleshoot-install>.
 
 ---
 
