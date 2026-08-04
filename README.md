@@ -10,6 +10,39 @@ via Dependabot PRs that CI checks before you merge.
 
 ---
 
+## Contents
+
+**Changing the site**
+
+- [Editing the site (no coding needed)](#editing-the-site-no-coding-needed)
+  - [If your edit doesn't appear after 2 minutes](#if-your-edit-doesnt-appear-after-2-minutes)
+- [Access](#access) — how to ask for permission to edit
+- [Pages CMS (form-based editing)](#pages-cms-form-based-editing)
+
+**Taking care of the site**
+
+- [Maintainer setup (first time)](#maintainer-setup-first-time)
+  - [Turn on failure notifications](#turn-on-failure-notifications) — **start here**
+  - [Installing and running Claude Code](#installing-and-running-claude-code)
+- [Twice a year, do this](#twice-a-year-do-this)
+- [TODO](#todo) — what still needs a human
+
+**How it's built**
+
+- [Stack](#stack)
+  - [Dependency pins](#dependency-pins)
+- [Commands](#commands)
+- [Repository layout](#repository-layout)
+- [How a few things work](#how-a-few-things-work)
+- [Search Engine Optimization](#search-engine-optimization)
+- [Deployment & CI](#deployment--ci)
+
+Also at the repo root: **[LAUNCH.md](LAUNCH.md)** (going live and the domain
+cutover) and **[CLAUDE.md](CLAUDE.md)** (the operating manual the Claude agent
+reads automatically).
+
+---
+
 ## Editing the site (no coding needed)
 
 Everything an organizer normally changes is plain text you can edit on GitHub (click a file,
@@ -309,41 +342,51 @@ adding a build step and a silent design-range footgun. Not worth it; revisit onl
 
 ---
 
-## Twice a year, do this
+## Maintainer setup (first time)
 
-This site needs no routine attention — but a handful of things rot on a calendar
-rather than on your commits, and each one is quiet until it isn't. Put a repeating
-reminder somewhere real (June and December work) and spend twenty minutes:
+Two things to do once, when you take this site on. The first takes fifteen
+seconds and matters more than anything else in this file.
 
-1. **Take one held major update.** `astro`, `embla-carousel`, `sharp` and
-   `typescript` never upgrade themselves (see Deployment & CI). Ask the Claude
-   agent to read the migration guide and do one of them, then run
-   `npm run preview` and click through the **mobile menu**, the **carousel**
-   (open a testimonial, use the arrows, swipe) and the **countdown copy** — CI
-   builds the site but never clicks it, so those three are what a bad major
-   breaks silently. One at a time, not all four at once.
-2. **Check the Node version.** `.nvmrc` pins the Node release Cloudflare builds
-   with. If that version is near end-of-life, bump it and confirm a deploy
-   succeeds. Skipping this for years is how a site becomes unbuildable.
-3. **Check that the alarms still reach someone.** Repo → **Watch** should show
-   more than one person receiving Issues. GitHub also disables scheduled
-   workflows in public repos after 60 days of no activity: repo → **Actions** →
-   "site checks" → **Enable workflow** if it's off.
-4. **Confirm the accounts are still in reach.** The domain registration (is
-   auto-renew on, and on a card that hasn't expired?), the Cloudflare account,
-   and the Google Search Console property. At least two people should be able to
-   get into each. A lapsed domain ends the site in a way no code can prevent.
-5. **Skim the TODO list below** and delete anything already done.
+### Turn on failure notifications
 
-Steps 1 and 2 are the only ones that need Claude Code. If you've never used it,
-the walkthrough below starts from nothing.
+**Do this before anything else.** When an edit breaks the site, or when the
+weekly check notices the cleanup date has gone stale, this repository
+automatically opens a **GitHub issue** describing what's wrong and how to fix it.
+Those issues go to whoever is _watching_ the repository — and if nobody is, they
+are written to an empty room. The site can then sit broken, or quietly advertise
+an event that already happened, for as long as nobody happens to look.
 
-### Running Claude Code for the first time
+To subscribe:
+
+1. Open the repository on GitHub:
+   <https://github.com/communitycleanupnyc/plgcleanup.org>
+2. Click the **Watch** button near the top right (it may say "Unwatch" if you're
+   already subscribed).
+3. Choose **Custom**.
+4. Tick **Issues**, then click **Apply**.
+
+Choose **Custom → Issues** rather than "All Activity": you'll be told when
+something is broken, without being emailed about every routine change.
+
+**More than one person should do this.** A single watcher is one holiday — or one
+changed email address, or one person moving out of the neighborhood — away from
+being no watchers at all. Ask a second organizer to follow the same four steps.
+If they need access in order to, see [Access](#access).
+
+To check who is currently subscribed, open the repository's **Watch** button and
+look at the list, or visit
+<https://github.com/communitycleanupnyc/plgcleanup.org/watchers>.
+
+### Installing and running Claude Code
 
 Claude Code is an AI assistant that works on this website's files with you. You
 describe what you want in plain English; it does the work and shows you before
-changing anything. This walkthrough assumes no prior experience. Budget an hour
-the first time and about ten minutes on every visit after that.
+changing anything. You need it for the dependency and Node steps in
+[Twice a year, do this](#twice-a-year-do-this); you don't need it for ordinary
+content edits, which are just text files on GitHub.
+
+The walkthrough below assumes no prior experience. Budget an hour the first time
+and about ten minutes on every visit after that.
 
 The official quickstart lives at
 **<https://code.claude.com/docs/en/quickstart>** — if anything below has drifted,
@@ -446,6 +489,41 @@ is the node version in .nvmrc still supported?
 **If you get stuck**, paste the error you're seeing straight into Claude Code and
 ask what it means — that is genuinely the fastest route. For installation
 problems specifically, see <https://code.claude.com/docs/en/troubleshoot-install>.
+
+---
+
+## Twice a year, do this
+
+This site needs no routine attention — but a handful of things rot on a calendar
+rather than on your commits, and each one is quiet until it isn't. Put a repeating
+reminder somewhere real (June and December work) and spend twenty minutes:
+
+1. **Take one held major update.** `astro`, `embla-carousel`, `sharp` and
+   `typescript` never upgrade themselves (see Deployment & CI). Ask the Claude
+   agent to read the migration guide and do one of them, then run
+   `npm run preview` and click through the **mobile menu**, the **carousel**
+   (open a testimonial, use the arrows, swipe) and the **countdown copy** — CI
+   builds the site but never clicks it, so those three are what a bad major
+   breaks silently. One at a time, not all four at once.
+2. **Check the Node version.** `.nvmrc` pins the Node release Cloudflare builds
+   with. If that version is near end-of-life, bump it and confirm a deploy
+   succeeds. Skipping this for years is how a site becomes unbuildable.
+3. **Check that the alarms still reach someone.** More than one person should
+   still be watching Issues — see
+   [Turn on failure notifications](#turn-on-failure-notifications), and check the
+   list at
+   [/watchers](https://github.com/communitycleanupnyc/plgcleanup.org/watchers).
+   GitHub also disables scheduled workflows in public repos after 60 days of no
+   activity: repo → **Actions** → "site checks" → **Enable workflow** if it's off.
+4. **Confirm the accounts are still in reach.** The domain registration (is
+   auto-renew on, and on a card that hasn't expired?), the Cloudflare account,
+   and the Google Search Console property. At least two people should be able to
+   get into each. A lapsed domain ends the site in a way no code can prevent.
+5. **Skim the TODO list below** and delete anything already done.
+
+Steps 1 and 2 are the only ones that need Claude Code. If you've never used
+it, [Installing and running Claude Code](#installing-and-running-claude-code)
+above starts from nothing.
 
 ---
 
