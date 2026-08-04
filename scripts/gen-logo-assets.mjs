@@ -1,14 +1,29 @@
-// Regenerates every raster/derived logo asset from the single source of truth:
-//   public/images/logo.svg  (a hand cradling a tree)
+// Regenerates the raster logo assets from public/images/logo.svg (a hand
+// cradling a tree). Run `npm run gen:logo` after editing that file.
 //
-// Outputs (run `npm run gen:logo` after editing logo.svg):
-//   public/favicon.svg          green tree mark (canopy + trunk), transparent
-//   public/favicon.png          raster of favicon.svg, transparent
+// Writes:
+//   public/favicon.png          green tree mark, transparent, 288px wide
 //   public/apple-touch-icon.png 180x180 green tree on black, opaque
-//   public/images/logo.webp     400x400 full mark (hand + tree), black, transparent
+//   public/images/logo.webp     400x400 full mark (hand + tree), transparent
 //
-// The header logo in src/components/SiteHeader.astro is an inline <svg> using
-// currentColor; keep its viewBox + path in sync with logo.svg by hand.
+// Does NOT write, and must be kept in sync BY HAND:
+//   public/favicon.svg                    (the green tree mark, hand-authored)
+//   src/components/SiteHeader.astro       (inline <svg>, currentColor — copy the
+//                                          viewBox and path across after an edit)
+//
+// WHAT THIS SCRIPT ASSUMES about logo.svg. It reads the file with regexes, not
+// an SVG parser, so redrawing the logo without honoring these will produce
+// silently wrong output rather than an error:
+//
+//   1. Exactly ONE <path> element (enforced below — the script throws otherwise).
+//   2. Its `d` attribute begins its subpaths with "M", and the FIRST TWO subpaths
+//      are the tree (canopy outline, then trunk notch); everything after is the
+//      hand. Reordering them changes what the favicon shows.
+//   3. A viewBox anchored at "0 0".
+//   4. The tree's height in user units is the hardcoded `treeH` below. It is
+//      measured, not derived — re-measure it (e.g. in a vector editor, or via the
+//      bounding box of the first two subpaths) after any edit to the tree, or the
+//      favicon and touch icon will crop or letterbox.
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -19,6 +34,18 @@ const BLACK = "#010101"; // logo.svg source fill
 
 // Pull the path + viewBox out of the source SVG.
 const src = readFileSync(new URL("public/images/logo.svg", `file://${root}`), "utf8");
+
+// Assumption 1, enforced: only the FIRST <path> is ever read, so a logo redrawn
+// as several paths would silently generate assets from a fragment of itself.
+const pathCount = (src.match(/<path\b/g) ?? []).length;
+if (pathCount !== 1) {
+  throw new Error(
+    `public/images/logo.svg has ${pathCount} <path> elements; this script only reads the first one ` +
+      `and would generate the logo from a fragment. Flatten the artwork to a single path (in your ` +
+      `vector editor: select all → unite/merge), then re-measure treeH in this script.`,
+  );
+}
+
 const d = src.match(/ d="([^"]+)"/)[1];
 const [vbW, vbH] = src
   .match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/)
@@ -31,6 +58,8 @@ const tree = subs.slice(0, 2).join(""); // the icon mark (matches historical fav
 const full = d; // the complete lockup (hand + tree)
 
 // Tree bbox shares the source origin (0,0); height differs from the full mark.
+// MEASURED, not computed — see assumption 4 in the header. Re-measure after any
+// edit to the tree artwork.
 const treeH = 296.1;
 
 const svg = ({ w, h, bg, fill, path, tx = 0, ty = 0, scale = 1 }) =>

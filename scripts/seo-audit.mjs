@@ -10,7 +10,12 @@
  *   node scripts/seo-audit.mjs dist            (site inferred from index canonical)
  *
  * Exit codes: 0 = clean or warnings only, 1 = errors.
- * Env: SEO_SKIP_FRESH=1 downgrades stale-Event-schema errors to warnings.
+ * Env:
+ *   SEO_SKIP_FRESH=1       downgrades stale-Event-schema errors to warnings.
+ *   SEO_SKIP_PLACEHOLDER=1 downgrades the placeholder-content errors ("xyz"
+ *                          names, "…"-only pull quotes) to warnings. Set
+ *                          pre-launch only, while real testimonial copy is
+ *                          still being written — remove at launch (LAUNCH.md).
  */
 
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
@@ -19,9 +24,21 @@ import { join, posix } from "node:path";
 // ---------------------------------------------------------------- config ---
 const CFG = {
   // Strings that must never ship in visible text (case-insensitive). ERROR.
-  forbiddenVisible: ["example.org", "example.com", "lorem ipsum", "TKTK", "STUB —", "STUB -"],
+  forbiddenVisible: [
+    "example.org",
+    "example.com",
+    "lorem ipsum",
+    "TKTK",
+    "STUB —",
+    "STUB -",
+    // Editors write "_todo_" into Markdown while drafting. Shipping one means an
+    // unfinished page went live (this is how terms.md nearly launched blank).
+    "TODO",
+  ],
   // Softer launch markers. WARN.
-  warnVisible: ["coming soon", "TODO"],
+  warnVisible: ["coming soon"],
+  // Placeholder testimonial copy. ERROR unless SEO_SKIP_PLACEHOLDER=1.
+  placeholderVisible: ["xyz"],
   // Comment markers that leak roadmap if shipped inside <!-- -->. WARN.
   commentMarkers: ["TODO", "STUB", "FIXME", "HACK"],
   // Alt texts that are effectively junk. WARN. (alt="" is fine = decorative.)
@@ -37,7 +54,7 @@ const CFG = {
     "Bytespider",
   ],
   thinWords: 120, // WARN below this visible word count
-  thinAllow: ["terms.html", "404.html"], // pages allowed to be thin
+  thinAllow: ["404.html"], // pages allowed to be thin
   imgBudgetBytes: 1.5 * 1024 * 1024, // per-page local image weight. WARN.
   titleLen: [15, 70],
   descLen: [50, 165],
@@ -78,6 +95,9 @@ const decode = (s) =>
 const issues = []; // {level, file, msg}
 const err = (file, msg) => issues.push({ level: "ERROR", file, msg });
 const warn = (file, msg) => issues.push({ level: "WARN", file, msg });
+// Placeholder-content findings: errors, unless the pre-launch escape hatch is set.
+const placeholder = (file, msg) =>
+  process.env.SEO_SKIP_PLACEHOLDER ? warn(file, msg) : err(file, msg);
 
 // Map a URL path ("/about", "/about/", "/") to a file in dist, honoring both
 // Astro build formats (about.html and about/index.html).
@@ -150,6 +170,7 @@ const inSitemap = new Set(sitemapUrls.map((u) => pathToFile(new URL(u).pathname)
 const titles = new Map(),
   descs = new Map();
 const missingAssets = new Set();
+const eventNodePages = new Set(); // pages that emitted an Event JSON-LD node
 
 function assetExists(u, page) {
   // Only verify same-host or root-relative references; externals are lychee's job.
@@ -248,8 +269,16 @@ for (const page of htmlFiles) {
     for (const n of nodes) {
       for (const k of ["image", "logo"]) if (typeof n[k] === "string") assetExists(n[k], page);
       if (n["@type"] === "Event") {
+        eventNodePages.add(page);
+        // Google requires these three; without them the node is inert in search.
+        for (const k of ["name", "startDate", "location"])
+          if (!n[k]) err(page, `Event JSON-LD is missing required "${k}".`);
         const end = new Date(n.endDate ?? n.startDate ?? 0);
-        if (end < new Date()) {
+        // An unparseable date compares false against every Date, so it would
+        // sail past the freshness check below as if it were fresh.
+        if (Number.isNaN(end.getTime()))
+          err(page, `Event has unparseable startDate/endDate: ${n.endDate ?? n.startDate}`);
+        else if (end < new Date()) {
           const msg = `Stale Event schema: "${n.name}" ended ${end.toISOString().slice(0, 10)}. Rebuild with a future event or drop past events at build time.`;
           process.env.SEO_SKIP_FRESH ? warn(page, msg) : err(page, msg);
         }
@@ -262,8 +291,10 @@ for (const page of htmlFiles) {
     }
   }
 
-  // Internal links resolve
-  for (const m of body.matchAll(/href="([^"#]+)"/g)) {
+  // Internal links resolve. The pattern must NOT exclude "#": excluding it made
+  // the regex skip every link containing a fragment rather than skipping the
+  // fragment part (pathToFile already strips #, so /about#team resolves fine).
+  for (const m of body.matchAll(/href="([^"]+)"/g)) {
     const h = decode(m[1]);
     if (/^(https?:|mailto:|tel:)/.test(h)) {
       if (/\/\/(www\.)?(example\.(org|com|net)|localhost|127\.0\.0\.1)/i.test(h))
@@ -290,6 +321,15 @@ for (const page of htmlFiles) {
   for (const s of CFG.warnVisible)
     if (vis.toLowerCase().includes(s.toLowerCase()))
       warn(page, `Launch marker visible on page: "${s}"`);
+  // Placeholder testimonial copy: a stand-in name ("xyz"), or a pull quote that
+  // is nothing but dots. Both ship straight onto the home-page carousel.
+  for (const s of CFG.placeholderVisible)
+    if (vis.toLowerCase().includes(s.toLowerCase())) placeholder(page, `Placeholder name: "${s}"`);
+  for (const q of html.matchAll(/card__quote[^>]*>([\s\S]*?)<\/p>/g)) {
+    const text = decode(q[1].replace(/<[^>]+>/g, "")).replace(/[“”"\s]|\[…\]/g, "");
+    if (text && /^[.…]+$/.test(text))
+      placeholder(page, `Placeholder pull quote (dots only): "${text}"`);
+  }
   const words = vis.split(" ").filter(Boolean).length;
   if (words < CFG.thinWords && !CFG.thinAllow.includes(page))
     warn(page, `Thin page: ${words} visible words (< ${CFG.thinWords}).`);
@@ -334,8 +374,10 @@ for (const page of htmlFiles) {
     }
   }
   if (noAlt) warn(page, `${noAlt} <img> tag(s) missing an alt attribute.`);
+  // ERROR, not WARN: testimonial alt text is derived in Carousel.astro, so junk
+  // alt can only reappear via a hand-written one. This is the regression net.
   if (junk.length)
-    warn(
+    err(
       page,
       `${junk.length} image(s) with junk alt text (${[...new Set(junk)].slice(0, 4).join(", ")}) — use real descriptions or alt="" if decorative.`,
     );
@@ -348,6 +390,29 @@ for (const page of htmlFiles) {
   // Sitemap membership (indexable pages only)
   if (!inSitemap.has(page) && page !== "404.html" && !(rm && /noindex/i.test(rm[1])))
     err(page, "Indexable page missing from sitemap.");
+}
+
+// -------------------------------------------------- Event schema presence ---
+// join.astro drops the Event JSON-LD once the cleanup is over (a past event in
+// search results is worse than none). That legitimate absence must not become a
+// silent hole where a *future* event ships with no schema at all — so require
+// the node whenever dist itself still describes an upcoming event.
+//
+// The event's end timestamp is read back out of dist, not src: every
+// [data-countdown] element carries data-end, baked from src/data/event.ts. That
+// keeps this check honest about what actually shipped.
+if (fileSet.has("join.html")) {
+  let latestEnd = null;
+  for (const page of htmlFiles)
+    for (const m of read(page).matchAll(/data-end="([^"]+)"/g)) {
+      const d = new Date(decode(m[1]));
+      if (!Number.isNaN(d.getTime()) && (!latestEnd || d > latestEnd)) latestEnd = d;
+    }
+  if (latestEnd && latestEnd > new Date() && !eventNodePages.has("join.html"))
+    err(
+      "join.html",
+      `No Event JSON-LD, but the build describes an upcoming cleanup ending ${latestEnd.toISOString()}. Google event listings need the schema — check the eventSchema block in src/pages/join.astro.`,
+    );
 }
 
 // ---------------------------------------------------------------- report ---

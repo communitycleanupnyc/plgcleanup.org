@@ -7,29 +7,23 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "audit": "node scripts/seo-audit.mjs dist --site https://plgcleanup.pages.dev",
+    "audit": "node scripts/seo-audit.mjs dist",
     "gen:logo": "node scripts/gen-logo-assets.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "git config core.hooksPath .githooks || true"
   },
   "dependencies": {
-    "@floating-ui/dom": "^1.7.6",
-    "astro": "^6.4.7",
-    "embla-carousel": "^8.6.0"
+    "astro": "^6.4.8",
+    "embla-carousel": "^8.6.0",
+    "sharp": "^0.34.5"
   },
   "overrides": {
     "esbuild": "^0.28.1"
   },
-  "allowScripts": {
-    "esbuild@0.28.1": true,
-    "fsevents@2.3.3": true,
-    "sharp@0.34.5": true
-  },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@astrojs/sitemap": "^3.7.3",
-    "astro-delete-unused-images": "^1.0.3",
     "prettier": "^3.9.5",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^5.9.3"

@@ -1,7 +1,6 @@
 ---
 name: "Abby …"
 quote: "Not gonna lie"
-alt: "…"
 image: ../../assets/testimonials/abby.jpg
 order: 1
 ---

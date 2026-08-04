@@ -45,7 +45,6 @@ const items: CarouselItem[] = await Promise.all(
       img: entry.data.image,
       name: entry.data.name,
       quote: entry.data.quote,
-      alt: entry.data.alt,
       focusPosition: entry.data.focusPosition,
       Body: Content,
     };
@@ -60,7 +59,7 @@ const ctaLabel = renderCtaLabel(state);
 ---
 
 <Base
-  title="Volunteer Trash Cleanup in Prospect Lefferts Gardens"
+  title="Trash Cleanup in Prospect Lefferts Gardens"
   description="A volunteer trash cleanup crew in Prospect Lefferts Gardens, Brooklyn. No registration, all supplies provided — just show up."
 >
   <div class="hero">
@@ -74,7 +73,8 @@ const ctaLabel = renderCtaLabel(state);
       sizes="148px"
       format="webp"
       layout="none"
-      loading="lazy"
+      loading="eager"
+      fetchpriority="high"
       decoding="async"
     />
   </div>
@@ -99,7 +99,7 @@ const ctaLabel = renderCtaLabel(state);
   </div>
 
   <section class="why" aria-labelledby="why-label">
-    <p class="why__label" id="why-label">Why volunteer</p>
+    <h2 class="why__label" id="why-label">Why volunteer</h2>
     <div class="why__grid">
       <div class="why__col">
         <h3>Really, picking up trash?</h3>
@@ -152,7 +152,7 @@ const ctaLabel = renderCtaLabel(state);
     font-weight: 500;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--text-muted);
     margin-bottom: 0.875rem;
   }
 

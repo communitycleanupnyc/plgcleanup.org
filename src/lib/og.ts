@@ -8,6 +8,14 @@ import { RANDOMIZE_OG_IMAGE } from "../config";
 // (src/config.ts) to feature a random volunteer, chosen fresh per build.
 // Base.astro renders the chosen photo into a high-res share image with Sharp.
 const testimonials = await getCollection("testimonials");
+// Base.astro renders this on every page, so an empty collection wouldn't fail
+// one page — it would crash the whole build with a bare "cannot read image of
+// undefined". Say what actually needs doing instead.
+if (testimonials.length === 0) {
+  throw new Error(
+    "[testimonials] The social share image features a testimonial photo, but src/content/testimonials/ is empty. Add at least one testimonial.",
+  );
+}
 const byOrder = [...testimonials].sort((a, b) => a.data.order - b.data.order);
 const pick = RANDOMIZE_OG_IMAGE
   ? testimonials[Math.floor(Math.random() * testimonials.length)]

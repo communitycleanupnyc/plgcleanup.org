@@ -14,7 +14,10 @@ const {
 } = Astro.props as CarouselProps;
 
 const N = items.length;
-const headingId = `ch-${Math.random().toString(36).slice(2, 9)}`;
+// A fixed id, not a random one: there is one carousel per page, and a random id
+// made every build emit different HTML for identical content — which defeats
+// diffing a build against the last one to see what actually changed.
+const headingId = "carousel-heading";
 
 const DENSITIES = [1, 2, 3];
 
@@ -44,7 +47,7 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
   N > 0 && (
     <section
       class="carousel-section"
-      aria-labelledby={headingId}
+      aria-labelledby={heading ? headingId : undefined}
       data-carousel
       data-variant={variant}
       data-grayscale={String(grayscale)}
@@ -118,7 +121,7 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                   <div class="card__media">
                     <Image
                       src={item.img}
-                      alt={item.alt}
+                      alt={`Portrait of ${item.name}, Community Cleanup PLG volunteer`}
                       width={info.fallbackW}
                       height={info.fallbackH}
                       widths={info.widths}
@@ -132,8 +135,11 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                       style={blurStyle}
                     />
                     {enablePopup && Body && (
-                      <div class="card__panel" hidden>
-                        <button class="card__panel-close" aria-label="Close testimonial">
+                      <div class="card__panel" id={`carousel-panel-${index}`} hidden>
+                        <button
+                          class="card__panel-close"
+                          aria-label={`Close ${item.name}'s testimonial`}
+                        >
                           <svg
                             width="20"
                             height="20"
@@ -149,7 +155,16 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                             />
                           </svg>
                         </button>
-                        <div class="card__panel-body">
+                        {/* tabindex="0" is what makes this scrollable box reachable by
+                            keyboard — Safari, unlike Firefox/Chrome, will not focus an
+                            overflow container on its own, so arrow keys can't scroll a
+                            long testimonial there otherwise. */}
+                        <div
+                          class="card__panel-body"
+                          tabindex="0"
+                          role="region"
+                          aria-label={`${item.name}'s testimonial`}
+                        >
                           <Body />
                         </div>
                       </div>
@@ -167,6 +182,7 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                       <button
                         class="card__toggle"
                         aria-expanded="false"
+                        aria-controls={`carousel-panel-${index}`}
                         aria-label={`Read ${item.name}'s testimonial`}
                       >
                         <svg

@@ -3,8 +3,16 @@
 :root {
   --bg: #000;
   --text: #e2e2e2;
-  --muted: #292929;
+  /* SURFACE tokens — backgrounds only. --surface was called --muted, a name that
+     invited use as a text colour: at 1.44:1 on --bg it made the "← Back home"
+     link on every prose page, and the ticker's play/pause control, effectively
+     invisible. Renamed so the mistake can't be made twice. For dim TEXT or
+     icons, reach for --text-muted below. */
+  --surface: #292929;
   --line: #3d3d3d;
+  /* Dim foreground text and icons: ~7.4:1 on --bg (WCAG AA needs 4.5:1 for text,
+     3:1 for icons and other non-text controls). */
+  --text-muted: #9a9a96;
   --brand: #63c9ea;
   --accent: #24cb71;
   --select: #eeb408;

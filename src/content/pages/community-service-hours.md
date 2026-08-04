@@ -1,9 +1,7 @@
 ---
-title: Community Service Hours in Brooklyn - We Sign School Forms
+title: Community Service Hours in Brooklyn
 description: Earn verified community service hours at our Prospect Lefferts Gardens cleanups. We sign school, DOE, and National Honor Society forms on the spot.
 ---
-
-_todo: review_
 
 # Community service hours in Brooklyn
 

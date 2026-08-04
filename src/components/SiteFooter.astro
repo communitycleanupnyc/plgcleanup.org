@@ -1,5 +1,7 @@
 ---
-
+// Build-time year. The daily rebuild (site-checks.yml `redeploy`) is what keeps
+// this from going stale on 1 January without anyone pushing a commit.
+const year = new Date().getFullYear();
 ---
 
 <footer class="site-footer">
@@ -37,7 +39,7 @@
     </div>
     <div class="footer-right">
       <a href="/terms">Volunteering Terms</a>
-      <p class="footer-copyright">&copy; Community Cleanup PLG 2026</p>
+      <p class="footer-copyright">&copy; Community Cleanup PLG {year}</p>
       <p class="footer-made">Made with 💚 in Brooklyn, New York</p>
     </div>
   </div>

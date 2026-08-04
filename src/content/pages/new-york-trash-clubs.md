@@ -1,5 +1,5 @@
 ---
-title: New York Trash Clubs — Volunteer Street Cleanup Crews Across NYC
+title: New York Trash Clubs
 description: A guide to volunteer street-cleanup clubs across New York City and Brooklyn — who they are, where they clean, and how to join.
 ---
 
@@ -9,8 +9,6 @@ New York has seen a growing trend of volunteer-run "trash clubs" like ours. Here
 the crews we know of, so you can find one near you.
 
 Did we miss any, or curious about starting a trash club in your neighborhood? [Email us](mailto:communitycleanupplg@gmail.com)
-
-_todo: fill this out_
 
 ## Clubs around the city
 

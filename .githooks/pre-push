@@ -4,7 +4,9 @@
 # placeholder links, stale Event schema, shipped TODOs…).
 # Runs only on push (not every commit), so the extra seconds are infrequent.
 # Bypass once with: git push --no-verify
-# SEO_SKIP_FRESH mirrors the workflow env (site-checks.yml): pre-launch it
-# downgrades the stale-Event check to a warning so a past event.json date can't
-# block pushes. Drop it here and in the workflow at launch to re-arm the gate.
-SEO_SKIP_FRESH=1 npm run format:check && npm run check && npm run build && SEO_SKIP_FRESH=1 npm run audit
+# SEO_SKIP_FRESH / SEO_SKIP_PLACEHOLDER mirror the workflow env (ci.yml): before
+# launch they downgrade the stale-Event check and the placeholder-testimonial
+# check to warnings, so a past event.json date or an unwritten testimonial can't
+# block pushes. Drop them here AND in ci.yml / site-checks.yml at launch to arm
+# the gate for real — see LAUNCH.md step A.4.
+npm run format:check && npm run check && npm run build && SEO_SKIP_FRESH=1 SEO_SKIP_PLACEHOLDER=1 npm run audit

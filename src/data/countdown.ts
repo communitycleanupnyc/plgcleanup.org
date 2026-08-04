@@ -85,16 +85,25 @@ export function computeCountdown(now: Date, startIso: string, endIso: string): C
 
   if (N === 1) return { tag: "tomorrow" };
 
-  const todayDow = new Date(todayMs).getUTCDay();
-  const thisSatMs = todayMs + ((6 - todayDow + 7) % 7) * 86_400_000;
-  const nextSatMs = thisSatMs + 7 * 86_400_000;
+  // Cleanups run on either weekend day, so "this weekend" can't be a single-day
+  // comparison against Saturday — that silently drops every Sunday cleanup down
+  // to the generic "in five days" copy. Instead, map any day onto the Saturday
+  // of the weekend it belongs to and compare weekends. Sunday (dow 0) belongs to
+  // the weekend that started the day before; every other day looks forward.
+  const weekendSaturday = (dayMs: number) => {
+    const dow = new Date(dayMs).getUTCDay();
+    return dow === 0 ? dayMs - 86_400_000 : dayMs + (6 - dow) * 86_400_000;
+  };
+  const thisWeekendMs = weekendSaturday(todayMs);
+  const nextWeekendMs = thisWeekendMs + 7 * 86_400_000;
+  const cleanupWeekendMs = weekendSaturday(cleanupDayMs);
 
   const dayName = new Intl.DateTimeFormat("en-US", {
     timeZone: TIME_ZONE,
     weekday: "long",
   }).format(new Date(startIso));
-  if (cleanupDayMs === thisSatMs) return { tag: "this-weekend", dayName };
-  if (cleanupDayMs === nextSatMs) return { tag: "next-weekend", dayName };
+  if (cleanupWeekendMs === thisWeekendMs) return { tag: "this-weekend", dayName };
+  if (cleanupWeekendMs === nextWeekendMs) return { tag: "next-weekend", dayName };
 
   const word = N >= 0 && N < NUMBER_WORDS.length ? NUMBER_WORDS[N] : String(N);
   const monthName = new Intl.DateTimeFormat("en-US", {
@@ -142,7 +151,7 @@ export function renderJoinCountdown(state: CountdownState): string {
     case "hours":
       return `Is starting in ${plural(state.n, "hour")}!`;
     case "tomorrow":
-      return "is tomorrow!";
+      return "Is tomorrow!";
     case "this-weekend":
       return `Is this ${state.dayName}!`;
     case "next-weekend":

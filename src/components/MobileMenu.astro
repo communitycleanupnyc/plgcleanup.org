@@ -44,13 +44,32 @@
     else window.addEventListener("load", enableSlide, { once: true });
   }
 
+  // The menu claims role="dialog" aria-modal="true", so Tab must not walk behind
+  // it — it's an opaque overlay, and reaching the nav links underneath is how a
+  // keyboard user ends up typing into something they can't see. `inert` on every
+  // other top-level element takes that whole subtree out of the tab order and
+  // out of the accessibility tree in one attribute.
+  //
+  // Computed from body.children rather than a hard-coded id list, so adding a new
+  // top-level element later can't silently reopen the hole.
+  const isTouch = () => window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+
+  function setBackgroundInert(inert: boolean) {
+    for (const el of Array.from(document.body.children)) {
+      if (el === mobileMenu || el === menuBtn) continue;
+      if (inert) el.setAttribute("inert", "");
+      else el.removeAttribute("inert");
+    }
+  }
+
   function openMobileMenu() {
     mobileMenu!.classList.add("is-open");
     menuBtn!.setAttribute("aria-expanded", "true");
     menuBtn!.setAttribute("aria-label", "Close menu");
     document.body.style.overflow = "hidden";
+    setBackgroundInert(true);
     // Keyboard users need focus moved into the dialog; touch users don't
-    if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
+    if (!isTouch()) {
       mobileMenu!.querySelector<HTMLElement>(".mobile-menu-link")?.focus();
     }
   }
@@ -59,7 +78,12 @@
     menuBtn!.setAttribute("aria-expanded", "false");
     menuBtn!.setAttribute("aria-label", "Open menu");
     document.body.style.overflow = "";
-    menuBtn!.blur();
+    setBackgroundInert(false);
+    // The blur() exists for touch, where the button otherwise keeps a stuck
+    // :focus style after a tap. On a keyboard it would drop focus onto <body>,
+    // stranding the user at the top of the document — so gate it to touch and
+    // let the button keep focus (and its visible ring) everywhere else.
+    if (isTouch()) menuBtn!.blur();
   }
 
   menuBtn?.addEventListener("click", () => {

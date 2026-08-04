@@ -181,6 +181,12 @@ document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((section) => {
     slide.classList.add("is-panel-open");
     slide.querySelector(".card__toggle")?.setAttribute("aria-expanded", "true");
 
+    // Move focus into what just opened. The panel precedes the toggle in the DOM,
+    // so without this, Tab from the toggle walks AWAY from the content the user
+    // just revealed. The close button is the natural landing spot, and mirrors
+    // closePanel(), which returns focus to the toggle.
+    slide.querySelector<HTMLElement>(".card__panel-close")?.focus();
+
     // Highlight the source card while its panel is open
     setActive(parseInt(slide.dataset.index ?? "-1", 10));
   }

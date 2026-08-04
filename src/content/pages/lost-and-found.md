@@ -1,5 +1,5 @@
 ---
-title: Lost & Found — Items Found in Prospect Lefferts Gardens Cleanups
+title: Lost & Found in Prospect Lefferts Gardens
 description: We have found interesting things in Prospect Lefferts Gardens!
 ---
 

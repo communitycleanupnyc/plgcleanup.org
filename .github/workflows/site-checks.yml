@@ -1,54 +1,70 @@
 # .github/workflows/site-checks.yml
 #
-# Three jobs:
-#  1) audit — builds the site and runs the SEO/launch gate on every push/PR (and
-#     on the weekly cron). Fails on shippable-bug classes: broken assets,
-#     placeholder links, missing 404, stale Event schema, sitemap drift… On the
-#     Monday cron this doubles as the freshness tripwire — if the event data
-#     wasn't rolled forward, the stale-Event check fails and GitHub emails you.
+# The unattended half of the safety net. Nothing here runs on a push — ci.yml
+# owns push/PR (build + SEO gate). These three jobs run on a clock instead:
+#
+#  1) audit — Monday cron + on-demand. Rebuilds and runs the SEO/launch gate with
+#     the freshness check ARMED, so if nobody rolled event.json forward, this
+#     fails. That is the whole point of the job: it is the tripwire for the site
+#     being quietly abandoned.
 #  2) links — external-link check (lychee). External links rot on time, not on
 #     your commits, and the check is flaky (rate limits, bot walls), so it runs
 #     weekly and on-demand only — never gating a normal push/PR.
-#  3) redeploy — Saturday cron, 30 min after the cleanup ends, that triggers a
-#     fresh Cloudflare Pages build so the server-rendered CTA label ("Join us
-#     this Saturday") and the Event JSON-LD flip forward to the next cleanup the
-#     moment this one is over — for no-JS visitors and crawlers. (JS visitors get
-#     it live from countdown.client.ts regardless.)
+#  3) redeploy — daily, ~30 min after any afternoon cleanup could end. Triggers a
+#     fresh Cloudflare Pages build so the baked-in HTML catches up with the
+#     calendar: the CTA label ("Join us this Sunday"), the /join countdown line,
+#     and the removal of the Event JSON-LD once the cleanup is past. It does NOT
+#     advance to "the next cleanup" — event.json holds exactly one date and only a
+#     human changes it. Daily (not weekly) caps that staleness at 24h no matter
+#     which day the cleanup lands on; ~365 builds/yr against Pages' 500/month
+#     limit costs nothing. JS visitors get all of this live from
+#     countdown.client.ts regardless — this is for crawlers and no-JS visitors.
 #
-# Two crons feed this file (see `schedule` below); jobs pick their trigger with
-# `github.event.schedule` so the Monday checks and the Saturday redeploy stay
-# independent.
+# WHEN SOMETHING BREAKS: the `audit` job opens a GitHub issue on failure. Email
+# from a failed scheduled run goes ONLY to whoever last committed to this file,
+# which after a hand-off is exactly the wrong person — hence the issue. Every
+# organizer should Watch → Custom → Issues on this repo (see LAUNCH.md A.5).
+#
+# NOTE on the cron guards: the `if:` conditions below string-match
+# `github.event.schedule` against the cron expressions BYTE-FOR-BYTE. Change a
+# cron and you must change its guard to match, or the job silently stops running.
 #
 # Setup:
-#  - Put seo-audit.mjs in scripts/.
 #  - Add a Pages Deploy Hook (Cloudflare dashboard → your project → Settings →
 #    Builds & deployments → Deploy hooks) as repo secret CF_PAGES_DEPLOY_HOOK.
-#  - At domain cutover, change SITE below in the same PR that changes
-#    astro.config `site`.
+#  - At domain cutover, change SITE below. Full runbook: LAUNCH.md.
 
 name: site checks
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-  # Crons paused pre-launch (2026-07-25): the Saturday redeploy needs the
+  # Crons paused pre-launch (2026-07-25): the redeploy needs the
   # CF_PAGES_DEPLOY_HOOK secret (not yet set) and there is no future event to
-  # flip to; the Monday tripwire is redundant while SEO_SKIP_FRESH relaxes the
-  # freshness gate. Restore both at launch, in the same PR that sets the secret
-  # and rolls event.json forward:
+  # flip past; the Monday tripwire is redundant while SEO_SKIP_FRESH relaxes the
+  # freshness gate. Restore both at launch — uncomment BYTE-IDENTICALLY, since
+  # the job guards below string-match these lines (LAUNCH.md A.3):
   #   - cron: "0 12 * * 1"  # Mondays 12:00 UTC — audit tripwire + links
-  #   - cron: "30 15 * * 6" # Saturdays 15:30 UTC — 30 min post-cleanup → redeploy
+  #   - cron: "30 20 * * *" # Daily 20:30 UTC (~4:30pm EDT / 3:30pm EST) — redeploy
   workflow_dispatch: # lets you run the weekly links check on demand
 
+permissions:
+  contents: read
+  issues: write # the audit job's failure notice; nothing else writes
+
 env:
-  SITE: https://plgcleanup.pages.dev # ← flip to https://plgcleanup.org at cutover
+  SITE: https://plgcleanup.pages.dev # ← flip to https://plgcleanup.org at cutover (LAUNCH.md B.3)
   # Pre-launch: downgrade the stale-Event check from error → warning so a past
-  # event date can't fail push/PR builds. Remove at launch to re-arm the gate.
+  # event date can't fail the run. Remove at launch to re-arm the tripwire
+  # (LAUNCH.md A.4) — without that removal the whole `audit` job is decorative.
   SEO_SKIP_FRESH: "1"
+  # Pre-launch: several testimonials are still awaiting real copy. Remove at
+  # launch (LAUNCH.md A.4).
+  SEO_SKIP_PLACEHOLDER: "1"
 
 jobs:
   audit:
+    # Cron + on-demand only. ci.yml runs this same gate on every push, so
+    # building here as well would just be a second red X for the same edit.
+    if: github.event_name != 'push' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -61,9 +77,34 @@ jobs:
       - name: SEO / launch gate
         run: node scripts/seo-audit.mjs dist --site "$SITE"
 
+      # A tripwire is only a tripwire if it reaches a person. Scheduled-run
+      # failure email goes to the last committer of this file and nowhere else,
+      # and this repo has no watchers by default — so file an issue instead.
+      - name: Open an issue if the scheduled check failed
+        if: failure() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Site check failed — is the next cleanup date set?"
+          body="The weekly automatic check of the site failed.
+
+          The most likely cause by far: **the cleanup date in \`src/data/event.json\`
+          is in the past**, so the site is advertising an event that already
+          happened. Edit it in Pages CMS (\"Event details\") or directly on GitHub.
+
+          Full details: $RUN_URL"
+          existing=$(gh issue list --state open --search "in:title $title" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi
+
   links:
     # Weekly (Monday cron) + on-demand only — keep flaky external-link checks off
-    # push/PR, and off the Saturday redeploy cron.
+    # push/PR, and off the daily redeploy cron.
+    # ⚠ This string must match the Monday `schedule` entry byte-for-byte.
     if: github.event.schedule == '0 12 * * 1' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
@@ -75,7 +116,11 @@ jobs:
       - run: npm ci
       - run: npx astro build
       - name: External links (lychee)
-        uses: lycheeverse/lychee-action@v2
+        # Pinned to a full commit SHA, not the mutable v2 tag: this action is
+        # handed github.token, and main has no PR gate, so a hijacked tag would be
+        # a direct path into the repo. Dependabot's github-actions ecosystem keeps
+        # SHA pins updated.
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           # Bot-walled hosts excluded: they 4xx for crawlers but work for humans.
           args: >-
@@ -87,9 +132,9 @@ jobs:
           fail: true
 
   redeploy:
-    # Saturday cron only — 30 min after the cleanup ends. (Cron is UTC and can't
-    # follow DST: 15:30 UTC is 11:30am EDT now; in winter EST it lands 10:30am.)
-    if: github.event.schedule == '30 15 * * 6'
+    # Daily cron only. ⚠ This string must match the daily `schedule` entry
+    # byte-for-byte.
+    if: github.event.schedule == '30 20 * * *'
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Cloudflare Pages build

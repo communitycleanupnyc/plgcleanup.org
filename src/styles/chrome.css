@@ -135,7 +135,7 @@
 
 /* Continuous band: bg lives on the viewport (always fills full width) */
 .ticker__viewport {
-  background: var(--muted);
+  background: var(--surface);
   transition: background 0ms ease;
   cursor: pointer;
 }
@@ -180,7 +180,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--muted);
+  color: var(--text-muted);
   transition: color 100ms ease;
 }
 .ticker__toggle:hover,
@@ -631,7 +631,7 @@
   outline: none;
 }
 .mobile-menu-ctas .cta-secondary {
-  background: var(--muted);
+  background: var(--surface);
   color: var(--text);
   font-size: 1.5rem;
   transition:

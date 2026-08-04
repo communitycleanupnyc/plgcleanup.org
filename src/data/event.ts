@@ -55,6 +55,16 @@ const END_DATE = easternDate(CLEANUP_DATE, CLEANUP_END_TIME, "The end time");
 export const CLEANUP_ISO = START_DATE.toISOString();
 export const CLEANUP_END_ISO = END_DATE.toISOString();
 
+/**
+ * The same two instants written as New York local time with an explicit offset
+ * ("2026-08-09T14:00:00-04:00") instead of UTC ("…T18:00:00.000Z"). Both name
+ * the identical moment, but Google's Event structured-data guidance asks for the
+ * local form, because that is the wall-clock time it shows in search results.
+ * Used only in the /join JSON-LD; everything else keeps the UTC form above.
+ */
+export const CLEANUP_ISO_LOCAL = easternIsoString(START_DATE);
+export const CLEANUP_END_ISO_LOCAL = easternIsoString(END_DATE);
+
 /** The time as readers see it, e.g. "10–11am" — built from the start/end. */
 export const CLEANUP_TIME = formatTimeRange(START_DATE, END_DATE);
 
@@ -76,7 +86,19 @@ function parseDate(value: string) {
   const m = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!m)
     throw new Error(`The cleanup date is "${value}". Write it like "2026-07-18" (year-month-day).`);
-  return { year: +m[1], month: +m[2], day: +m[3] };
+  const year = +m[1],
+    month = +m[2],
+    day = +m[3];
+  // Shape alone isn't enough: JavaScript rolls impossible dates forward without
+  // complaint, so "2026-13-45" would quietly become 14 February 2027 and ship a
+  // perfectly plausible countdown to a date nobody chose. Round-trip it.
+  const roundTrip = new Date(Date.UTC(year, month - 1, day));
+  if (roundTrip.getUTCMonth() + 1 !== month || roundTrip.getUTCDate() !== day) {
+    throw new Error(
+      `The cleanup date is "${value}", which isn't a real date. Check the month (01–12) and the day.`,
+    );
+  }
+  return { year, month, day };
 }
 
 /** Read "10:00am" / "2pm" into 24-hour hour+minute, or explain the mistake. */
@@ -123,6 +145,35 @@ function easternDate(dateStr: string, timeStr: string, field: string) {
     get("second"),
   );
   return new Date(guess.getTime() * 2 - asUTC);
+}
+
+/**
+ * Write an instant as a New York local ISO string with its UTC offset, e.g.
+ * "2026-08-09T14:00:00-04:00" (-05:00 in winter). Derived from the same
+ * Intl round-trip easternDate() uses, so DST is handled identically.
+ */
+function easternIsoString(d: Date) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TIME_ZONE,
+    hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(d);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "00";
+  // en-CA renders midnight as hour "24"; normalize before both uses.
+  const hour = String(+get("hour") % 24).padStart(2, "0");
+  const wall = `${get("year")}-${get("month")}-${get("day")}T${hour}:${get("minute")}:${get("second")}`;
+  // Offset = (that wall time read as if UTC) − (the real instant).
+  const offsetMinutes = (Date.parse(`${wall}Z`) - d.getTime()) / 60_000;
+  const sign = offsetMinutes < 0 ? "-" : "+";
+  const abs = Math.abs(offsetMinutes);
+  const hh = String(Math.floor(abs / 60)).padStart(2, "0");
+  const mm = String(abs % 60).padStart(2, "0");
+  return `${wall}${sign}${hh}:${mm}`;
 }
 
 /** Read the hour, minute, and am/pm of an instant as it reads in New York. */

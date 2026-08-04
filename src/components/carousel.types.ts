@@ -7,7 +7,7 @@ export interface CarouselItem {
   quote: string;
   /** Rendered Markdown body (the testimonial reveal panel). Optional. */
   Body?: AstroComponentFactory;
-  alt: string;
+  /** No `alt` here on purpose — Carousel.astro derives it from `name`. */
   focusPosition?: string;
 }
 

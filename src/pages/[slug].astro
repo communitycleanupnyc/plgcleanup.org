@@ -6,8 +6,23 @@ import Prose from "../components/Prose.astro";
 // One static route per Markdown file in src/content/pages/. The filename is the
 // URL slug (faq.md → /faq). index.astro and join.astro are their own files and
 // take precedence over this catch-all.
+//
 export async function getStaticPaths() {
+  // Those hand-written routes win SILENTLY: a src/content/pages/join.md would
+  // build clean and simply never appear, leaving an editor staring at the old
+  // /join page wondering what they did wrong. Name the collision instead.
+  // (Declared in here, not at module scope: Astro hoists getStaticPaths out of
+  // the component, so it cannot see the frontmatter's other declarations.)
+  const RESERVED_SLUGS = ["index", "join", "404"];
   const pages = await getCollection("pages");
+  for (const page of pages) {
+    if (RESERVED_SLUGS.includes(page.id)) {
+      throw new Error(
+        `[pages] "${page.id}.md" can't be used: /${page.id} is already a built-in page of the site, ` +
+          `so this file would never show up. Rename it to something else (the filename becomes the web address).`,
+      );
+    }
+  }
   return pages.map((page) => ({
     params: { slug: page.id },
     props: { page },

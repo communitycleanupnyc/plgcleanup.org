@@ -9,6 +9,9 @@ src/content/
 # Data files edited via Pages CMS (event details, statistics) — same reasoning;
 # their .ts loaders validate the values at build. (Only the JSON, not the .ts.)
 src/data/*.json
+# Cloudflare Pages config file — no extension, so Prettier can't infer a parser.
+# Its format is whitespace-significant anyway (2-space indent under each path).
+public/_headers
 public/fonts/
 *.woff2
 *.webp

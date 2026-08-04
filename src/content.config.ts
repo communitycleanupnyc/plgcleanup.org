@@ -22,17 +22,28 @@ const pages = defineCollection({
 });
 
 // Testimonials shown in the home-page carousel. One Markdown file per person:
-// frontmatter holds their name, pull-quote, photo, and alt text; the Markdown
-// body is the longer testimonial shown in the reveal panel.
+// frontmatter holds their name, pull-quote, and photo; the Markdown body is the
+// longer testimonial shown in the reveal panel.
+//
+// There is deliberately no `alt` field. Every photo here is a portrait of the
+// named volunteer, so Carousel.astro derives the alt text from `name` — an
+// editor can't leave it blank, can't type "…" into it, and can't forget to
+// update it when the photo changes.
 const testimonials = defineCollection({
   loader: glob({ pattern: "*.md", base: "./src/content/testimonials" }),
   schema: ({ image }) =>
     z.object({
       name: filled("name"),
       quote: filled("quote"),
-      alt: filled("alt"),
       // Optional CSS object-position for the cropped photo, e.g. "50% 30%".
-      focusPosition: z.string().trim().min(1).optional(),
+      focusPosition: z
+        .string()
+        .trim()
+        .regex(
+          /^\d{1,3}% \d{1,3}%$/,
+          'Photo focus must be two percentages, like "50% 30%" (horizontal then vertical).',
+        )
+        .optional(),
       image: image(),
       // Lower numbers sort first; the 2nd entry is the default carousel highlight.
       order: z.number().int().nonnegative().default(100),

@@ -1,9 +1,8 @@
 ---
 name: "Bhinish"
 quote: "We can easily doom scroll"
-alt: "Bhinish"
 image: ../../assets/testimonials/bhinish.jpg
-order: 2
+order: 3
 ---
 
 In a time when we can easily doom scroll into a state of despair and anxiety, going outside and meeting good people who just want to do a little something for their neighborhood once a week has been salve to the soul.

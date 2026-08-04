@@ -1,5 +1,5 @@
 ---
-title: Community Partners in Prospect Lefferts Gardens
+title: Community Partners
 description: The local businesses and neighborhood organizations that help keep Prospect Lefferts Gardens clean alongside Community Cleanup PLG.
 ---
 
@@ -9,8 +9,6 @@ Community Cleanup PLG works with local businesses and
 organizations. These partners who donate supplies, host us, spread the word, or show up to clean.
 
 Want to partner with us? [Email us](mailto:communitycleanupplg@gmail.com).
-
-_todo: fill this in_ 
 
 ## Our partners
 

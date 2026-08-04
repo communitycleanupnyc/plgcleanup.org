@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
-import deleteUnusedImages from "astro-delete-unused-images";
+// Vendored, not an npm dependency — see the header of that file for why.
+import deleteUnusedImages from "./src/integrations/delete-unused-images/index.js";
 
 export default defineConfig({
   // Canonical production origin — used to build absolute URLs (e.g. the social

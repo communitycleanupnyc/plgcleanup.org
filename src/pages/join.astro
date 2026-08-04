@@ -5,6 +5,8 @@ import cart from "../assets/cart.webp";
 import {
   CLEANUP_ISO,
   CLEANUP_END_ISO,
+  CLEANUP_ISO_LOCAL,
+  CLEANUP_END_ISO_LOCAL,
   CLEANUP_TIME,
   CLEANUP_CORNER,
   CLEANUP_MAPS_URL,
@@ -27,6 +29,13 @@ const joinDisplayDate = new Intl.DateTimeFormat("en-US", {
 
 // Event structured data — the one schema type with a visible SERP surface
 // (Google event listings). Built from the same event.ts values shown on the page.
+//
+// Dropped entirely once the cleanup is over: there is no "next" event to flip to
+// (event.json holds exactly one), and an EventScheduled node for a date that has
+// already passed is worse in search results than no node at all. The daily
+// rebuild in .github/workflows/site-checks.yml is what makes this take effect
+// without anyone pushing a commit.
+const isPastEvent = state.tag === "past";
 const eventUrl = new URL("/join", Astro.site).href;
 const eventSchema = {
   "@context": "https://schema.org",
@@ -34,8 +43,9 @@ const eventSchema = {
   name: `Community Cleanup PLG — ${CLEANUP_CORNER}`,
   description:
     "A one-hour volunteer street cleanup in Prospect Lefferts Gardens, Brooklyn. No registration; all supplies provided. Just show up.",
-  startDate: CLEANUP_ISO,
-  endDate: CLEANUP_END_ISO,
+  // Local time + offset, not UTC — the form Google's Event docs ask for.
+  startDate: CLEANUP_ISO_LOCAL,
+  endDate: CLEANUP_END_ISO_LOCAL,
   eventStatus: "https://schema.org/EventScheduled",
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
   isAccessibleForFree: true,
@@ -135,7 +145,11 @@ const eventSchema = {
       </div>
     </div>
   </div>
-  <script type="application/ld+json" is:inline set:html={JSON.stringify(eventSchema)} />
+  {
+    !isPastEvent && (
+      <script type="application/ld+json" is:inline set:html={JSON.stringify(eventSchema)} />
+    )
+  }
 </Base>
 
 <script>

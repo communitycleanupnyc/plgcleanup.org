@@ -28,8 +28,9 @@ interface Props {
 }
 // Brand name + browser-tab title template, defined once. Pages pass only their
 // own short title (e.g. "FAQ") and the layout appends " | Community Cleanup PLG",
-// so the separator and site name live in exactly one place. No title (the home
-// page) → the tab just reads the site name.
+// so the separator and site name live in exactly one place. A page that passes
+// no title at all gets just the site name — nothing currently does; every route,
+// home included, sets one.
 const SITE_NAME = "Community Cleanup PLG";
 const SITE_DESCRIPTION =
   "We clean Prospect Lefferts Gardens. No registration, all supplies included. Just show up.";
@@ -75,6 +76,7 @@ const orgSchema = {
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:site_name" content={SITE_NAME} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
@@ -94,9 +96,10 @@ const orgSchema = {
   </head>
 
   <body>
+    <a href="#main" class="skip-link">Skip to content</a>
     <SiteHeader navMode={navMode} />
     <MobileMenu />
-    <main>
+    <main id="main" tabindex="-1">
       <slot />
     </main>
     <SiteFooter />

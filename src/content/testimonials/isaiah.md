@@ -1,9 +1,8 @@
 ---
 name: "xyz"
 quote: "..."
-alt: "..."
 image: ../../assets/testimonials/isaiah.jpg
-order: 9
+order: 14
 ---
 
 ...

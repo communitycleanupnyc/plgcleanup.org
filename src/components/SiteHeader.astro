@@ -8,7 +8,11 @@ const { navMode = "ticker" } = Astro.props;
 const TICKER_TEXT = `${POUNDS_COLLECTED_DISPLAY} pounds and counting, this year alone! See which block is up next. →`;
 ---
 
-<div class={`site-chrome ${navMode === "ticker" ? "compact" : "static-nav"}`} id="site-chrome">
+<!-- A <header>, not a <div>: this is the site's banner landmark, which screen
+     reader users jump to directly. Every coordinating CSS selector matches on
+     .site-chrome / #site-chrome, and MobileMenu stays a sibling, so the general-
+     sibling rules (.site-chrome.is-fixed ~ …) are unaffected by the element swap. -->
+<header class={`site-chrome ${navMode === "ticker" ? "compact" : "static-nav"}`} id="site-chrome">
   <div class="ticker-bar">
     <div class="ticker" id="ticker">
       <div class="ticker__viewport">
@@ -82,7 +86,7 @@ const TICKER_TEXT = `${POUNDS_COLLECTED_DISPLAY} pounds and counting, this year 
       <a href="/join" class="nav-btn">Join</a>
     </div>
   </nav>
-</div><!-- /.site-chrome -->
+</header><!-- /.site-chrome -->
 
 <div id="chrome-spacer" aria-hidden="true"></div>
 

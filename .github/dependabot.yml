@@ -19,6 +19,24 @@ updates:
       # Track: https://github.com/withastro/roadmap/discussions/1321
       - dependency-name: typescript
         update-types: [version-update:semver-major]
+
+      # Majors below are held deliberately. CI builds the site but never executes
+      # the client JavaScript, so a major that silently kills the mobile menu, the
+      # carousel, or the countdown would arrive as an ordinary green PR — and this
+      # repo's merge instruction to non-technical editors is "merge it when CI is
+      # green". Minors and patches still flow automatically.
+      #
+      # To take one of these on: ask the Claude agent to read the migration guide,
+      # do the upgrade, then click through the mobile menu, the carousel (open a
+      # testimonial, arrows, swipe), and the countdown copy in `npm run preview`.
+      - dependency-name: astro
+        update-types: [version-update:semver-major]
+      - dependency-name: embla-carousel
+        update-types: [version-update:semver-major]
+      # sharp additionally must stay inside the range Astro itself declares
+      # (^0.34.0 as of astro 6.4.8) — see "Dependency pins" in the README.
+      - dependency-name: sharp
+        update-types: [version-update:semver-major]
     commit-message:
       prefix: "deps"
 

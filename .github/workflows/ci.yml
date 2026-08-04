@@ -1,5 +1,14 @@
-# Runs on every push and pull request: type-checks and builds the site so a
-# broken edit can never reach Cloudflare Pages. Formatting is checked too.
+# Runs on every push and pull request: type-checks, builds the site, and runs the
+# SEO/launch gate so a broken edit can never reach Cloudflare Pages. Formatting is
+# checked too.
+#
+# This is the ONLY per-push build. site-checks.yml used to build again on the same
+# push (three builds per edit, counting Cloudflare's); its audit job is now cron +
+# manual only, so an editor with a bad edit sees one red X, not two.
+#
+# When this fails on a push to main, the last step opens a GitHub issue. That
+# matters more than it looks: a Pages CMS edit that fails the build leaves the site
+# frozen on the last good deploy, with no signal anywhere the editor is looking.
 name: CI
 
 on:
@@ -9,6 +18,15 @@ on:
 
 permissions:
   contents: read
+  issues: write # for the failure notice below; nothing else writes
+
+env:
+  SITE: https://plgcleanup.pages.dev # ← flip to https://plgcleanup.org at cutover (LAUNCH.md B.3)
+  # Pre-launch escape hatches — both are deleted at launch (LAUNCH.md A.4).
+  # FRESH: lets a past event.json date warn instead of failing every push.
+  # PLACEHOLDER: lets the not-yet-written testimonials warn instead of failing.
+  SEO_SKIP_FRESH: "1"
+  SEO_SKIP_PLACEHOLDER: "1"
 
 jobs:
   build:
@@ -31,3 +49,33 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: SEO / launch gate
+        run: node scripts/seo-audit.mjs dist --site "$SITE"
+
+      # Tell a human. Push only: pull_request runs from a fork (or from Dependabot)
+      # get a read-only token, so trying this there would fail the job a second
+      # time for an unrelated reason.
+      - name: Open an issue if the build failed
+        if: failure() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SHA: ${{ github.sha }}
+        run: |
+          title="Site build failed — the latest edit did not go live"
+          body="The site did not rebuild, so **it is still showing the previous version**.
+
+          - Commit: \`$SHA\`
+          - What went wrong: $RUN_URL
+
+          Open that link, click the red step, and read the last few red lines — the
+          error names the file and the field. Fix it by re-editing that file, or
+          revert the commit from the GitHub UI. See \"If your edit doesn't appear\"
+          in the README."
+          existing=$(gh issue list --state open --search "in:title $title" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi
