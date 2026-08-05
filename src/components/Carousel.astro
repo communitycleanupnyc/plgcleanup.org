@@ -548,6 +548,28 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
   .card__panel-body {
     height: 100%;
     overflow-y: auto;
+    /* `contain` — deliberate, and measured. Do not change this to `auto` or
+       `none` without re-reading the following.
+
+       It does two things: it keeps the platform's elastic overscroll (the panel
+       rubber-bands at the end of a long testimonial, matching how the page
+       itself behaves), and it stops scroll chaining — without it, overscrolling
+       the panel scrolls the PAGE behind it, sliding the carousel out from under
+       someone who is mid-read. That second property is the important one.
+
+       Measured 2026-08-04 on macOS with Reduce Motion off, comparing this
+       against `auto` and `none`, and against a copy of the panel with the
+       absolute positioning, `translate` and `overflow: hidden` ancestors all
+       removed:
+         · Chrome 151  — bounces. (Nested-scroller overscroll shipped in 145;
+                         before that no nested scroller bounced in Chrome at all.)
+         · Safari 26.5 — does NOT bounce. WebKit suppresses the affordance that
+                         the spec says `contain` preserves. The ancestors are not
+                         the cause: stripping them changed nothing in Safari.
+       So the missing Safari bounce is a WebKit difference, not something in this
+       stylesheet. The only way to buy it back is a Safari-targeted hack that
+       swaps in `auto` — which reintroduces the page-scrolling bug above. Not
+       worth it; leave this alone. */
     overscroll-behavior: contain;
     padding: var(--panel-pad);
     padding-top: 2.75rem;

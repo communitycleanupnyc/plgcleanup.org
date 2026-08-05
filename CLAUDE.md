@@ -39,6 +39,11 @@ explicitly asks:
   canonical "flush styles to restart a CSS transition" idiom. Removing it breaks
   the animations. Lighthouse's "forced reflow" warning here is a documented
   won't-fix.
+- **`overscroll-behavior: contain` on `.card__panel-body`** (Carousel.astro). The
+  testimonial panel rubber-bands in Chrome and Firefox but not Safari; that is a
+  WebKit difference, not a bug here, and the long comment above the property
+  records the measurements. Changing it to `auto` makes the page scroll behind an
+  open panel; `none` removes the bounce everywhere.
 - **No `script-src` CSP.** The build emits ~22 inline module scripts whose hashes
   change every build; hash maintenance is a footgun in a repo with no full-time
   maintainer. The scripts are all first-party build output and the site takes no

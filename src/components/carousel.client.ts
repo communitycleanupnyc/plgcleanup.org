@@ -173,6 +173,13 @@ document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((section) => {
     const panel = panelOf(slide);
     if (panel) {
       panel.removeAttribute("hidden");
+      // Start every reveal at the top of the quote. The panel keeps its DOM (and
+      // so its scrollTop) between opens, so without this, reopening a long
+      // testimonial drops you back wherever you happened to stop reading last
+      // time — which reads as a rendering glitch, not as a memory aid. Must come
+      // after the unhide: a `hidden` element has no scroll box to set.
+      const body = panel.querySelector<HTMLElement>(".card__panel-body");
+      if (body) body.scrollTop = 0;
       // Commit the resting (translate: 100%) state NOW — a bare rAF can batch the
       // unhide + class change into one style pass, so the panel snaps in with no
       // slide. Forcing layout here guarantees it animates from 100% → 0%.
