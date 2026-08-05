@@ -163,7 +163,7 @@ document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((section) => {
 
   function closeAllPanels(except: HTMLElement | null) {
     slides.forEach((s) => {
-      if (s === except || !s.classList.contains("is-panel-open")) return;
+      if (s === except || !isPanelShowing(s)) return;
       closePanel(s);
     });
   }
@@ -172,44 +172,60 @@ document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((section) => {
     closeAllPanels(slide);
     const panel = panelOf(slide);
     if (panel) {
-      panel.removeAttribute("hidden");
       // Start every reveal at the top of the quote. The panel keeps its DOM (and
       // so its scrollTop) between opens, so without this, reopening a long
       // testimonial drops you back wherever you happened to stop reading last
-      // time — which reads as a rendering glitch, not as a memory aid. Must come
-      // after the unhide: a `hidden` element has no scroll box to set.
+      // time — which reads as a rendering glitch, not as a memory aid.
       const body = panel.querySelector<HTMLElement>(".card__panel-body");
       if (body) body.scrollTop = 0;
-      // Commit the resting (translate: 100%) state NOW — a bare rAF can batch the
-      // unhide + class change into one style pass, so the panel snaps in with no
-      // slide. Forcing layout here guarantees it animates from 100% → 0%.
-      void panel.offsetHeight;
     }
-    slide.classList.add("is-panel-open");
+    // State that shouldn't wait for the animation.
     slide.querySelector(".card__toggle")?.setAttribute("aria-expanded", "true");
-
-    // Move focus into what just opened. The panel precedes the toggle in the DOM,
-    // so without this, Tab from the toggle walks AWAY from the content the user
-    // just revealed. The close button is the natural landing spot, and mirrors
-    // closePanel(), which returns focus to the toggle.
-    slide.querySelector<HTMLElement>(".card__panel-close")?.focus();
-
     // Highlight the source card while its panel is open
     setActive(parseInt(slide.dataset.index ?? "-1", 10));
+
+    // Two-step open, so the rise mirrors the fall. Step one makes the panel
+    // visible while it is still parked off-screen (see .is-panel-priming in
+    // Carousel.astro) — that is the frame the browser spends painting the text.
+    // Step two, a full frame later, starts the slide against painted content.
+    // Without the gap the paint and the first transition frames collide and the
+    // rise stutters; the fall never did, because the text was already painted.
+    //
+    // Two rAFs, not one: the first fires BEFORE the pending paint, the second
+    // after it, which is what actually guarantees a painted panel.
+    slide.classList.add("is-panel-priming");
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        // Bail if it was closed again in those two frames (fast toggling).
+        if (!slide.classList.contains("is-panel-priming")) return;
+        slide.classList.add("is-panel-open");
+        // Move focus into what just opened. The panel precedes the toggle in the
+        // DOM, so without this, Tab from the toggle walks AWAY from the content
+        // the user just revealed. The close button is the natural landing spot,
+        // and mirrors closePanel(), which returns focus to the toggle.
+        // preventScroll: the button is absolutely positioned inside a panel that
+        // is mid-slide, and letting the browser scroll it into view yanks the
+        // page while the animation runs.
+        slide.querySelector<HTMLElement>(".card__panel-close")?.focus({ preventScroll: true });
+      }),
+    );
+  }
+
+  function isPanelShowing(slide: HTMLElement) {
+    // "Showing" covers the two-frame priming window as well as the open state,
+    // so a fast second click closes the panel instead of re-opening it.
+    return (
+      slide.classList.contains("is-panel-open") || slide.classList.contains("is-panel-priming")
+    );
   }
 
   function closePanel(slide: HTMLElement) {
-    slide.classList.remove("is-panel-open");
+    slide.classList.remove("is-panel-open", "is-panel-priming");
     slide.querySelector(".card__toggle")?.setAttribute("aria-expanded", "false");
-
-    // Re-apply `hidden` once the slide-out finishes (matches the 0.4s visibility delay)
-    const panel = panelOf(slide);
-    panel?.addEventListener("transitionend", function h(e) {
-      if (e.propertyName === "translate" && !slide.classList.contains("is-panel-open")) {
-        panel.setAttribute("hidden", "");
-        panel.removeEventListener("transitionend", h);
-      }
-    });
+    // Nothing else to do. Dropping .is-panel-priming hands visibility back to the
+    // base rule, whose `transition: visibility 0s 0.44s` keeps the panel painted
+    // for the whole slide-out and only then hides it — which is what takes it
+    // back out of the tab order and the accessibility tree.
   }
 
   // Embla stopPropagation()s click in capture phase after drags,
@@ -222,7 +238,7 @@ document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((section) => {
     if (caption) {
       const slide = caption.closest<HTMLElement>(".embla__slide");
       if (!slide || !panelOf(slide)) return;
-      slide.classList.contains("is-panel-open") ? closePanel(slide) : openPanel(slide);
+      isPanelShowing(slide) ? closePanel(slide) : openPanel(slide);
       return;
     }
 

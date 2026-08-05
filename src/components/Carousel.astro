@@ -62,35 +62,62 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
         )}
         <p class="carousel-counter" aria-live="polite" />
         <div class="carousel-controls">
+          {/* Stroked, not a filled outline like it used to be. The button is now
+              shorter than it is wide, so the glyph is squashed vertically to keep
+              its breathing room proportional (preserveAspectRatio="none") — and a
+              filled arrow squashed that way gets THINNER, which is the opposite of
+              the intended weight. As a stroke, the weight is one number, applied
+              evenly to the shaft and both barbs, and non-scaling-stroke holds it at
+              exactly 1.0397px however the box is scaled — the old filled outline
+              measured 1.021px at its shaft, for reference.
+
+              Retuning it, in order of what you probably want:
+              · WEIGHT — stroke-width, and nothing else. Immune to every scale
+                below, which is the whole point of non-scaling-stroke.
+              · TIP ANGLE — the ±9.5118 barb spread. A deliberately wide number:
+                the glyph is squashed vertically to fit a short box, which flattens
+                the head, and the spread is what buys the angle back.
+              · STEM LENGTH — the shaft runs x=4→26.23 (22.23u) inside a 30.23u
+                viewBox, leaving a symmetric 4u each side. Shorten the shaft and
+                the viewBox by the SAME amount, and scale --arrow-w by the same
+                ratio: that holds sx at 1.0625 so the head renders pixel-identical
+                and only the stem changes. Shortening the shaft alone would just
+                push the glyph off-centre in its box.
+              · OVERALL LENGTH — --arrow-w on its own. */}
           <button class="carousel-arrow" data-dir="prev" aria-label="Previous">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="34"
+              width="30.23"
               height="24"
               fill="none"
-              viewBox="0 0 34 24"
+              viewBox="0 0 30.23 24"
+              preserveAspectRatio="none"
             >
               <path
-                fill="currentColor"
-                fill-rule="evenodd"
-                d="M11.478 19.75 4 12l7.478-7.75.733.709-6.302 6.53H30v1.021H5.91l6.301 6.531z"
-                clip-rule="evenodd"
+                d="M26.23 12H4m7.478-9.5118L4 12l7.478 9.5118"
+                stroke="currentColor"
+                stroke-width="1.0397"
+                stroke-linejoin="miter"
+                vector-effect="non-scaling-stroke"
               />
             </svg>
           </button>
+          {/* Mirror of the prev glyph — see the note above it. */}
           <button class="carousel-arrow" data-dir="next" aria-label="Next">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="34"
+              width="30.23"
               height="24"
               fill="none"
-              viewBox="0 0 34 24"
+              viewBox="0 0 30.23 24"
+              preserveAspectRatio="none"
             >
               <path
-                fill="currentColor"
-                fill-rule="evenodd"
-                d="M22.522 4.25 30 12l-7.478 7.75-.733-.709 6.302-6.53H4V11.49h24.09L21.79 4.959z"
-                clip-rule="evenodd"
+                d="M4 12h22.23m-7.478-9.5118L26.23 12l-7.478 9.5118"
+                stroke="currentColor"
+                stroke-width="1.0397"
+                stroke-linejoin="miter"
+                vector-effect="non-scaling-stroke"
               />
             </svg>
           </button>
@@ -134,8 +161,15 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                       data-blur-up
                       style={blurStyle}
                     />
+                    {/* No `hidden` attribute here on purpose. `hidden` is display:none,
+                        which would force layout + first paint of this whole text block
+                        inside the frame the open animation starts — the panel visibly
+                        stuttered. The CSS below hides it with `visibility: hidden`
+                        instead (the same mechanism MobileMenu uses), which keeps it laid
+                        out and ready to composite, and still keeps it out of the tab
+                        order and the accessibility tree. */}
                     {enablePopup && Body && (
-                      <div class="card__panel" id={`carousel-panel-${index}`} hidden>
+                      <div class="card__panel" id={`carousel-panel-${index}`}>
                         <button
                           class="card__panel-close"
                           aria-label={`Close ${item.name}'s testimonial`}
@@ -217,12 +251,43 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
 <style>
   /* ── Section layout ─────────────────────────────── */
   .carousel-section {
+    /* Shared geometry tokens. They live here, on the component root, rather than
+       on .card__panel, because the caption and the panel are SIBLINGS that have
+       to line up with each other — the caption's text must start on the same
+       vertical as the panel's body text, and the ✕ must land on the same
+       vertical as the caret. Both percentages below resolve against the same
+       containing block (the slide), so those alignments hold at every width. */
+    /* ONE inset governs all four text edges of a card, so the caption sits
+       optically centred under the photo and the panel's body text lines up with
+       it. It sets, and must keep setting, all of:
+         · the caption's name/quote left edge
+         · the caret's right edge
+         · the ✕ glyph's right edge
+         · the panel body text's left edge
+       Deliberately a fixed length, not a percentage. Percentages are ignored
+       during intrinsic sizing (that asymmetry is what broke the mobile spacing),
+       and a fixed value guarantees the left and right insets are exactly equal
+       rather than equal-ish after rounding. */
+    --card-inset: 1rem;
+    --panel-gutter: 2rem; /* wider right inset, clears the ✕ and scrollbar */
+    --panel-scrollbar-w: 6px;
+    --icon-size: 1.25rem; /* the caret and ✕ glyphs are both 20px */
+
     width: var(--site-w);
     margin-left: var(--site-ml);
     margin-bottom: clamp(2rem, 7vw, 3rem);
   }
 
   .carousel-header {
+    /* The heading's type metrics, shared so the arrow buttons can be exactly as
+       tall as the "WHY TRASH CLUB" line box. Spelled out as size × line-height
+       rather than using the `1lh` unit because <button> does not inherit
+       font-family or font-size — `1lh` on the button would silently resolve
+       against the UA's default font and drift away from the heading. */
+    --heading-size: 1.2rem;
+    --heading-lh: 1.2;
+    --heading-box: calc(var(--heading-size) * var(--heading-lh));
+
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -230,7 +295,8 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
   }
 
   .carousel-heading {
-    font-size: 1.2rem;
+    font-size: var(--heading-size);
+    line-height: var(--heading-lh);
     font-weight: 600;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -266,11 +332,20 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
   }
 
   .carousel-arrow {
+    /* Geometry, all derived so the proportions survive a type-size change:
+       · the glyph is 25% longer than the 34px it used to be
+       · the box is exactly as tall as the heading's line box
+       · the box keeps the ~1px of side breathing room it always had
+       The arrow's own height is a PERCENTAGE of the box (see the svg rule), so
+       the whitespace above and below it stays in the same ratio it had at the
+       old 36px square — which is what stops a shorter box from looking cramped. */
+    --arrow-w: 2.00746rem; /* 32.12px — see the glyph note in the markup */
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: calc(var(--arrow-w) + 0.125rem);
+    height: var(--heading-box);
     background: var(--text);
     border: none;
     color: var(--bg);
@@ -278,6 +353,16 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     transition:
       background-color 225ms ease,
       color 225ms ease;
+  }
+
+  .carousel-arrow svg {
+    width: var(--arrow-w);
+    /* 24/36 — the arrow-to-box height ratio of the original square button, so the
+       breathing room above and below scales with the box instead of being fixed.
+       Squashing the glyph vertically is what `preserveAspectRatio="none"` on the
+       markup is for; the stroke weight is held constant against that squash by
+       vector-effect="non-scaling-stroke". */
+    height: 66.667%;
   }
   /* Hover only on hover-capable devices — on touch, :hover sticks after a tap,
      leaving the arrow green until you tap elsewhere. Touch gets :active instead,
@@ -393,10 +478,29 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
      The whole caption box is a tap target that opens the panel: text on the
      left, reveal arrow on the right, vertically centered between name & quote. */
   .card__caption {
+    /* The PHOTO alone decides how wide a slide is. The slide is a flex column, so
+       its width is the widest of its children's max-content widths — meaning a
+       caption wider than its photo silently widens the whole card and shows up
+       as extra space between images. Because every photo has its own aspect
+       ratio, the overhang differs card to card and the gaps look random. That is
+       what happened on mobile: at --size-m the photos are ~267px wide while the
+       caption wants ~293px, so each slide carried ~26px of stray width. Desktop
+       hid it only because the photos there happen to be wider than the caption.
+
+       width: 0 takes the caption out of that max-content calculation entirely;
+       min-width: 100% then stretches it back over whatever width the photo
+       settled on. The quote wraps into the space available, as it should. */
+    width: 0;
+    min-width: 100%;
     display: flex;
     align-items: center;
     gap: 0.5rem;
     margin-top: 0.625rem;
+    /* Equal on both sides: the name/quote's left edge and the caret's right edge
+       sit the same distance in from the photo, so the row reads as centred under
+       it. The same token insets the panel's body text, so the caption text and
+       the testimonial text share one left vertical. */
+    padding-inline: var(--card-inset);
     cursor: pointer;
   }
   .card__caption-text {
@@ -453,7 +557,7 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
   /* ── Reveal arrow (right side, inset from the image edge) ── */
   .card__toggle {
     flex-shrink: 0;
-    margin-right: clamp(0.75rem, 8%, 2rem); /* ~10% inset from the image's right edge */
+    /* Right inset now comes from .card__caption's padding-inline — see there. */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -493,10 +597,21 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     transform: rotate(-180deg);
   }
 
-  /* ── Slide-up testimonial panel (clipped to the image) ── */
+  /* ── Slide-up testimonial panel (clipped to the image) ──
+     Hidden with `visibility`, never with `display: none` / the `hidden`
+     attribute — exactly like .mobile-menu in chrome.css, and for the same
+     reason. visibility:hidden keeps the panel laid out and ready to composite,
+     so opening it only has to animate; display:none would make the browser lay
+     out and paint this whole block of text in the same frame the slide begins,
+     which stutters. It still leaves the panel out of the tab order and the
+     accessibility tree, so nothing is lost by not using `hidden`.
+
+     The paired `transition: visibility 0s 0.44s` below is what re-hides it, and
+     the 0.44s must stay in step with the translate duration: shorter and the
+     panel vanishes mid-slide, longer and it stays focusable after it's gone. */
   .card__panel {
     /* Same critically-damped spring the mobile menu slides on (--menu-spring in
-       Base.astro): a linear() curve that starts springy-fast, eases in, and stops
+       chrome.css): a linear() curve that starts springy-fast, eases in, and stops
        exactly on target — no overshoot, no bounce. Drives the body text's vertical
        slide. (No overshoot → no bleed needed to cover a gap.) */
     --panel-spring: linear(
@@ -519,12 +634,8 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
       0.998 89%,
       1 100%
     );
-    /* Body text inset, the wider right gutter that reserves room for the close
-       button (like padding-top reserves room above the text), and the desktop
-       scrollbar width. The close button centers itself in that right gutter. */
-    --panel-pad: 1.25rem;
-    --panel-gutter: 2rem;
-    --panel-scrollbar-w: 6px;
+    /* --card-inset / --panel-gutter / --panel-scrollbar-w live on
+       .carousel-section, so the caption can align to the same values. */
     position: absolute;
     inset: 0;
     z-index: 2;
@@ -537,6 +648,35 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
       translate 0.44s var(--panel-spring),
       visibility 0s 0.44s;
   }
+  /* Paint-before-animate. The panel is hidden with `visibility`, and a
+     visibility:hidden element is laid out but NEVER PAINTED. So flipping it
+     visible and starting the slide in the same frame makes the browser paint a
+     whole testimonial's worth of text and run the first frames of the transition
+     together — the rise stutters, while the fall looks perfectly smooth because
+     by then the text is already painted. That asymmetry is the entire bug.
+
+     This class makes the panel visible while it is still parked at translate
+     100% — off the bottom of the media box, and clipped away by its
+     overflow:hidden, so nothing is on screen. carousel.client.ts adds it, waits
+     one full frame for the paint to land, and only then adds .is-panel-open. The
+     transition therefore starts against already-painted content, exactly like
+     the close does. */
+  .card.is-panel-priming .card__panel {
+    visibility: visible;
+    /* This transition override is load-bearing, not a copy-paste artefact.
+       The base rule delays visibility by 0.44s (that delay is what keeps the
+       panel painted through the slide-OUT). Inheriting it here would start a
+       *delayed* visibility transition targeting `visible`; because
+       .is-panel-open then targets the same value, the spec says the running
+       transition is not restarted, so it would keep the 0.44s delay and the
+       panel would stay invisible for the whole rise and pop into place at the
+       end. Overriding the delay to 0s makes it visible immediately — parked
+       off-screen and clipped away, which is exactly what we want to paint. */
+    transition:
+      translate 0.44s var(--panel-spring),
+      visibility 0s 0s;
+  }
+
   .card.is-panel-open .card__panel {
     translate: 0 0;
     visibility: visible;
@@ -571,7 +711,7 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
        swaps in `auto` — which reintroduces the page-scrolling bug above. Not
        worth it; leave this alone. */
     overscroll-behavior: contain;
-    padding: var(--panel-pad);
+    padding: var(--card-inset);
     padding-top: 2.75rem;
     /* Reserve a wider right gutter so the text column ends clear of the close
        button and scrollbar. */
@@ -620,12 +760,17 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     justify-content: center;
     position: absolute;
     top: 0.6rem;
-    /* Center the ✕ in the reserved right gutter, between the text column's right
-       edge and the scrollbar's left edge. The scrollbar occupies the rightmost
-       --panel-scrollbar-w; the text ends one --panel-gutter further in, so the
-       gutter midpoint sits (--panel-gutter / 2 + --panel-scrollbar-w) from the
-       edge. glyph-center inset = right + --close-size / 2 → solve for right. */
-    right: calc(var(--panel-gutter) / 2 + var(--panel-scrollbar-w) - var(--close-size) / 2);
+    /* Land the ✕ GLYPH's right edge exactly where the caret's right edge sits,
+       so opening and closing controls share one vertical.
+       The two can't use the same offset directly: .card__toggle has no padding,
+       so its box IS its 20px glyph, whereas this button pads the same 20px glyph
+       out to a --close-size hit target. Aligning the boxes would leave the
+       glyphs (--close-size − --icon-size) / 2 apart — 6px of visible drift. So
+       pull the box out by exactly that half-difference.
+       Both this and the caret's inset resolve their percentage against the same
+       containing block (the panel is inset:0 within the slide), so they stay
+       aligned at every viewport width. */
+    right: calc(var(--card-inset) - (var(--close-size) - var(--icon-size)) / 2);
     z-index: 3;
     width: var(--close-size);
     height: var(--close-size);
