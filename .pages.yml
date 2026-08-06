@@ -98,14 +98,27 @@ content:
         description: >-
           A unique number. Lowest shows first in the carousel and is the photo
           used in link previews; the second-lowest is the highlighted card.
+      # `required: false` alone does NOT make a patterned field optional in Pages
+      # CMS: an untouched string field holds "", the pattern is checked against
+      # it regardless, and the failure blocks saving the whole entry — not just
+      # this field. So the regex has to accept the blank case itself (`^\s*$|`).
+      # Without it, editors are forced to invent a value to save any edit.
+      # Pages CMS drops empty fields on save, so blank means the key is simply
+      # absent from the file — which the site treats as "centered". A stray space
+      # does get written; content.config.ts trims it back to "absent" so that
+      # can't fail the build either.
       - name: focusPosition
-        label: Photo focus (e.g. 50% 30%)
+        label: Photo focus (optional)
         type: string
         required: false
-        description: Optional. Which part of the photo to keep centered when cropped, e.g. "50% 30%".
+        description: >-
+          Leave this blank unless the photo crops badly — blank centers it, which
+          is right for almost every photo. To nudge it, write two percentages:
+          across, then down. "50% 30%" is centered left-to-right and higher up;
+          "50% 0%" is the very top.
         pattern:
-          regex: "^\\d{1,3}% \\d{1,3}%$"
-          message: Write two percentages separated by a space, like 50% 30% (across, then down).
+          regex: "^\\s*$|^\\s*\\d{1,3}% \\d{1,3}%\\s*$"
+          message: Leave it blank, or write two percentages separated by a space, like 50% 30% (across, then down).
       - { name: body, label: Full testimonial, type: rich-text, required: true }
 
   - name: event

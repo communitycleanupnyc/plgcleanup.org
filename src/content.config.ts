@@ -36,14 +36,21 @@ const testimonials = defineCollection({
       name: filled("name"),
       quote: filled("quote"),
       // Optional CSS object-position for the cropped photo, e.g. "50% 30%".
-      focusPosition: z
-        .string()
-        .trim()
-        .regex(
-          /^\d{1,3}% \d{1,3}%$/,
-          'Photo focus must be two percentages, like "50% 30%" (horizontal then vertical).',
-        )
-        .optional(),
+      // Absent, empty, or blank all mean "centered" (Carousel.astro falls back
+      // to "50% 50%"): a bare or emptied `focusPosition:` line left behind by a
+      // hand edit is not an error, so it must not fail the build.
+      focusPosition: z.preprocess(
+        (value) =>
+          value == null || (typeof value === "string" && value.trim() === "") ? undefined : value,
+        z
+          .string()
+          .trim()
+          .regex(
+            /^\d{1,3}% \d{1,3}%$/,
+            'Photo focus must be blank, or two percentages like "50% 30%" (horizontal then vertical).',
+          )
+          .optional(),
+      ),
       image: image(),
       // Lower numbers sort first; the 2nd entry is the default carousel highlight.
       order: z.number().int().nonnegative().default(100),
