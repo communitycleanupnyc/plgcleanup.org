@@ -4,9 +4,42 @@
 # Respects .prettierignore (content Markdown is skipped). Wired up by the
 # "prepare" npm script (git config core.hooksPath). Bypass once: --no-verify.
 
-files=$(git diff --cached --name-only --diff-filter=ACMR)
-[ -z "$files" ] && exit 0
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$staged" ] && exit 0
+
+# A file can be staged AND have further unstaged edits — that's what `git add -p`
+# is for. Formatting one of those rewrites the working copy, and the `git add`
+# below would then sweep the unstaged hunks into the commit too. So split the
+# list: format the fully-staged files, hold back the partly-staged ones.
+formattable=""
+held=""
+while IFS= read -r file; do
+  [ -z "$file" ] && continue
+  if [ -n "$(git diff --name-only -- "$file")" ]; then
+    held="$held$file
+"
+  else
+    formattable="$formattable$file
+"
+  fi
+done <<STAGED
+$staged
+STAGED
 
 # NUL-delimit for filenames with spaces (newlines in names are unsupported).
-printf '%s\n' "$files" | tr '\n' '\0' | xargs -0 npx prettier --write --ignore-unknown
-printf '%s\n' "$files" | tr '\n' '\0' | xargs -0 git add --
+if [ -n "$formattable" ]; then
+  printf '%s' "$formattable" | tr '\n' '\0' | xargs -0 npx prettier --write --ignore-unknown
+  printf '%s' "$formattable" | tr '\n' '\0' | xargs -0 git add --
+fi
+
+# The held-back files skipped formatting, so they're only a problem if they are
+# actually unformatted — that's the case CI would fail on. Say so now instead.
+if [ -n "$held" ] &&
+  ! printf '%s' "$held" | tr '\n' '\0' | xargs -0 npx prettier --check --ignore-unknown >/dev/null 2>&1; then
+  echo "These files are staged, have more unstaged edits, and need formatting:"
+  printf '%s' "$held" | sed 's/^/  /'
+  echo "Formatting them here would commit the unstaged edits too, so this commit"
+  echo "stopped instead. Run 'npm run format', stage the result, and commit again."
+  echo "To commit anyway: git commit --no-verify"
+  exit 1
+fi

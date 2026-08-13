@@ -46,11 +46,28 @@ if (pathCount !== 1) {
   );
 }
 
-const d = src.match(/ d="([^"]+)"/)[1];
-const [vbW, vbH] = src
-  .match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/)
-  .slice(1)
-  .map(Number);
+// Assumption 2, enforced: the path carries its outline in a `d` attribute.
+const dMatch = src.match(/ d="([^"]+)"/);
+if (!dMatch) {
+  throw new Error(
+    `public/images/logo.svg has no <path d="…"> attribute, so there is no outline to read. ` +
+      `Re-export it with the artwork as a single path (some editors emit <rect>/<circle> ` +
+      `shapes instead — convert those to a path first).`,
+  );
+}
+const d = dMatch[1];
+
+// Assumption 3, enforced: the viewBox starts at 0 0, because every coordinate
+// below is measured from that origin.
+const vbMatch = src.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
+if (!vbMatch) {
+  throw new Error(
+    `public/images/logo.svg needs a viewBox anchored at "0 0" (this script measures every ` +
+      `coordinate from that origin). Move the artwork so it starts at the top-left corner, ` +
+      `then re-export.`,
+  );
+}
+const [vbW, vbH] = vbMatch.slice(1).map(Number);
 
 // Subpaths: 0 = tree canopy+trunk outline, 1 = trunk notch, 2..n = hand swooshes.
 const subs = d.split(/(?=M)/g);

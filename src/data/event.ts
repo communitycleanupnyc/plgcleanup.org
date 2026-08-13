@@ -51,6 +51,17 @@ const TIME_ZONE = "America/New_York";
 const START_DATE = easternDate(CLEANUP_DATE, CLEANUP_START_TIME, "The start time");
 const END_DATE = easternDate(CLEANUP_DATE, CLEANUP_END_TIME, "The end time");
 
+// Both times can be written correctly and still be in the wrong order ("2pm" to
+// "11am"). That shape passes every check above, so catch it here: otherwise the
+// page would read "2pm–11am" and the countdown would call the cleanup over hours
+// before it starts.
+if (END_DATE <= START_DATE) {
+  throw new Error(
+    `The end time is "${CLEANUP_END_TIME}" and the start time is "${CLEANUP_START_TIME}", ` +
+      `so the cleanup would end before it began. Check both in the "Event details" form.`,
+  );
+}
+
 /** Standard ISO timestamps other parts of the site read. */
 export const CLEANUP_ISO = START_DATE.toISOString();
 export const CLEANUP_END_ISO = END_DATE.toISOString();

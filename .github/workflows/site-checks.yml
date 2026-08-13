@@ -62,9 +62,12 @@ env:
 
 jobs:
   audit:
-    # Cron + on-demand only. ci.yml runs this same gate on every push, so
-    # building here as well would just be a second red X for the same edit.
-    if: github.event_name != 'push' && github.event_name != 'pull_request'
+    # Monday cron + on-demand only. ci.yml runs this same gate on every push, so
+    # building here as well would just be a second red X for the same edit. The
+    # schedule string must match the Monday cron above byte-for-byte; matching on
+    # the string (not just "is a schedule") keeps the daily redeploy cron from
+    # firing this job too, which would turn the weekly tripwire into daily noise.
+    if: github.event.schedule == '0 12 * * 1' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

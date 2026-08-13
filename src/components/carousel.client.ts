@@ -9,11 +9,18 @@ import EmblaCarousel from "embla-carousel";
 // are freed. Progressive enhancement: opaque cover photos already occlude the
 // blur, so the effect works with JS disabled — this just tidies up after.
 document.querySelectorAll<HTMLImageElement>("img[data-blur-up]").forEach((img) => {
+  // Drops the whole inline style the blur-up needed — the LQIP background and
+  // the `color:transparent` that hid the alt text while it loaded. Also runs on
+  // `error`: a photo that never arrives should show its alt text, and leaving
+  // the colour transparent would paint that text invisibly.
   const clear = () => {
-    img.style.backgroundImage = "none";
+    img.removeAttribute("style");
   };
   if (img.complete && img.naturalWidth > 0) clear();
-  else img.addEventListener("load", clear, { once: true });
+  else {
+    img.addEventListener("load", clear, { once: true });
+    img.addEventListener("error", clear, { once: true });
+  }
 });
 
 document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((section) => {
