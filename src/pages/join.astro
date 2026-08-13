@@ -13,6 +13,7 @@ import {
   CLEANUP_MAPS_EMBED_URL,
 } from "../data/event";
 import { computeCountdown, renderJoinCountdown } from "../data/countdown";
+import { SITE } from "../site.config";
 
 const cleanupDate = new Date(CLEANUP_ISO);
 // Rendered at build time and recomputed on load by ../lib/countdown.client.ts.
@@ -40,7 +41,7 @@ const eventUrl = new URL("/join", Astro.site).href;
 const eventSchema = {
   "@context": "https://schema.org",
   "@type": "Event",
-  name: `Community Cleanup PLG — ${CLEANUP_CORNER}`,
+  name: `${SITE.name} — ${CLEANUP_CORNER}`,
   description:
     "A one-hour volunteer street cleanup in Prospect Lefferts Gardens, Brooklyn. No registration; all supplies provided. Just show up.",
   // Local time + offset, not UTC — the form Google's Event docs ask for.
@@ -50,7 +51,7 @@ const eventSchema = {
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
   isAccessibleForFree: true,
   url: eventUrl,
-  image: new URL("/images/logo.webp", Astro.site).href,
+  image: new URL(SITE.schema.logo, Astro.site).href,
   location: {
     "@type": "Place",
     name: CLEANUP_CORNER,
@@ -63,8 +64,8 @@ const eventSchema = {
     },
   },
   organizer: {
-    "@type": "NGO",
-    name: "Community Cleanup PLG",
+    "@type": SITE.schema.type,
+    name: SITE.name,
     url: new URL("/", Astro.site).href,
   },
 };
@@ -147,7 +148,12 @@ const eventSchema = {
   </div>
   {
     !isPastEvent && (
-      <script type="application/ld+json" is:inline set:html={JSON.stringify(eventSchema)} />
+      <script
+        slot="head"
+        type="application/ld+json"
+        is:inline
+        set:html={JSON.stringify(eventSchema)}
+      />
     )
   }
 </Base>
@@ -162,8 +168,8 @@ const eventSchema = {
     position: relative;
     width: var(--site-w);
     margin-left: var(--site-ml);
-    padding-top: clamp(3rem, 8vw, 5rem);
-    padding-bottom: clamp(2rem, 7vw, 3rem);
+    padding-top: var(--space-section);
+    padding-bottom: var(--space-block);
   }
 
   .join-cart-cell {
@@ -201,17 +207,17 @@ const eventSchema = {
   }
 
   .join-sub {
-    font-size: 1.0625rem;
+    font-size: var(--fs-body);
     line-height: 1.55;
     color: var(--text);
-    margin-bottom: clamp(2rem, 5vw, 3rem);
+    margin-bottom: var(--space-gap);
   }
 
   .join-details {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: clamp(1.5rem, 3vw, 2.5rem);
-    margin-bottom: clamp(2rem, 5vw, 3rem);
+    margin-bottom: var(--space-gap);
   }
 
   @media (max-width: 540px) {
@@ -227,7 +233,7 @@ const eventSchema = {
   }
 
   .join-detail-label {
-    font-size: 1.5rem;
+    font-size: var(--fs-lg);
     font-weight: 400;
     letter-spacing: 0em;
     text-transform: uppercase;
@@ -242,14 +248,14 @@ const eventSchema = {
   }
 
   .join-reassurance {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 400;
     color: var(--text);
     opacity: 0.6;
   }
 
   .join-service-hours {
-    font-size: 1.0625rem;
+    font-size: var(--fs-body);
     line-height: 1.55;
     color: var(--text);
   }

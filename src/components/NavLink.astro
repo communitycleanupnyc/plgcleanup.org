@@ -1,0 +1,23 @@
+---
+// One navigation/footer link, rendered from a SiteLink in src/site.config.ts.
+// Used by SiteHeader, MobileMenu, and SiteFooter so `external` handling (and the
+// safe rel) lives in exactly one place.
+//
+// The label sits tight against the tags on purpose: Astro preserves whitespace,
+// and the site's link underline is an inset box-shadow spanning the whole
+// element, so a stray leading/trailing space visibly widens every underline.
+import type { SiteLink } from "../site.config";
+
+interface Props {
+  link: SiteLink;
+  class?: string;
+}
+const { link, class: className } = Astro.props;
+---
+
+<a
+  href={link.href}
+  class={className}
+  target={link.external ? "_blank" : undefined}
+  rel={link.external ? "noopener noreferrer" : undefined}>{link.label}</a
+>

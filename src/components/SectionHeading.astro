@@ -1,0 +1,52 @@
+---
+// A section label with the site's block-bullet decoration. Used by the carousel
+// heading and by page section labels, which previously defined the identical
+// ::before rule in two separate files.
+//
+//   <SectionHeading id="why-label">Why volunteer</SectionHeading>
+//
+// Pair it with <Section labelledby="…"> so the heading names its section.
+interface Props {
+  as?: "h2" | "h3" | "h4";
+  id?: string;
+  class?: string;
+}
+
+const { as: Tag = "h2", id, class: className }: Props = Astro.props;
+---
+
+<Tag id={id} class:list={["section-heading", className]}>
+  <slot />
+</Tag>
+
+<style>
+  /* Astro's scoped styles don't cross a component boundary: a rule written in the
+     PARENT for a class passed in here would compile with the parent's scope id and
+     never match this element. So every dimension a caller might need to change is
+     a custom property — those inherit, so the caller sets them on any ancestor.
+     See .carousel-header in Carousel.astro, which reuses this heading inside a
+     flex row and zeroes the bottom margin. */
+  .section-heading {
+    font-size: var(--heading-size, 1.2rem);
+    line-height: var(--heading-lh, normal);
+    margin-bottom: var(--heading-gap, 0.75rem);
+    flex: var(--heading-flex, 0 1 auto);
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  /* The square bullet that marks a section label. */
+  .section-heading::before {
+    content: "";
+    display: block;
+    flex-shrink: 0;
+    width: var(--heading-mark-w, 1.25rem);
+    height: var(--heading-mark-h, 0.75rem);
+    background: var(--text);
+  }
+</style>

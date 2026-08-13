@@ -3,12 +3,17 @@ import Base from "../layouts/Base.astro";
 import { Image } from "astro:assets";
 import raccoon from "../assets/raccoon.webp";
 import Carousel from "../components/Carousel.astro";
+import Hero from "../components/Hero.astro";
+import Section from "../components/Section.astro";
+import SectionHeading from "../components/SectionHeading.astro";
+import FeatureGrid from "../components/FeatureGrid.astro";
+import Button from "../components/Button.astro";
 import type { CarouselItem } from "../components/carousel.types";
 import { getCollection, render } from "astro:content";
 import { VOLUNTEER_COUNT } from "../data/stats";
 import { CLEANUP_ISO, CLEANUP_END_ISO } from "../data/event";
 import { computeCountdown, renderCtaLabel } from "../data/countdown";
-import { RANDOMIZE_TESTIMONIALS } from "../config";
+import { SITE } from "../site.config";
 
 // Fisher–Yates: a uniform random permutation (a fresh copy, doesn't mutate input).
 function shuffle<T>(items: readonly T[]): T[] {
@@ -20,21 +25,21 @@ function shuffle<T>(items: readonly T[]): T[] {
   return a;
 }
 
-// Testimonials come from src/content/testimonials/*.md (see src/content.config.ts).
+// Carousel items come from src/content/gallery/*.md (see src/content.config.ts).
 // The image() schema validates every photo at build time, so a missing or
 // misnamed image fails the build loudly — no hand-rolled checks needed.
-// Order is the `order` field by default; RANDOMIZE_TESTIMONIALS (src/config.ts)
-// shuffles them fresh on every build instead.
-const testimonials = await getCollection("testimonials");
-const entries = RANDOMIZE_TESTIMONIALS
-  ? shuffle(testimonials)
-  : testimonials.sort((a, b) => a.data.order - b.data.order);
+// Order is the `order` field by default; features.randomizeGallery
+// (src/site.config.ts) shuffles them fresh on every build instead.
+const gallery = await getCollection("gallery");
+const entries = SITE.features.randomizeGallery
+  ? shuffle(gallery)
+  : gallery.sort((a, b) => a.data.order - b.data.order);
 
-// The schema can't see the Markdown body, so guard it here: a blank testimonial
+// The schema can't see the Markdown body, so guard it here: a blank body
 // would render an empty reveal panel. Fail the build loudly instead.
 for (const entry of entries) {
   if (!entry.body?.trim()) {
-    throw new Error(`[testimonials] "${entry.id}.md" has an empty body. Add the testimonial text.`);
+    throw new Error(`[gallery] "${entry.id}.md" has an empty body. Add the panel text.`);
   }
 }
 
@@ -43,8 +48,9 @@ const items: CarouselItem[] = await Promise.all(
     const { Content } = await render(entry);
     return {
       img: entry.data.image,
-      name: entry.data.name,
-      quote: entry.data.quote,
+      alt: entry.data.alt,
+      title: entry.data.title,
+      caption: entry.data.caption,
       focusPosition: entry.data.focusPosition,
       Body: Content,
     };
@@ -62,46 +68,43 @@ const ctaLabel = renderCtaLabel(state);
   title="Trash Cleanup in Prospect Lefferts Gardens"
   description="A volunteer trash cleanup crew in Prospect Lefferts Gardens, Brooklyn. No registration, all supplies provided — just show up."
 >
-  <div class="hero">
-    <h1>Clean Prospect Lefferts Gardens.</h1>
-    <Image
-      src={raccoon}
-      alt=""
-      class="raccoon"
-      aria-hidden="true"
-      widths={[148, 296]}
-      sizes="148px"
-      format="webp"
-      layout="none"
-      loading="eager"
-      fetchpriority="high"
-      decoding="async"
-    />
-  </div>
-
-  <div class="hero-body">
+  <Hero title="Clean Prospect Lefferts Gardens.">
+    <Fragment slot="decoration">
+      <Image
+        src={raccoon}
+        alt=""
+        class="raccoon"
+        aria-hidden="true"
+        widths={[148, 296]}
+        sizes="148px"
+        format="webp"
+        layout="none"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+      />
+    </Fragment>
     <p>
       {VOLUNTEER_COUNT} of your neighbors are helping keep trash off our streets.
     </p>
     <p>Want to see why people love volunteering with us?</p>
-  </div>
+  </Hero>
 
   <div class="cta-actions">
-    <a
-      class="cta-primary"
+    <Button
       href="/join"
       data-countdown
       data-variant="cta"
       data-start={CLEANUP_ISO}
-      data-end={CLEANUP_END_ISO}>{ctaLabel}</a
+      data-end={CLEANUP_END_ISO}>{ctaLabel}</Button
     >
-    <a class="cta-secondary" href="/schedule">View schedule</a>
+    <Button href="/schedule" variant="secondary">View schedule</Button>
   </div>
 
-  <section class="why" aria-labelledby="why-label">
-    <h2 class="why__label" id="why-label">Why volunteer</h2>
-    <div class="why__grid">
-      <div class="why__col">
+  <Section labelledby="why-label" bottom="block">
+    <SectionHeading id="why-label">Why volunteer</SectionHeading>
+    <FeatureGrid columns={3}>
+      <div>
         <h3>Really, picking up trash?</h3>
         <p>
           Every piece counts, down to a cigarette butt. Simply being visible inspires others to help
@@ -112,7 +115,7 @@ const ctaLabel = renderCtaLabel(state);
           >"
         </p>
       </div>
-      <div class="why__col">
+      <div>
         <h3>What to expect</h3>
         <p>
           Just bring yourself! And water if it's hot out. We'll provide you with gloves, a grabber,
@@ -120,17 +123,27 @@ const ctaLabel = renderCtaLabel(state);
           crew shot at the end.
         </p>
       </div>
-      <div class="why__col">
+      <div>
         <h3>Who you'll meet</h3>
         <p>
           Around 5 to 10 fellow volunteers, including your squad lead(s). These are your neighbors
           and they rock. Chat, or lock in to savor the rhythmic process of sanitation.
         </p>
       </div>
-    </div>
-  </section>
+    </FeatureGrid>
+  </Section>
 
-  <Carousel items={items} variant="natural" heading="Why trash club" />
+  <Carousel
+    items={items}
+    variant="natural"
+    grayscale
+    heading="Why trash club"
+    labels={{
+      open: "Read {title}'s testimonial",
+      close: "Close {title}'s testimonial",
+      region: "{title}'s testimonial",
+    }}
+  />
 </Base>
 
 <script>
@@ -138,31 +151,11 @@ const ctaLabel = renderCtaLabel(state);
 </script>
 
 <style>
-  /* Home page (hero, hero body, why-volunteer grid). */
-  .hero {
-    position: relative;
-    width: var(--site-w);
-    margin-left: var(--site-ml);
-    padding-top: clamp(3rem, 8vw, 5rem);
-    margin-bottom: clamp(10rem, 7vw, 3.5rem);
-  }
+  /* Home page. The hero, section column, heading, and 3-col grid now live in
+     components (Hero, Section, SectionHeading, FeatureGrid); what remains here
+     is the decoration this page alone owns. */
 
-  .hero-kicker {
-    font-size: 0.6875rem;
-    font-weight: 500;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 0.875rem;
-  }
-
-  /* Hero h1 is much larger; z-index lifts it above the raccoon */
-  .hero h1 {
-    font-size: clamp(3.25rem, 11vw, 6rem);
-    position: relative;
-    z-index: 1;
-  }
-
+  /* Positioned against Hero's headline block, which is position: relative. */
   .raccoon {
     position: absolute;
     z-index: 0;
@@ -179,125 +172,6 @@ const ctaLabel = renderCtaLabel(state);
   @media (max-width: 380px) {
     .raccoon {
       width: 100px;
-    }
-  }
-
-  /* ── Hero body (below h1, above CTA) ───────────── */
-
-  .hero-body {
-    width: var(--site-w);
-    margin-left: var(--site-ml);
-    /*padding-left: var(--edge);*/
-    padding-right: var(--edge);
-    display: flex;
-    flex-direction: column;
-    gap: 0.625rem;
-    margin-bottom: clamp(2rem, 6vw, 3rem);
-  }
-
-  .hero-body p {
-    line-height: 1.4;
-    color: var(--text);
-    font-weight: 400;
-    letter-spacing: -0.005em;
-    max-width: 70ch;
-  }
-
-  .hero-body p:first-child {
-    font-size: clamp(2rem, 3.5vw, 2.75rem);
-    line-height: 1.25;
-    margin-bottom: 1rem;
-  }
-
-  .hero-body p:last-child {
-    /* Match the CTA button text size (.cta-primary / .cta-secondary) below it. */
-    font-size: clamp(1.75rem, 2vw, 1.25rem);
-    font-weight: 200;
-    letter-spacing: 0em;
-  }
-
-  /* ── Why volunteer (Config 3-col grid) ──────────── */
-
-  .why {
-    width: var(--site-w);
-    margin-left: var(--site-ml);
-    margin-bottom: clamp(2rem, 7vw, 3rem);
-  }
-
-  .why__label {
-    font-size: 1.2rem;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text);
-    margin-bottom: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-  }
-
-  .why__label::before {
-    content: "";
-    display: block;
-    flex-shrink: 0;
-    width: 1.25rem;
-    height: 0.75rem;
-    background: var(--text);
-  }
-
-  .why__grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    border-top: 1.5px solid var(--line);
-    border-bottom: 1.5px solid var(--line);
-  }
-
-  .why__col {
-    padding-block: 2rem;
-  }
-
-  /* Right padding on every col except last — gap before the divider */
-  .why__col:not(:last-child) {
-    padding-right: clamp(0rem, 2.5vw, 1.5rem);
-  }
-
-  /* Left padding + divider on col 2 and col 3 */
-  .why__col + .why__col {
-    border-left: 1.5px solid var(--line);
-    padding-left: clamp(1rem, 2.5vw, 1.5rem);
-  }
-
-  .why__col h3 {
-    font-family: var(--font-display);
-    font-size: clamp(2rem, 3vw, 2rem);
-    font-weight: 300;
-    letter-spacing: -0.03em;
-    font-optical-sizing: auto;
-    font-variation-settings:
-      "SOFT" 50,
-      "WONK" 0;
-    line-height: 1.1;
-    margin-bottom: 0.75rem;
-  }
-
-  .why__col p {
-    font-size: 1.2rem;
-    line-height: 1.6;
-    font-weight: 300;
-    color: var(--text);
-  }
-
-  @media (max-width: 760px) {
-    .why__grid {
-      grid-template-columns: 1fr;
-    }
-    .why__col + .why__col {
-      border-left: none;
-      border-top: 1.5px solid var(--line);
-      padding-left: 0;
-    }
-    .why__col:not(:last-child) {
-      padding-right: 0;
     }
   }
 </style>

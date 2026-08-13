@@ -29,10 +29,10 @@ settings:
       rename: "Rename {oldPath} to {newPath} (via Pages CMS)"
 
 media:
-  - name: testimonial-photos
-    label: Testimonial photos
-    input: src/assets/testimonials
-    output: ../../assets/testimonials
+  - name: gallery-photos
+    label: Gallery photos
+    input: src/assets/gallery
+    output: ../../assets/gallery
     extensions: [jpg, jpeg, png, webp]
 
 content:
@@ -73,25 +73,33 @@ content:
           values: [ticker, static]
       - { name: body, label: Page content, type: rich-text, required: true }
 
-  - name: testimonials
-    label: Testimonials
+  - name: gallery
+    label: Gallery
     type: collection
-    path: src/content/testimonials
-    filename: "{fields.name}.md"
+    path: src/content/gallery
+    filename: "{fields.title}.md"
     view:
-      fields: [name, quote, order]
+      fields: [title, caption, order]
       sort: [order]
     fields:
-      - name: name
-        label: Name
+      - name: title
+        label: Title
         type: string
         required: true
         description: >-
-          First name is fine. If a name repeats — a second Abby — write "Abby R."
-          so the two don't overwrite each other (the name becomes the filename).
-          The photo's alt text is written for you from this name.
-      - { name: quote, label: Pull quote, type: string, required: true }
-      - { name: image, label: Photo, type: image, media: testimonial-photos, required: true }
+          First name is fine. If a title repeats — a second Abby — write "Abby R."
+          so the two don't overwrite each other (the title becomes the filename).
+      - { name: caption, label: Pull quote, type: string, required: true }
+      - name: alt
+        label: Photo description (alt text)
+        type: string
+        required: true
+        description: >-
+          What is in the photo, for people who can't see it — screen reader users,
+          and anyone whose image fails to load. Describe the picture, not the
+          person's role: "Abby laughing while emptying a grabber into a blue bag"
+          beats "volunteer photo". Don't start with "Photo of" or "Image of".
+      - { name: image, label: Photo, type: image, media: gallery-photos, required: true }
       - name: order
         label: Display order
         type: number
@@ -119,7 +127,7 @@ content:
         pattern:
           regex: "^\\s*$|^\\s*\\d{1,3}% \\d{1,3}%\\s*$"
           message: Leave it blank, or write two percentages separated by a space, like 50% 30% (across, then down).
-      - { name: body, label: Full testimonial, type: rich-text, required: true }
+      - { name: body, label: Full text (reveal panel), type: rich-text, required: true }
 
   - name: event
     label: Event details

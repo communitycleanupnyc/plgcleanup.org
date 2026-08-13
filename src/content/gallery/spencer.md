@@ -1,8 +1,9 @@
 ---
-name: Spencer
-quote: Respecting the neighborhood
-image: ../../assets/testimonials/spencer.jpg
-order: 3
+title: "Spencer"
+caption: "Respecting the neighborhood"
+alt: "Portrait of Spencer"
+image: ../../assets/gallery/spencer.jpg
+order: 7
 ---
 As a newcomer to Flatbush, it’s important to me that I participate as a neighbor. 
 

@@ -2,11 +2,23 @@
 // Readable, edge-aligned column for Markdown content pages (about, faq, terms,
 // schedule, partners, and the rest). The rendered Markdown arrives via <slot/>,
 // so its elements are styled with :global() below.
+interface Props {
+  /** Where the closing back-link points. Pass `null` to omit the link. */
+  backHref?: string | null;
+  backLabel?: string;
+}
+
+const { backHref = "/", backLabel = "← Back home" } = Astro.props;
 ---
 
 <div class="prose">
   <slot />
-  <a href="/" class="prose-back">← Back home</a>
+  {
+    /* set:html rather than a child expression: .prose-back is an underlined
+      inline-block, so a stray whitespace text node either side of the label
+      would render as underlined space. A self-closing tag can't collect any. */
+  }
+  {backHref && <a href={backHref} class="prose-back" set:html={backLabel} />}
 </div>
 
 <style>
@@ -14,8 +26,8 @@
     width: var(--site-w);
     margin-left: var(--site-ml);
     max-width: 68ch;
-    padding-top: clamp(3rem, 8vw, 5rem);
-    padding-bottom: clamp(2rem, 7vw, 3rem);
+    padding-top: var(--space-section);
+    padding-bottom: var(--space-block);
   }
 
   .prose :global(h1) {
@@ -31,7 +43,7 @@
   }
 
   .prose :global(p) {
-    font-size: 1.0625rem;
+    font-size: var(--fs-body);
     line-height: 1.6;
     margin-bottom: 1.25rem;
   }
@@ -49,19 +61,16 @@
   .prose-back {
     display: inline-block;
     margin-top: 1rem;
-    font-size: 0.9375rem;
+    font-size: var(--fs-sm);
     color: var(--text-muted);
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 3px;
-    text-decoration-color: rgba(245, 244, 238, 0.25);
+    text-decoration-color: color-mix(in srgb, var(--text) 25%, transparent);
   }
   .prose-back:hover {
     color: var(--text);
     text-decoration-color: var(--text);
   }
-  .prose-back:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+  /* Focus ring comes from the global :focus-visible rule in base.css. */
 </style>

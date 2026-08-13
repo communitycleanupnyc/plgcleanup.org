@@ -1,5 +1,6 @@
 ---
 import "../styles/tokens.css";
+import "../styles/fonts.css";
 import "../styles/base.css";
 import "../styles/chrome.css";
 import SiteHeader from "../components/SiteHeader.astro";
@@ -7,6 +8,7 @@ import MobileMenu from "../components/MobileMenu.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import { getImage } from "astro:assets";
 import { featured, OG_SIZE } from "../lib/og";
+import { SITE } from "../site.config";
 
 // Render this build's randomly-featured testimonial into a high-res square share
 // image (Sharp, build-time), and resolve it to an absolute URL for the meta tags.
@@ -26,16 +28,13 @@ interface Props {
   description?: string;
   navMode?: "ticker" | "static";
 }
-// Brand name + browser-tab title template, defined once. Pages pass only their
-// own short title (e.g. "FAQ") and the layout appends " | Community Cleanup PLG",
-// so the separator and site name live in exactly one place. A page that passes
-// no title at all gets just the site name — nothing currently does; every route,
-// home included, sets one.
-const SITE_NAME = "Community Cleanup PLG";
-const SITE_DESCRIPTION =
-  "We clean Prospect Lefferts Gardens. No registration, all supplies included. Just show up.";
-const { title, description = SITE_DESCRIPTION, navMode = "ticker" } = Astro.props;
-const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
+// Browser-tab title template, defined once. Pages pass only their own short
+// title (e.g. "FAQ") and the layout appends " | {SITE.name}", so the separator
+// and site name live in exactly one place. A page that passes no title at all
+// gets just the site name — nothing currently does; every route, home included,
+// sets one. The name itself comes from src/site.config.ts.
+const { title, description = SITE.description, navMode = "ticker" } = Astro.props;
+const fullTitle = title ? `${title} | ${SITE.name}` : SITE.name;
 
 // This page's own absolute URL, resolved against `site` (astro.config.mjs).
 // build.format "file" makes Astro.url.pathname the emitted file path
@@ -47,28 +46,26 @@ const canonicalURL = new URL(cleanPath, Astro.site);
 
 // Sitewide organization identity for search/AI engines. Emitted once per page as
 // JSON-LD; the homepage URL + logo are absolute so they resolve off any host.
+// Every value is from SITE.schema (src/site.config.ts). `areaServed` is dropped
+// when blank, so a site that isn't geographically scoped emits no empty key.
 const orgSchema = {
   "@context": "https://schema.org",
-  "@type": "NGO",
-  name: SITE_NAME,
+  "@type": SITE.schema.type,
+  name: SITE.name,
   url: new URL("/", Astro.site).href,
-  logo: new URL("/images/logo.webp", Astro.site).href,
-  description: SITE_DESCRIPTION,
-  areaServed: "Prospect Lefferts Gardens, Brooklyn, NY",
-  sameAs: [
-    "https://www.instagram.com/communitycleanupplg/",
-    "https://communitycleanupplg.substack.com/",
-    "https://discord.com/invite/H9her7r8N2",
-  ],
+  logo: new URL(SITE.schema.logo, Astro.site).href,
+  description: SITE.description,
+  ...(SITE.schema.areaServed ? { areaServed: SITE.schema.areaServed } : {}),
+  sameAs: SITE.schema.sameAs,
 };
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={SITE.lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#14130F" />
+    <meta name="theme-color" content={SITE.themeColor} />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
@@ -76,23 +73,28 @@ const orgSchema = {
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:site_name" content={SITE.name} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content={String(OG_SIZE)} />
     <meta property="og:image:height" content={String(OG_SIZE)} />
-    <meta property="og:image:alt" content="A Community Cleanup PLG volunteer" />
+    <meta property="og:image:alt" content={featured.alt} />
     <meta property="og:url" content={canonicalURL} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
-    <link rel="preload" href="/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/Fraunces.woff2" as="font" type="font/woff2" crossorigin />
+    {
+      SITE.fonts.map((href) => (
+        <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
+      ))
+    }
     <script type="application/ld+json" is:inline set:html={JSON.stringify(orgSchema)} />
+    {/* Page-specific <head> content — e.g. join.astro's Event JSON-LD. */}
+    <slot name="head" />
   </head>
 
   <body>

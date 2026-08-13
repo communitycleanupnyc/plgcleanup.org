@@ -2,10 +2,11 @@
 interface Props {
   navMode?: "ticker" | "static";
 }
-import { POUNDS_COLLECTED_DISPLAY } from "../data/stats";
+import { SITE } from "../site.config";
+import Logo from "./Logo.astro";
+import NavLink from "./NavLink.astro";
+import Ticker from "./Ticker.astro";
 const { navMode = "ticker" } = Astro.props;
-
-const TICKER_TEXT = `${POUNDS_COLLECTED_DISPLAY} pounds and counting, this year alone! See which block is up next. →`;
 ---
 
 <!-- A <header>, not a <div>: this is the site's banner landmark, which screen
@@ -13,77 +14,24 @@ const TICKER_TEXT = `${POUNDS_COLLECTED_DISPLAY} pounds and counting, this year 
      .site-chrome / #site-chrome, and MobileMenu stays a sibling, so the general-
      sibling rules (.site-chrome.is-fixed ~ …) are unaffected by the element swap. -->
 <header class={`site-chrome ${navMode === "ticker" ? "compact" : "static-nav"}`} id="site-chrome">
-  <div class="ticker-bar">
-    <div class="ticker" id="ticker">
-      <div class="ticker__viewport">
-        <div class="ticker__track">
-          <a href="/join" class="ticker__segment ticker__link">{TICKER_TEXT}</a>
-        </div>
-      </div>
-      <!-- Control on the right, outside the scrolling area -->
-      <button
-        class="ticker__toggle"
-        id="ticker-toggle"
-        type="button"
-        aria-pressed="false"
-        aria-label="Play stats ticker"
-      >
-        <!-- play-circle (shown when paused) -->
-        <svg
-          class="ticker__icon ticker__icon--play"
-          width="22"
-          height="22"
-          viewBox="2.25 2.25 19.5 19.5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="0.75"
-          aria-hidden="true"
-        >
-          <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
-          <path
-            fill="currentColor"
-            stroke="none"
-            d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z"
-          ></path>
-        </svg>
-        <!-- pause-circle (shown when playing) -->
-        <svg
-          class="ticker__icon ticker__icon--pause"
-          width="22"
-          height="22"
-          viewBox="2.25 2.25 19.5 19.5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="0.75"
-          aria-hidden="true"
-        >
-          <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
-          <path stroke-width="1.5" stroke-linecap="square" d="M14.25 10v4M9.75 10v4"></path>
-        </svg>
-      </button>
-    </div>
-  </div>
+  {SITE.features.ticker && <Ticker />}
 
   <!-- Nav: logo left + links right (hidden in compact mode) -->
   <nav class="nav" id="main-nav" aria-label="Site navigation">
-    <a href="/" class="nav-home" aria-label="Community Cleanup PLG — home">
-      <svg
-        class="site-logo"
-        viewBox="0 0 287.56 362.83"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-        ><path
-          fill="currentColor"
-          d="M13.34,131.12c-.16,1.43-.25,2.87-.25,4.33,0,25.68,24.91,46.5,55.65,46.5,12.97,0,24.9-3.72,34.36-9.94,3.64,1.61,7.45,2.98,11.42,4.04,2.3,11.4,5.84,29.29,7.39,38.52,4.59,27.34-.43,49.99-5.52,64.29l-3.9,17.2c9.43-2.09,25.66-10.1,39.16-21.29,21.74-18.02,41.56-20.62,41.56-20.62l-6.34-5.51c-18.33-17.96-12.56-45.48-6.29-62.55,9.19-.42,17.55-3.99,24.05-9.65,5.18,1.57,10.74,2.44,16.54,2.44,27.6,0,49.99-19.41,50.22-43.42,9.79-6.35,16.16-16.63,16.16-28.25,0-10.93-5.64-20.68-14.46-27.09,1.67-3.67,2.6-7.65,2.6-11.81,0-17.88-16.87-32.41-37.83-32.76-9.71-16.28-28.15-27.28-49.3-27.28-6.64,0-13,1.09-18.92,3.08C161.27,4.3,150.18,0,138.01,0,120.05,0,104.43,9.35,96.42,23.14c-6.51-2.66-13.73-4.15-21.35-4.15-28.59,0-51.77,20.85-51.77,46.56,0,1.19.07,2.36.16,3.53C9.51,75.6,0,88.49,0,103.35,0,114.24,5.11,124.08,13.34,131.12ZM139.28,220.66c-4.86-4.31-7.29-31.96-8.61-41.97,1.82.12,3.64.2,5.5.2,5.7,0,11.23-.58,16.56-1.66-3.14,19.11-13.44,43.43-13.44,43.43ZM269.04,279.15c-.2,1.31-1.05,2.49-1.82,3.58-1.39,1.86-3.05,3.6-4.72,5.26-4.32,4.29-9.03,8.22-13.43,12.47-6.43,6.32-17.61,14.63-17.61,14.63,0,0,12.29-13.72,12.65-22.59.14-3.33-1.21-5.22-1.21-5.22,0,0,8-5.23,12.8-7.97.27-.15,1.75-1.01,1.99-1.14.86-.47,1.74-.9,2.63-1.3,1.46-.66,3.08-1.27,4.65-1.41.92-.09,1.92-.02,2.71.34,1.31.56,1.49,2.07,1.36,3.34ZM287.66,268.98c-.94,1.68-2.31,3.14-3.67,4.52-2.96,2.94-12.22,8.91-12.22,8.91,0,0,2.32-4.31,1.71-6.98-.87-3.84-6.02-4.14-6.66-4.11,8.05-3.99,16.1-7.6,19.99-5.44.62.35,1.03.96,1.27,1.64.08.42-.18,1-.42,1.46ZM234.71,302.32c-6.49,13.01-16.6,24.02-27.98,32.96-21.69,16.97-48.91,25.61-76.22,27.23-6.81.43-13.77.44-20.57-.02-.98-.06-3.06-.28-4.1-.36-.81-.08-1.9-.22-2.72-.32-2.52-.29-5.61-.79-8.12-1.28-.82-.15-1.85-.35-2.68-.55-.76-.16-1.94-.42-2.67-.6-.84-.23-3.22-.77-3.98-1.02-.67-.18-1.96-.57-2.64-.75-2.06-.63-4.44-1.42-6.5-2.16-1.67-.62-3.46-1.31-5.1-2.01-27.29-11.3-48.78-33.54-63.3-58.9,0,0,38.94,27.09,79.11,28.68,24.08.95,35.43-5.79,40.68-9.35,11.6-8.24,22.7-17.2,34.24-25.49,2.23-1.58,4.45-3.15,6.76-4.6,6.28-3.92,24.73-14.97,30.29-6.58.79,1.54-.17,3.22-1.16,4.52-2,2.53-4.85,4.57-7.68,6.18-.64.36-2.45,1.29-3.1,1.65-5,2.64-10.25,5.69-13.35,10.6-1.01,1.64-1.68,3.58-1.63,5.51h.59s26.36-10.11,56-27.67c5.72-3.39,18.79-10.2,24.91-12.7,3.24-1.25,7.78-2.92,11.14-2.16,1.35.27,3.25,1.53,3.25,1.53l-30.32,19.84c-8.25.42-11.84,4.82-20.77,17.17-3.23,4.46-9.74,13.53-13.04,15.27,1.82-.47,6.38-.86,10.97-4.7,4.21-3.53,7.65-8.35,11.06-12.64,2.2-2.75,7.43-10.89,11.77-9.4,2.83.98-1.88,9.51-3.14,12.11Z"
-        ></path></svg
-      >
-      <span class="nav-wordmark">Community Cleanup PLG</span>
+    <a href="/" class="nav-home" aria-label={`${SITE.name} — home`}>
+      <Logo class="site-logo" />
+      <span class="nav-wordmark">{SITE.name}</span>
     </a>
     <div class="nav-links">
-      <a href="/about" class="nav-link">About</a>
-      <a href="/faq" class="nav-link">FAQ</a>
-      <span class="nav-divider" aria-hidden="true"></span>
-      <a href="/join" class="nav-btn">Join</a>
+      {SITE.nav.header.map((link) => <NavLink link={link} class="nav-link" />)}
+      {
+        SITE.nav.headerCta && (
+          <>
+            <span class="nav-divider" aria-hidden="true" />
+            <NavLink link={SITE.nav.headerCta} class="nav-btn" />
+          </>
+        )
+      }
     </div>
   </nav>
 </header><!-- /.site-chrome -->
@@ -96,55 +44,6 @@ const TICKER_TEXT = `${POUNDS_COLLECTED_DISPLAY} pounds and counting, this year 
   const chrome = document.getElementById("site-chrome")!;
   const isStaticNav = chrome.classList.contains("static-nav");
   const menuBtn = document.getElementById("nav-menu-btn");
-
-  // ── Ticker ──────────────────────────────────────────
-  const ticker = document.getElementById("ticker")!;
-  const tickerToggle = document.getElementById("ticker-toggle")!;
-  const tickerTrack = ticker.querySelector(".ticker__track") as HTMLElement;
-  const tickerViewport = ticker.querySelector(".ticker__viewport") as HTMLElement;
-
-  // Clone segments until track fills 3× the viewport, then pin --seg-w.
-  // Animates from translateX(0) → translateX(--seg-w) so the loop is
-  // seamless at any viewport width, with natural inter-segment spacing.
-  function fillTicker() {
-    const template = tickerTrack.children[0] as HTMLElement;
-    // Read geometry once, up front — never inside the loop below (reading a
-    // dirtied layout after each appendChild is the forced-reflow thrash).
-    const segW = template.offsetWidth;
-    if (!segW) return;
-    const target = tickerViewport.offsetWidth * 3;
-    // How many segments fill 3× the viewport (+1 spare for a seamless loop),
-    // minus what's already there — so a resize re-run adds nothing.
-    const want = Math.ceil(target / segW) + 1;
-    const needed = Math.max(0, want - tickerTrack.children.length);
-    // Build the clones off-DOM, then attach in a single write (no reflow).
-    const frag = document.createDocumentFragment();
-    for (let i = 0; i < needed; i++) {
-      const clone = template.cloneNode(true) as HTMLElement;
-      clone.setAttribute("aria-hidden", "true");
-      clone.setAttribute("tabindex", "-1");
-      frag.appendChild(clone);
-    }
-    tickerTrack.appendChild(frag);
-    tickerTrack.style.setProperty("--seg-w", segW + "px");
-  }
-
-  document.fonts.ready.then(fillTicker);
-  new ResizeObserver(fillTicker).observe(tickerViewport);
-
-  // Autoplay on load — only if user has no motion preference and ticker is shown
-  if (!isStaticNav && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    ticker.classList.add("is-playing");
-    tickerToggle.setAttribute("aria-pressed", "true");
-    tickerToggle.setAttribute("aria-label", "Pause stats ticker");
-  }
-
-  tickerToggle.addEventListener("click", () => {
-    const playing = ticker.classList.toggle("is-playing");
-    tickerToggle.setAttribute("aria-pressed", String(playing));
-    tickerToggle.setAttribute("aria-label", playing ? "Pause stats ticker" : "Play stats ticker");
-    tickerToggle.classList.add("is-activated");
-  });
 
   // ── Scroll behavior ─────────────────────────────────────────────
   if (isStaticNav) {

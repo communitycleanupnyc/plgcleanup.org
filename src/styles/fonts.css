@@ -1,0 +1,28 @@
+/* Typefaces.
+   ────────────────────────────────────────────────────────────────────────────
+   To swap the fonts, three edits and nothing else:
+
+     1. Drop the new .woff2 files into public/fonts/ (delete the old ones).
+     2. Rewrite the @font-face blocks below to match — family name, file name,
+        and the weight range the variable font actually covers.
+     3. Point --font-body / --font-display (src/styles/tokens.css) at the new
+        family names, and update SITE.fonts (src/site.config.ts) so the right
+        files are preloaded in <head>.
+
+   Both fonts here are variable and are deliberately NOT subset — see
+   "Dependency pins" in the README for the measurement behind that decision. */
+
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/Fraunces.woff2") format("woff2");
+  font-weight: 300 900;
+  /* optional: paint immediately in the fallback serif if the font isn't ready,
+     with no swap-in shift — keeps the LCP headline off the font's critical path. */
+  font-display: optional;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter.woff2") format("woff2");
+  font-weight: 200 700;
+  font-display: optional;
+}

@@ -1,6 +1,8 @@
 // Client behavior for Carousel.astro: Embla motion, blur-up cleanup, the
-// single-highlight model, the "N of M" counter, and the testimonial reveal panel.
-// Self-contained — it discovers every [data-carousel] section in the DOM.
+// single-highlight model, the "N of M" counter, and the reveal panel.
+// Self-contained — it discovers every [data-carousel] section in the DOM and
+// reads its configuration back off that element's data-* attributes, so it
+// needs nothing passed in from Astro.
 
 import EmblaCarousel from "embla-carousel";
 
@@ -65,17 +67,33 @@ document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((section) => {
   let arrowNav = false; // true only while an arrow-button move is settling
   let swipeDir = 0; // +1 = images scrolled left (advance), -1 = scrolled right (back)
 
+  // How long the highlight takes to cross from one photo to the next. Written to
+  // --hl-dur, which is the transition-duration of `filter` and `opacity` on the
+  // slide images (see .card__media img in Carousel.astro).
+  //
+  // TUNE THE CROSSFADE HERE — one line each, nothing else reads these:
+  const HL_DURATION = {
+    /** Desktop: moving the mouse from one photo to another. */
+    hover: "500ms",
+    /** Desktop: the prev/next arrow buttons. */
+    arrow: "350ms",
+    /** Touch: swiping back (right). Advancing snaps instantly instead. */
+    swipeBack: "225ms",
+    /** Taps, advance-swipes, and pressing the next image — no fade at all. */
+    instant: "0ms",
+  };
+  const setHighlightDuration = (ms: string) => section.style.setProperty("--hl-dur", ms);
+
   function setActive(i: number) {
     activeIndex = i;
     slides.forEach((s, idx) => s.classList.toggle("is-active", idx === activeIndex));
   }
   setActive(-1);
 
-  // Mobile highlight speed (desktop keeps its fixed 225ms in CSS): advancing — images
-  // scrolled LEFT — snaps in instantly; going back — scrolled RIGHT — fades smoothly.
-  // --hl-dur feeds the touch `transition-duration` in the stylesheet.
+  // Mobile highlight speed: advancing — images scrolled LEFT — snaps in
+  // instantly; going back — scrolled RIGHT — fades smoothly.
   function setHighlightSpeed() {
-    section.style.setProperty("--hl-dur", swipeDir > 0 ? "0ms" : "225ms");
+    setHighlightDuration(swipeDir > 0 ? HL_DURATION.instant : HL_DURATION.swipeBack);
   }
 
   // Physical swipe direction that feeds setHighlightSpeed().
@@ -93,7 +111,7 @@ document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((section) => {
       if (!slide) return;
       const cur = activeIndex >= 0 ? slides[activeIndex] : null;
       if (!cur || slide.getBoundingClientRect().left > cur.getBoundingClientRect().left + 1) {
-        section.style.setProperty("--hl-dur", "0ms");
+        setHighlightDuration(HL_DURATION.instant);
         setActive(parseInt(slide.dataset.index ?? "-1", 10));
       }
     },
@@ -116,15 +134,21 @@ document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((section) => {
   slides.forEach((slide, i) => {
     slide.addEventListener("pointerenter", (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
-      section.style.setProperty("--hl-dur", "225ms"); // hover is always a smooth crossfade
+      setHighlightDuration(HL_DURATION.hover); // hover is always a smooth crossfade
       setActive(i);
     });
     if (!isTouch) slide.addEventListener("focusin", () => setActive(i));
   });
 
   // ── Counter ─────────────────────────────────────
+  // Template comes from the `labels.counter` prop via a data attribute, so the
+  // wording (and its language) is the caller's to set, not this file's.
+  const counterLabel = section.dataset.counterLabel ?? "{n} of {total}";
   function updateCounter() {
-    if (counter) counter.textContent = `${embla.selectedScrollSnap() + 1} of ${N}`;
+    if (!counter) return;
+    counter.textContent = counterLabel
+      .replaceAll("{n}", String(embla.selectedScrollSnap() + 1))
+      .replaceAll("{total}", String(N));
   }
 
   embla.on("select", () => {
@@ -135,7 +159,7 @@ document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((section) => {
       // instant, back smooth) — a long crossfade there leaves the old highlight
       // lingering during the fade, which reads as a stuck/double highlight.
       if (isTouch) setHighlightSpeed();
-      else section.style.setProperty("--hl-dur", "350ms");
+      else setHighlightDuration(HL_DURATION.arrow);
       setActive(idx);
       arrowNav = false;
     } else if (isTouch) {
@@ -150,16 +174,119 @@ document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((section) => {
   // ── Arrow buttons ────────────────────────────────
   // Flag the move as arrow-driven (so `select` commits its highlight) and record the
   // direction: next = advance (instant), prev = back (smooth).
-  section.querySelector("[data-dir=prev]")?.addEventListener("click", () => {
+  function goPrev() {
     arrowNav = true;
     swipeDir = -1;
     embla.scrollPrev();
-  });
-  section.querySelector("[data-dir=next]")?.addEventListener("click", () => {
+  }
+  function goNext() {
     arrowNav = true;
     swipeDir = 1;
     embla.scrollNext();
+  }
+  function goTo(index: number) {
+    arrowNav = true;
+    swipeDir = index > embla.selectedScrollSnap() ? 1 : -1;
+    embla.scrollTo(index);
+  }
+  section.querySelector("[data-dir=prev]")?.addEventListener("click", goPrev);
+  section.querySelector("[data-dir=next]")?.addEventListener("click", goNext);
+
+  // ── Keyboard navigation ──────────────────────────
+  // The viewport is overflow:hidden and not focusable, so without this the only
+  // way to move the carousel from a keyboard is to Tab to the two arrow buttons.
+  // Arrow/Home/End work from anywhere inside the carousel.
+  //
+  // Not while focus is inside an open panel: arrow keys have to keep scrolling
+  // that text, which is the whole reason .card__panel-body carries tabindex="0".
+  section.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if ((e.target as HTMLElement).closest(".card__panel")) return;
+
+    switch (e.key) {
+      case "ArrowLeft":
+        goPrev();
+        break;
+      case "ArrowRight":
+        goNext();
+        break;
+      case "Home":
+        goTo(0);
+        break;
+      case "End":
+        goTo(N - 1);
+        break;
+      default:
+        return;
+    }
+    // Only reached when the key was handled — stop the page scrolling too.
+    e.preventDefault();
   });
+
+  // ── Off-screen slides ────────────────────────────
+  // The track loops and is clipped, so most slides are invisible at any moment —
+  // but they stay in the tab order and the accessibility tree, and Tab walks
+  // through every one of them including photos nobody can see. Hide those.
+  //
+  // NOT `inert`, which would be the one-attribute way to do this. `inert` also
+  // makes the subtree non-hit-testable, which silently breaks the hover
+  // highlight: a slide that is inert when the pointer enters it fires no
+  // `pointerenter`, so it never becomes .is-active and never runs the crossfade.
+  // The visible symptom is a highlight that stops following the mouse — most
+  // obviously right after a scroll, when the card under a stationary cursor is
+  // skipped entirely (pointerenter only fires on entry, and the cursor never
+  // moved). aria-hidden + tabindex="-1" achieves the same tab-order and
+  // screen-reader result and leaves pointer behaviour completely untouched.
+  //
+  // The slide holding focus is never hidden: `select` closes any open panel and
+  // hands focus back to that slide's toggle, and hiding it in the same turn
+  // would strand that focus inside an aria-hidden subtree.
+  const FOCUSABLE = "a[href], button, [tabindex]";
+
+  function setSlideHidden(slide: HTMLElement, hidden: boolean) {
+    if (slide.dataset.offscreen === String(hidden)) return; // already in this state
+    slide.dataset.offscreen = String(hidden);
+
+    if (hidden) slide.setAttribute("aria-hidden", "true");
+    else slide.removeAttribute("aria-hidden");
+
+    // Take the controls out of the tab order too — aria-hidden alone would
+    // leave a focusable element inside a hidden subtree, which is its own bug.
+    // The authored tabindex is remembered so .card__panel-body gets its 0 back.
+    for (const el of slide.querySelectorAll<HTMLElement>(FOCUSABLE)) {
+      if (hidden) {
+        if (el.dataset.tabindexWas === undefined)
+          el.dataset.tabindexWas = el.getAttribute("tabindex") ?? "";
+        el.setAttribute("tabindex", "-1");
+      } else {
+        const prev = el.dataset.tabindexWas;
+        if (prev === undefined) continue;
+        if (prev === "") el.removeAttribute("tabindex");
+        else el.setAttribute("tabindex", prev);
+        delete el.dataset.tabindexWas;
+      }
+    }
+  }
+
+  function updateOffscreenSlides() {
+    const inView = new Set(embla.slidesInView());
+    // Before Embla has measured (and if it ever reports nothing), treat every
+    // slide as visible. Hiding all of them would leave the carousel unreachable.
+    if (inView.size === 0) {
+      slides.forEach((slide) => setSlideHidden(slide, false));
+      return;
+    }
+    slides.forEach((slide, i) => {
+      const visible = inView.has(i) || slide.contains(document.activeElement);
+      setSlideHidden(slide, !visible);
+    });
+  }
+  embla.on("slidesInView", updateOffscreenSlides);
+  embla.on("reInit", updateOffscreenSlides);
+  // Re-evaluate when focus moves, so a slide that was hidden but has just been
+  // scrolled into view (or out of it) settles into the right state.
+  section.addEventListener("focusin", updateOffscreenSlides);
+  updateOffscreenSlides();
 
   // ── Testimonial panel ────────────────────────────
   if (!enablePopup) return;
@@ -227,12 +354,30 @@ document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((section) => {
   }
 
   function closePanel(slide: HTMLElement) {
+    // Whether focus is inside the panel we're about to close. Must be read
+    // BEFORE the classes come off, while the panel is still focusable.
+    const panel = panelOf(slide);
+    const hadFocus = !!panel && panel.contains(document.activeElement);
+
     slide.classList.remove("is-panel-open", "is-panel-priming");
     slide.querySelector(".card__toggle")?.setAttribute("aria-expanded", "false");
-    // Nothing else to do. Dropping .is-panel-priming hands visibility back to the
-    // base rule, whose `transition: visibility 0s 0.44s` keeps the panel painted
-    // for the whole slide-out and only then hides it — which is what takes it
-    // back out of the tab order and the accessibility tree.
+
+    // Return focus to the toggle that opened this panel. Without it, the panel
+    // goes visibility:hidden 0.44s later with focus still inside it, focus falls
+    // to <body>, and a keyboard user is silently dumped at the top of the
+    // document (WCAG 2.4.3). This lives here rather than in the close-button
+    // click handler so EVERY close path is covered — Escape and the carousel
+    // settling on another slide both call closePanel() too.
+    // preventScroll: the carousel may be mid-transition; letting the browser
+    // scroll the toggle into view yanks the page.
+    if (hadFocus) {
+      slide.querySelector<HTMLElement>(".card__toggle")?.focus({ preventScroll: true });
+    }
+
+    // Dropping .is-panel-priming hands visibility back to the base rule, whose
+    // `transition: visibility 0s 0.44s` keeps the panel painted for the whole
+    // slide-out and only then hides it — which is what takes it back out of the
+    // tab order and the accessibility tree.
   }
 
   // Embla stopPropagation()s click in capture phase after drags,
@@ -251,11 +396,10 @@ document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((section) => {
 
     const close = target.closest<HTMLElement>(".card__panel-close");
     if (close) {
+      // closePanel() returns focus to the toggle itself — focus is on this
+      // button, which is inside the panel.
       const slide = close.closest<HTMLElement>(".embla__slide");
-      if (slide) {
-        closePanel(slide);
-        slide.querySelector<HTMLElement>(".card__toggle")?.focus();
-      }
+      if (slide) closePanel(slide);
       return;
     }
 
@@ -265,7 +409,7 @@ document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((section) => {
     if (media && !target.closest(".card__panel")) {
       const slide = media.closest<HTMLElement>(".embla__slide");
       if (slide) {
-        section.style.setProperty("--hl-dur", "0ms"); // a direct tap highlights instantly
+        setHighlightDuration(HL_DURATION.instant); // a direct tap highlights instantly
         setActive(parseInt(slide.dataset.index ?? "-1", 10));
       }
     }

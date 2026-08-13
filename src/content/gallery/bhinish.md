@@ -1,7 +1,8 @@
 ---
-name: "Bhinish"
-quote: "We can easily doom scroll"
-image: ../../assets/testimonials/bhinish.jpg
+title: "Bhinish"
+caption: "We can easily doom scroll"
+alt: "Portrait of Bhinish"
+image: ../../assets/gallery/bhinish.jpg
 order: 3
 ---
 

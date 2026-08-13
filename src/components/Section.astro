@@ -1,0 +1,59 @@
+---
+// The site's content column. Every full-width block on every page sits in one
+// of these — it applies `width: var(--site-w)` plus the derived left offset,
+// which is the idiom the pages used to repeat in their own <style> blocks.
+//
+//   <Section top="section" bottom="block">…</Section>
+//
+// `top` and `bottom` pick a token from src/styles/tokens.css rather than taking
+// a raw length, so vertical rhythm stays consistent and reskinnable.
+interface Props {
+  /** Element to render. Use "section" when the block has a heading. */
+  as?: "section" | "div" | "header" | "article";
+  id?: string;
+  /** id of the heading that names this section (sets aria-labelledby). */
+  labelledby?: string;
+  class?: string;
+  /** Space above: the major-section gap, or none. */
+  top?: "section" | "none";
+  /** Space below: the between-blocks gap, the wider gap, or none. */
+  bottom?: "block" | "gap" | "none";
+}
+
+const {
+  as: Tag = "section",
+  id,
+  labelledby,
+  class: className,
+  top = "none",
+  bottom = "none",
+}: Props = Astro.props;
+---
+
+<Tag
+  id={id}
+  aria-labelledby={labelledby}
+  class:list={["section", className]}
+  data-top={top}
+  data-bottom={bottom}
+>
+  <slot />
+</Tag>
+
+<style>
+  .section {
+    width: var(--site-w);
+    margin-left: var(--site-ml);
+  }
+
+  .section[data-top="section"] {
+    padding-top: var(--space-section);
+  }
+
+  .section[data-bottom="block"] {
+    margin-bottom: var(--space-block);
+  }
+  .section[data-bottom="gap"] {
+    margin-bottom: var(--space-gap);
+  }
+</style>

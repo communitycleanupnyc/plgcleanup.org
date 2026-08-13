@@ -1,0 +1,83 @@
+---
+// An N-column grid of short text blocks, separated by hairline rules and
+// collapsing to a single column on narrow screens.
+//
+//   <FeatureGrid columns={3}>
+//     <div><h3>…</h3><p>…</p></div>
+//     <div><h3>…</h3><p>…</p></div>
+//   </FeatureGrid>
+//
+// The cells are slotted rather than passed as data so the copy — including any
+// inline links — stays in the page that owns it. Because slotted content keeps
+// the *caller's* style scope, the cell styling below uses :global(), the same
+// approach Prose.astro takes for rendered Markdown.
+interface Props {
+  /** Columns on wide screens. Collapses to 1 below 760px. */
+  columns?: number;
+  class?: string;
+}
+
+const { columns = 3, class: className } = Astro.props;
+---
+
+<div class:list={["feature-grid", className]} style={`--columns:${columns}`}>
+  <slot />
+</div>
+
+<style>
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--columns, 3), 1fr);
+    border-top: 1.5px solid var(--line);
+    border-bottom: 1.5px solid var(--line);
+  }
+
+  .feature-grid > :global(*) {
+    padding-block: 2rem;
+  }
+
+  /* Right padding on every cell except the last — gap before the divider */
+  .feature-grid > :global(*:not(:last-child)) {
+    padding-right: clamp(0rem, 2.5vw, 1.5rem);
+  }
+
+  /* Left padding + divider on every cell after the first */
+  .feature-grid > :global(* + *) {
+    border-left: 1.5px solid var(--line);
+    padding-left: clamp(1rem, 2.5vw, 1.5rem);
+  }
+
+  .feature-grid :global(h3) {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 3vw, 2rem);
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    font-optical-sizing: auto;
+    font-variation-settings:
+      "SOFT" 50,
+      "WONK" 0;
+    line-height: 1.1;
+    margin-bottom: 0.75rem;
+  }
+
+  .feature-grid :global(p) {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    font-weight: 300;
+    color: var(--text);
+  }
+
+  @media (max-width: 760px) {
+    .feature-grid {
+      grid-template-columns: 1fr;
+    }
+    .feature-grid > :global(* + *) {
+      border-left: none;
+      border-top: 1.5px solid var(--line);
+      padding-left: 0;
+    }
+    .feature-grid > :global(*:not(:last-child)) {
+      padding-right: 0;
+    }
+  }
+</style>

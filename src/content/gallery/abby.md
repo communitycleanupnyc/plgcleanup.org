@@ -1,7 +1,8 @@
 ---
-name: Abby
-quote: Forces me to slow down
-image: ../../assets/testimonials/abby.jpg
+title: "Abby"
+caption: "Forces me to slow down"
+alt: "Portrait of Abby"
+image: ../../assets/gallery/abby.jpg
 order: 1
 ---
 Volunteering with Community Cleanup PLG has been an incredible way to feel more connected to my neighborhood. 

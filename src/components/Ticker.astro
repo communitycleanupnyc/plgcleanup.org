@@ -1,0 +1,122 @@
+---
+// The scrolling stats band across the top of the site header, with its
+// play/pause control.
+//
+// Rendered by SiteHeader only when SITE.features.ticker is on. To retire the
+// feature for good: set that flag to false, confirm the build is green, then
+// delete this file, its import in SiteHeader.astro, the .ticker* rules in
+// src/styles/chrome.css, and src/data/stats.{json,ts}.
+//
+// The copy lives here because it is inseparable from its data source.
+import { POUNDS_COLLECTED_DISPLAY } from "../data/stats";
+
+const TICKER_TEXT = `${POUNDS_COLLECTED_DISPLAY} pounds and counting, this year alone! See which block is up next. →`;
+const TICKER_HREF = "/join";
+---
+
+<div class="ticker-bar">
+  <div class="ticker" id="ticker">
+    <div class="ticker__viewport">
+      <div class="ticker__track">
+        <a href={TICKER_HREF} class="ticker__segment ticker__link">{TICKER_TEXT}</a>
+      </div>
+    </div>
+    <!-- Control on the right, outside the scrolling area -->
+    <button
+      class="ticker__toggle"
+      id="ticker-toggle"
+      type="button"
+      aria-pressed="false"
+      aria-label="Play stats ticker"
+    >
+      <!-- play-circle (shown when paused) -->
+      <svg
+        class="ticker__icon ticker__icon--play"
+        width="22"
+        height="22"
+        viewBox="2.25 2.25 19.5 19.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="0.75"
+        aria-hidden="true"
+      >
+        <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+        <path
+          fill="currentColor"
+          stroke="none"
+          d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z"
+        ></path>
+      </svg>
+      <!-- pause-circle (shown when playing) -->
+      <svg
+        class="ticker__icon ticker__icon--pause"
+        width="22"
+        height="22"
+        viewBox="2.25 2.25 19.5 19.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="0.75"
+        aria-hidden="true"
+      >
+        <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+        <path stroke-width="1.5" stroke-linecap="square" d="M14.25 10v4M9.75 10v4"></path>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  // Fills the scrolling track and drives the play/pause control. Lives here
+  // rather than in SiteHeader so the whole feature is one file; the header's
+  // scroll behavior is independent and runs whether or not this is rendered.
+  const ticker = document.getElementById("ticker")!;
+  const tickerToggle = document.getElementById("ticker-toggle")!;
+  const tickerTrack = ticker.querySelector(".ticker__track") as HTMLElement;
+  const tickerViewport = ticker.querySelector(".ticker__viewport") as HTMLElement;
+
+  // Clone segments until track fills 3× the viewport, then pin --seg-w.
+  // Animates from translateX(0) → translateX(--seg-w) so the loop is
+  // seamless at any viewport width, with natural inter-segment spacing.
+  function fillTicker() {
+    const template = tickerTrack.children[0] as HTMLElement;
+    // Read geometry once, up front — never inside the loop below (reading a
+    // dirtied layout after each appendChild is the forced-reflow thrash).
+    const segW = template.offsetWidth;
+    if (!segW) return;
+    const target = tickerViewport.offsetWidth * 3;
+    // How many segments fill 3× the viewport (+1 spare for a seamless loop),
+    // minus what's already there — so a resize re-run adds nothing.
+    const want = Math.ceil(target / segW) + 1;
+    const needed = Math.max(0, want - tickerTrack.children.length);
+    // Build the clones off-DOM, then attach in a single write (no reflow).
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < needed; i++) {
+      const clone = template.cloneNode(true) as HTMLElement;
+      clone.setAttribute("aria-hidden", "true");
+      clone.setAttribute("tabindex", "-1");
+      frag.appendChild(clone);
+    }
+    tickerTrack.appendChild(frag);
+    tickerTrack.style.setProperty("--seg-w", segW + "px");
+  }
+
+  document.fonts.ready.then(fillTicker);
+  new ResizeObserver(fillTicker).observe(tickerViewport);
+
+  // Autoplay on load — only when the ticker is actually shown (the header is in
+  // its compact/ticker mode) and the visitor has no motion preference. Read off
+  // the header's class rather than passed in, so this script stays standalone.
+  const isStaticNav = !!document.getElementById("site-chrome")?.classList.contains("static-nav");
+  if (!isStaticNav && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    ticker.classList.add("is-playing");
+    tickerToggle.setAttribute("aria-pressed", "true");
+    tickerToggle.setAttribute("aria-label", "Pause stats ticker");
+  }
+
+  tickerToggle.addEventListener("click", () => {
+    const playing = ticker.classList.toggle("is-playing");
+    tickerToggle.setAttribute("aria-pressed", String(playing));
+    tickerToggle.setAttribute("aria-label", playing ? "Pause stats ticker" : "Play stats ticker");
+    tickerToggle.classList.add("is-activated");
+  });
+</script>

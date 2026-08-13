@@ -1,0 +1,28 @@
+---
+// The site's call-to-action link. Wraps the .cta-primary / .cta-secondary
+// styles in src/styles/base.css so callers don't reach for a bare class name.
+//
+//   <Button href="/join">Join us</Button>
+//   <Button href="/schedule" variant="secondary">View schedule</Button>
+//
+// Any extra attributes are passed straight through, which is how the home page
+// attaches the countdown hooks (data-countdown, data-start, data-end).
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"a"> {
+  href: string;
+  variant?: "primary" | "secondary";
+}
+
+// The label is written tight against the tags below — Astro preserves
+// whitespace, and all the button's padding must come from CSS, not stray
+// text nodes. (A JS comment, not an HTML one: HTML comments here would ship
+// in the output on every button.)
+const { href, variant = "primary", class: className, ...rest } = Astro.props;
+---
+
+<a
+  href={href}
+  class:list={[variant === "primary" ? "cta-primary" : "cta-secondary", className]}
+  {...rest}><slot /></a
+>

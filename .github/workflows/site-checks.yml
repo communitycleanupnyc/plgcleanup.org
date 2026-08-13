@@ -56,7 +56,7 @@ env:
   # event date can't fail the run. Remove at launch to re-arm the tripwire
   # (LAUNCH.md A.4) — without that removal the whole `audit` job is decorative.
   SEO_SKIP_FRESH: "1"
-  # Pre-launch: several testimonials are still awaiting real copy. Remove at
+  # Pre-launch: several gallery items are still awaiting real copy. Remove at
   # launch (LAUNCH.md A.4).
   SEO_SKIP_PLACEHOLDER: "1"
 

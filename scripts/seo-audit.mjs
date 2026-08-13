@@ -14,7 +14,7 @@
  *   SEO_SKIP_FRESH=1       downgrades stale-Event-schema errors to warnings.
  *   SEO_SKIP_PLACEHOLDER=1 downgrades the placeholder-content errors ("xyz"
  *                          names, "…"-only pull quotes) to warnings. Set
- *                          pre-launch only, while real testimonial copy is
+ *                          pre-launch only, while real gallery copy is
  *                          still being written — remove at launch (LAUNCH.md).
  */
 
@@ -37,12 +37,15 @@ const CFG = {
   ],
   // Softer launch markers. WARN.
   warnVisible: ["coming soon"],
-  // Placeholder testimonial copy. ERROR unless SEO_SKIP_PLACEHOLDER=1.
+  // Placeholder gallery copy. ERROR unless SEO_SKIP_PLACEHOLDER=1.
   placeholderVisible: ["xyz"],
   // Comment markers that leak roadmap if shipped inside <!-- -->. WARN.
   commentMarkers: ["TODO", "STUB", "FIXME", "HACK"],
-  // Alt texts that are effectively junk. WARN. (alt="" is fine = decorative.)
+  // Alt texts that are effectively junk. ERROR. (alt="" is fine = decorative.)
   junkAlts: ["...", "\u2026", ".", "-", "image", "photo", "help me"],
+  // aria-* attributes whose value is a space-separated list of element ids.
+  // Each one is checked against the ids actually present on the page.
+  ariaIdRefs: ["aria-labelledby", "aria-describedby", "aria-controls", "aria-details"],
   // AI/answer-engine crawlers that should not be blocked in robots.txt. WARN.
   aiBots: [
     "GPTBot",
@@ -321,7 +324,7 @@ for (const page of htmlFiles) {
   for (const s of CFG.warnVisible)
     if (vis.toLowerCase().includes(s.toLowerCase()))
       warn(page, `Launch marker visible on page: "${s}"`);
-  // Placeholder testimonial copy: a stand-in name ("xyz"), or a pull quote that
+  // Placeholder gallery copy: a stand-in title ("xyz"), or a pull quote that
   // is nothing but dots. Both ship straight onto the home-page carousel.
   for (const s of CFG.placeholderVisible)
     if (vis.toLowerCase().includes(s.toLowerCase())) placeholder(page, `Placeholder name: "${s}"`);
@@ -374,8 +377,8 @@ for (const page of htmlFiles) {
     }
   }
   if (noAlt) warn(page, `${noAlt} <img> tag(s) missing an alt attribute.`);
-  // ERROR, not WARN: testimonial alt text is derived in Carousel.astro, so junk
-  // alt can only reappear via a hand-written one. This is the regression net.
+  // ERROR, not WARN: every gallery photo carries authored alt (a required field
+  // in src/content.config.ts), so junk alt means someone typed it. The net.
   if (junk.length)
     err(
       page,
@@ -386,6 +389,70 @@ for (const page of htmlFiles) {
       page,
       `Local image weight ${(pageImgBytes / 1048576).toFixed(2)} MB exceeds ${(CFG.imgBudgetBytes / 1048576).toFixed(1)} MB budget.`,
     );
+
+  // ── Accessibility ──────────────────────────────────────────────────────────
+  // Regex over built HTML, same as everything else here — so this catches the
+  // structural WCAG mistakes that survive a code review, not the behavioural
+  // ones. Focus order, computed contrast, and anything that needs a running
+  // browser are out of reach by design; `npm run a11y` covers colour, and the
+  // keyboard pass in the README covers the rest.
+
+  // Zoom must not be disabled (WCAG 1.4.4). The viewport check above only
+  // asserts the tag exists; this reads what it actually says.
+  const vp = head.match(/<meta\s+name="viewport"[^>]*\scontent="([^"]*)"/i);
+  if (vp && /user-scalable\s*=\s*(no|0)|maximum-scale\s*=\s*(1(\.0+)?)\b/i.test(vp[1]))
+    err(page, `Viewport blocks zoom (WCAG 1.4.4): "${vp[1]}"`);
+
+  // Exactly one <h1>, and no skipped heading levels (h2 → h4).
+  const headings = [...body.matchAll(/<h([1-6])\b[^>]*>/gi)].map((m) => Number(m[1]));
+  const h1s = headings.filter((h) => h === 1).length;
+  if (h1s !== 1) warn(page, `Expected exactly 1 <h1>, found ${h1s}.`);
+  for (let i = 1; i < headings.length; i++)
+    if (headings[i] > headings[i - 1] + 1) {
+      warn(page, `Heading level skips h${headings[i - 1]} → h${headings[i]}.`);
+      break; // one report per page is enough to send someone looking
+    }
+
+  // Duplicate ids. Breaks every aria-* reference that points at one, and is
+  // exactly what a copy-pasted component produces.
+  const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
+  const dupeIds = [...new Set(ids.filter((v, i) => ids.indexOf(v) !== i))];
+  if (dupeIds.length) err(page, `Duplicate id(s): ${dupeIds.slice(0, 5).join(", ")}`);
+
+  // aria-* that points at an id which isn't on the page. A dangling reference
+  // is silently ignored by assistive tech, so the control ends up unlabelled.
+  const idSet = new Set(ids);
+  for (const attr of CFG.ariaIdRefs)
+    for (const m of html.matchAll(new RegExp(`\\s${attr}="([^"]+)"`, "g")))
+      for (const ref of m[1].trim().split(/\s+/))
+        if (ref && !idSet.has(ref))
+          err(page, `${attr}="${ref}" points at no element on this page.`);
+
+  // Links and buttons with no accessible name — nothing to announce, and
+  // nothing for a voice-control user to say.
+  for (const m of html.matchAll(/<(a|button)\b([^>]*)>([\s\S]*?)<\/\1>/gi)) {
+    const [, tag, attrs, inner] = m;
+    if (tag.toLowerCase() === "a" && !/\shref=/.test(attrs)) continue; // not a link
+    if (/\saria-hidden="true"/.test(attrs)) continue;
+    const named =
+      /\saria-label="[^"]*[^\s"][^"]*"/.test(attrs) ||
+      /\saria-labelledby="/.test(attrs) ||
+      /\stitle="[^"]*[^\s"][^"]*"/.test(attrs) ||
+      // text content, or an image inside carrying a non-empty alt
+      decode(inner.replace(/<[^>]*>/g, "")).trim().length > 0 ||
+      /<img\b[^>]*\salt="[^"]*[^\s"][^"]*"/.test(inner);
+    if (!named)
+      err(page, `<${tag}> has no accessible name: ${m[0].replace(/\s+/g, " ").slice(0, 90)}…`);
+  }
+
+  // Positive tabindex overrides the document's natural order for everyone.
+  const positiveTab = [...html.matchAll(/\stabindex="(\d+)"/g)].filter((m) => Number(m[1]) > 0);
+  if (positiveTab.length)
+    err(page, `${positiveTab.length} element(s) with a positive tabindex — use 0 or -1.`);
+
+  // An <iframe> without a title is an unlabelled frame in the tab order.
+  for (const m of html.matchAll(/<iframe\b[^>]*>/gi))
+    if (!/\stitle="[^"]*[^\s"][^"]*"/.test(m[0])) err(page, "<iframe> missing a title attribute.");
 
   // Sitemap membership (indexable pages only)
   if (!inSitemap.has(page) && page !== "404.html" && !(rm && /noindex/i.test(rm[1])))

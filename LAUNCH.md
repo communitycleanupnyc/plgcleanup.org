@@ -16,7 +16,7 @@ lost.
 ## A. Go-live — re-arm the safety nets
 
 The repo currently ships with its automated checks disabled so that a past event
-date and unfinished testimonial copy can't fail every build during setup. This
+date and unfinished gallery copy can't fail every build during setup. This
 section turns them all back on. **Nothing here protects anything until it's done.**
 
 1. **[you] Create the Cloudflare deploy hook.** Cloudflare dashboard → Workers &
@@ -47,7 +47,7 @@ section turns them all back on. **Nothing here protects anything until it's done
    Until this is done, the Monday tripwire in `site-checks.yml` cannot fail, which
    means it is decorative. **This is the single most important step in this file.**
 
-   The build will now refuse to ship a page containing "todo", a testimonial named
+   The build will now refuse to ship a page containing "todo", a gallery item named
    "xyz" or quoted as "...", or an event date in the past. If it fails here, that
    is the gate doing its job — finish the content rather than putting the
    variables back.
@@ -147,7 +147,7 @@ Only needed if the project is deleted or you're moving accounts.
 | Build cache       | **On** (Settings → Build → Build cache)                            |
 
 Build cache matters more than it sounds: it persists `node_modules`, including
-Astro's processed-image cache, so adding one testimonial re-encodes one photo
+Astro's processed-image cache, so adding one gallery item re-encodes one photo
 instead of all sixteen — seconds instead of ~40.
 
 Then re-do: custom domains (B.1), the deploy hook + `CF_PAGES_DEPLOY_HOOK` secret

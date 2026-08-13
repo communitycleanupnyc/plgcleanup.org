@@ -1,0 +1,91 @@
+---
+// The page-opening headline and its supporting paragraphs.
+//
+//   <Hero title="Clean Prospect Lefferts Gardens.">
+//     <Image slot="decoration" src={art} alt="" aria-hidden="true" />
+//     <p>First paragraph — rendered large.</p>
+//     <p>Last paragraph — rendered at CTA size, to lead into the buttons.</p>
+//   </Hero>
+//
+// The `decoration` slot is for purely ornamental art. It is positioned against
+// the headline block (which is `position: relative`), so the caller styles it
+// with `position: absolute` in its own scope. Anything slotted there must carry
+// alt="" and aria-hidden="true" — it is decoration, not content.
+interface Props {
+  title: string;
+  /** Small uppercase label above the headline. Omit for no kicker. */
+  kicker?: string;
+}
+
+const { title, kicker } = Astro.props;
+---
+
+<div class="hero">
+  {kicker && <p class="hero-kicker">{kicker}</p>}
+  <h1>{title}</h1>
+  <slot name="decoration" />
+</div>
+
+<div class="hero-body">
+  <slot />
+</div>
+
+<style>
+  .hero {
+    position: relative;
+    width: var(--site-w);
+    margin-left: var(--site-ml);
+    padding-top: var(--space-section);
+    margin-bottom: clamp(10rem, 7vw, 3.5rem);
+  }
+
+  .hero-kicker {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.875rem;
+  }
+
+  /* Hero h1 is much larger than the base h1; z-index lifts it above decoration */
+  .hero h1 {
+    font-size: var(--fs-hero);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Hero body (below h1, above the CTAs) ───────────── */
+
+  .hero-body {
+    width: var(--site-w);
+    margin-left: var(--site-ml);
+    padding-right: var(--edge);
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    margin-bottom: clamp(2rem, 6vw, 3rem);
+  }
+
+  /* Slotted paragraphs keep the caller's style scope, so reach them globally. */
+  .hero-body :global(p) {
+    line-height: 1.4;
+    color: var(--text);
+    font-weight: 400;
+    letter-spacing: -0.005em;
+    max-width: 70ch;
+  }
+
+  .hero-body :global(p:first-child) {
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    line-height: 1.25;
+    margin-bottom: 1rem;
+  }
+
+  .hero-body :global(p:last-child) {
+    /* Match the CTA button text size (.cta-primary / .cta-secondary) below it. */
+    font-size: var(--fs-cta);
+    font-weight: 200;
+    letter-spacing: 0em;
+  }
+</style>

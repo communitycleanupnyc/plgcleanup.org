@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import Section from "../components/Section.astro";
 // A real 404.astro makes Cloudflare Pages serve this with an HTTP 404 for unknown
 // URLs, instead of SPA-falling-back to index.html with a 200 (soft-404 duplicates).
 ---
@@ -9,24 +10,21 @@ import Base from "../layouts/Base.astro";
   description="That page doesn't exist. Head back to Community Cleanup PLG to find your next Prospect Lefferts Gardens cleanup."
   navMode="static"
 >
-  <div class="notfound">
+  <Section as="div" class="notfound" top="section">
     <h1>Page not found</h1>
     <p>
       That page moved or never existed. No trash left behind, though — head back to the
       <a href="/">home page</a> or come <a href="/join">join the next cleanup</a>.
     </p>
-  </div>
+  </Section>
 </Base>
 
 <style>
   .notfound {
-    width: var(--site-w);
-    margin-left: var(--site-ml);
-    padding-top: clamp(3rem, 8vw, 5rem);
-    padding-bottom: clamp(2rem, 7vw, 3rem);
+    padding-bottom: var(--space-block);
   }
   .notfound p {
-    font-size: 1.0625rem;
+    font-size: var(--fs-body);
     line-height: 1.55;
     margin-top: 1rem;
     max-width: 60ch;

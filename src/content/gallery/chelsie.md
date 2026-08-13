@@ -1,7 +1,8 @@
 ---
-name: Chelsie
-quote: "Community is everything "
-image: ../../assets/testimonials/chelsie.jpg
+title: "Chelsie"
+caption: "Community is everything"
+alt: "Portrait of Chelsie"
+image: ../../assets/gallery/chelsie.jpg
 order: 2
 ---
 My favorite part? Meeting our neighbors. 

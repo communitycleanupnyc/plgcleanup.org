@@ -1,6 +1,15 @@
-/* Design tokens — the single place to change colors, spacing, fonts, and the
-   content-column width. Referenced with var(--…) throughout the site. */
+/* Design tokens — the single place to change colors, type sizes, spacing,
+   motion, and the content-column width. Referenced with var(--…) throughout.
+
+   Rules of the road for this file:
+   • Every token here is USED. A token defined "for later" is a trap: --muted
+     below is the cautionary tale, and a colour with no documented safe use gets
+     reached for by the next person and misapplied. Add tokens when you have a
+     second use site, not before.
+   • Colour changes are gated by `npm run a11y` (scripts/contrast-check.mjs),
+     which recomputes the contrast ratios asserted in the comments below. */
 :root {
+  /* ── Colour ────────────────────────────────────────────────────────────── */
   --bg: #000;
   --text: #e2e2e2;
   /* SURFACE tokens — backgrounds only. --surface was called --muted, a name that
@@ -13,23 +22,63 @@
   /* Dim foreground text and icons: ~7.4:1 on --bg (WCAG AA needs 4.5:1 for text,
      3:1 for icons and other non-text controls). */
   --text-muted: #9a9a96;
-  --brand: #63c9ea;
   --accent: #24cb71;
   --select: #eeb408;
-
-  --edge: clamp(1.25rem, 5vw, 3rem);
-  --ticker-bg: rgba(255, 255, 255, 0.75);
-  --ticker-h: 3.3rem;
-  --nav-h: 3.52rem;
   --btn-light: var(--text);
-  --hover-radius: 0;
+
+  /* Keyboard focus ring. Drawn by the global :focus-visible rule in base.css.
+     Must clear 3:1 against --bg (WCAG 1.4.11 / 2.4.13) — a focus indicator that
+     only changes an icon's colour is not an indicator. */
+  --focus-ring-color: var(--accent);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+
+  /* ── Type ──────────────────────────────────────────────────────────────── */
+  /* Typefaces — change here to switch fonts site-wide. The @font-face blocks
+     they refer to live in src/styles/fonts.css. */
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+
+  /* The sizes this design actually reuses. One-off sizes stay inline at their
+     use site; promote one here once a second place wants it. */
+  --fs-hero: clamp(3.25rem, 11vw, 6rem);
+  --fs-h1: clamp(3rem, 5vw, 3rem);
+  --fs-cta: clamp(1.75rem, 2vw, 1.25rem);
+  --fs-lg: 1.5rem;
+  --fs-md: 1.1rem;
+  --fs-body: 1.0625rem;
+  --fs-base: 1rem;
+  --fs-sm: 0.9375rem;
+
+  /* ── Spacing ───────────────────────────────────────────────────────────── */
+  /* Fluid vertical rhythm. --space-section is the gap above a major section,
+     --space-block the gap between blocks inside one. */
+  --space-section: clamp(3rem, 8vw, 5rem);
+  --space-block: clamp(2rem, 7vw, 3rem);
+  --space-gap: clamp(2rem, 5vw, 3rem);
+  /* Horizontal breathing room at the viewport edge. */
+  --edge: clamp(1.25rem, 5vw, 3rem);
+
+  /* ── Motion ────────────────────────────────────────────────────────────── */
+  /* --dur-fast/--ease-out is the site-wide colour + background transition.
+     --dur-slide/--ease-standard is the chrome slide and hamburger morph.
+     The tuned spring curves (--panel-spring in Carousel.astro, --menu-spring in
+     chrome.css) stay next to the thing they animate — they are not general. */
+  --dur-fast: 225ms;
+  --ease-out: ease;
+  --dur-slide: 0.35s;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --ticker-duration: 12s;
 
+  /* ── Layout ────────────────────────────────────────────────────────────── */
   /* Content column: width + derived left-offset for the 95→90vw breakout */
   --site-w: 94vw;
   --site-ml: calc(50% - var(--site-w) / 2);
-
-  /* Typefaces — change here to switch fonts site-wide */
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-display: "Fraunces", Georgia, serif;
+  /* Reading-width cap on <main>. Widen it for an image-led site. */
+  --main-max-w: 900px;
+  --ticker-h: 3.3rem;
+  --nav-h: 3.52rem;
+  /* Corner radius on nav links, footer links, and CTA buttons. 0 is a
+     deliberate choice, not an oversight — the design is square-cornered. */
+  --hover-radius: 0;
 }

@@ -8,6 +8,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "audit": "node scripts/seo-audit.mjs dist",
+    "a11y": "node scripts/contrast-check.mjs",
     "gen:logo": "node scripts/gen-logo-assets.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

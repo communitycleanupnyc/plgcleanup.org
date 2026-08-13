@@ -17,13 +17,20 @@ change for "still works, untouched, in two years" over cleverness.
 Run all of this before claiming a change works:
 
 ```sh
-npm run check && npm run build && SEO_SKIP_FRESH=1 SEO_SKIP_PLACEHOLDER=1 npm run audit
+npm run check && npm run a11y && npm run build && SEO_SKIP_FRESH=1 SEO_SKIP_PLACEHOLDER=1 npm run audit
 ```
 
 `scripts/seo-audit.mjs` is the test suite — there is no test framework, by
-decision. Drop both env vars once LAUNCH.md step A.4 is done (they exist only
-because a past event date and unwritten testimonial copy would otherwise fail
-every build pre-launch).
+decision. `scripts/contrast-check.mjs` (`npm run a11y`) is the second half of it:
+it recomputes the WCAG contrast ratio of every colour pairing the site renders,
+straight from `src/styles/tokens.css`. Drop both env vars once LAUNCH.md step
+A.4 is done (they exist only because a past event date and unwritten gallery
+copy would otherwise fail every build pre-launch).
+
+**Neither script runs a browser**, so nothing in the automated gate exercises
+client JavaScript, focus order, or keyboard behaviour. After changing the
+carousel, the mobile menu, or anything focus-related, do the keyboard pass in
+the README ("Checking accessibility by hand") in `npm run preview`.
 
 ## Don't touch / don't "fix"
 
@@ -59,41 +66,96 @@ explicitly asks:
 
 Things that will silently break if you don't know them:
 
-- **Nav links are hand-maintained in THREE files.** Adding or renaming a page
-  means editing `src/components/SiteHeader.astro`, `src/components/MobileMenu.astro`,
-  and `src/components/SiteFooter.astro`. Nothing generates them.
+- **`src/site.config.ts` is the only place site identity lives.** Name,
+  description, theme colour, nav links, social links, structured data, and the
+  feature switches. The header, mobile menu, footer, and layout all read from it,
+  so adding a page means editing `SITE.nav` and nothing else. Don't reintroduce a
+  hard-coded link, brand name, or URL into a component.
 - **The `<title>` template lives only in `src/layouts/Base.astro`.** Pages pass
-  their short title (`"FAQ"`); the layout appends `" | Community Cleanup PLG"`.
-  Never write the site name into a page's own title.
+  their short title (`"FAQ"`); the layout appends `" | ${SITE.name}"`. Never
+  write the site name into a page's own title.
+- **`SiteHeader` and `MobileMenu` must stay direct, adjacent children of
+  `<body>`.** `chrome.css` positions the menu button with general-sibling
+  selectors (`.site-chrome.is-fixed ~ .nav-menu-btn`), and MobileMenu inerts the
+  background by walking `document.body.children`. Wrapping either one in a
+  container silently breaks the scroll behaviour and the focus containment.
 - **Filenames are URLs.** Every `src/content/pages/*.md` auto-routes via
   `src/pages/[slug].astro` (`faq.md` → `/faq`). `index`, `join`, and `404` are
   reserved — `[slug].astro` throws a friendly error if a content file claims one.
-- **Testimonial alt text is derived, not authored.** `Carousel.astro` builds it
-  from `name`. There is deliberately no `alt` field; don't add one back.
-- **At least one testimonial must exist** — the social share image is built from
+- **Gallery `alt` text is authored per photo and required** by the schema in
+  `src/content.config.ts`. It used to be derived from the name; it isn't any
+  more, because alt describes the _picture_, which a title can't stand in for.
+  Don't regenerate it from another field, and don't make the field optional.
+- **At least one gallery item must exist** — the social share image is built from
   the lowest-`order` one (`src/lib/og.ts`).
-- **Never delete an audit check to make CI pass.** `scripts/seo-audit.mjs` is the
-  launch gate. If it fails, the site is wrong, not the script.
+- **Never delete an audit check to make CI pass.** `scripts/seo-audit.mjs` and
+  `scripts/contrast-check.mjs` are the launch gate. If one fails, the site is
+  wrong, not the script.
+- **`Carousel.astro` holds no copy of its own.** Every string it speaks comes
+  from `labels` (defaults in `carousel.types.ts`), and every item field comes
+  from props. Keep it that way — it is the component most likely to be reused.
+- **Off-screen carousel slides are hidden with `aria-hidden` + `tabindex="-1"`,
+  not `inert`.** `inert` looks like the tidier one-attribute version and was
+  tried; it also blocks hit-testing, so a slide that is inert when the pointer
+  enters it fires no `pointerenter` and never runs its hover crossfade. The
+  highlight visibly stops following the mouse. Don't swap it back.
 - **`.pages.yml` nesting is fussy.** `settings.content` must be an object and
   commit messages must sit under `commit.templates`. A wrong shape parses fine and
   does nothing.
+
+## The component kit
+
+Presentation is componentised so a page is composition, not markup. Reach for
+these before writing a new `<style>` block; none of them contain site copy.
+
+| Component              | What it is                                                                       |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| `Section.astro`        | The content column (`--site-w` + offset). `top` / `bottom` pick a spacing token. |
+| `SectionHeading.astro` | Section label with the square bullet. Tune via `--heading-*` custom properties.  |
+| `Button.astro`         | `.cta-primary` / `.cta-secondary`; passes extra attributes through.              |
+| `Hero.astro`           | Headline + supporting paragraphs, with a `decoration` slot for ornament.         |
+| `FeatureGrid.astro`    | N-column grid of slotted text blocks, collapses at 760px.                        |
+| `Carousel.astro`       | The gallery. Fully props-driven — see `carousel.types.ts`.                       |
+| `NavLink.astro`        | One nav/footer link from a `SiteLink`; owns the `external` rel handling.         |
+| `Logo.astro`           | The logo mark. The only file that draws it.                                      |
+| `Prose.astro`          | Markdown column for content pages.                                               |
+
+Two things to know when writing a component here:
+
+- **Astro's scoped styles don't cross a component boundary.** A rule the parent
+  writes for a class it passes in compiles with the _parent's_ scope id and never
+  matches. Expose the knob as a CSS custom property instead — those inherit.
+  `SectionHeading` + `.carousel-header` is the worked example.
+- **Astro preserves whitespace.** In an inline-level element whose text is
+  underlined or background-inverted (nav links, buttons, `.prose-back`), a stray
+  newline inside the tag renders as a visible extra underline. Keep the label
+  tight against the tags, and comment why.
 
 ## Recipes
 
 - **Add a page:** create `src/content/pages/<slug>.md` with `title` and
   `description` frontmatter plus a Markdown body, then add the link to
-  `SiteFooter.astro` (and the header/mobile nav if it belongs there).
-- **Add a testimonial:** drop the photo in `src/assets/testimonials/`, create
-  `src/content/testimonials/<name>.md` with `name`, `quote`, `image`, `order`
-  (unique; lowest becomes the share image) and a Markdown body.
-- **Remove a testimonial:** delete the `.md`; the unused photo is pruned from the
-  build automatically. At least one must remain.
+  `SITE.nav` in `src/site.config.ts`.
+- **Add a gallery item:** drop the photo in `src/assets/gallery/`, create
+  `src/content/gallery/<name>.md` with `title`, `caption`, `alt`, `image`,
+  `order` (unique; lowest becomes the share image) and a Markdown body.
+- **Remove a gallery item:** delete the `.md`; the unused photo is pruned from
+  the build automatically. At least one must remain.
+- **Rename the site / change nav / swap social links:** `src/site.config.ts`.
+- **Turn a feature off:** `SITE.features` — the ticker, the gallery shuffle, the
+  random share image. Flip it, confirm the build is green, then delete the
+  feature's code and data if it's never coming back.
 - **Change the event:** `src/data/event.json` — `date` as `yyyy-mm-dd`, times like
   `10:00am` or `2pm`. Bad values fail the build with a message naming the field.
 - **Update stats:** `src/data/stats.json` — plain numbers, no commas.
-- **Change colors/fonts:** `src/styles/tokens.css`. `--surface` is for backgrounds,
-  `--text-muted` for dim text and icons; don't cross them (a previous version of
-  this file conflated them and shipped a 1.44:1 contrast failure).
+- **Change colors/spacing/type:** `src/styles/tokens.css`, then `npm run a11y`.
+  `--surface` is for backgrounds, `--text-muted` for dim text and icons; don't
+  cross them (a previous version of this file conflated them and shipped a
+  1.44:1 contrast failure — the contrast script now catches exactly that).
+  Every token in the file is in use: don't add one speculatively, and if you add
+  a new colour _pairing_, add it to `PAIRS` in `scripts/contrast-check.mjs`.
+- **Swap the fonts:** `src/styles/fonts.css` has the three-step recipe at the top
+  (files in `public/fonts/`, `@font-face`, then `--font-*` + `SITE.fonts`).
 
 ## When the build fails
 

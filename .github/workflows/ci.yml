@@ -24,7 +24,7 @@ env:
   SITE: https://plgcleanup.pages.dev # ← flip to https://plgcleanup.org at cutover (LAUNCH.md B.3)
   # Pre-launch escape hatches — both are deleted at launch (LAUNCH.md A.4).
   # FRESH: lets a past event.json date warn instead of failing every push.
-  # PLACEHOLDER: lets the not-yet-written testimonials warn instead of failing.
+  # PLACEHOLDER: lets the not-yet-written gallery copy warn instead of failing.
   SEO_SKIP_FRESH: "1"
   SEO_SKIP_PLACEHOLDER: "1"
 
@@ -46,6 +46,11 @@ jobs:
 
       - name: Type check
         run: npm run check
+
+      # Recomputes the WCAG contrast ratios of the colour tokens. Reads the CSS
+      # only, so it doesn't need a build — fail fast, before the slow steps.
+      - name: Contrast check
+        run: npm run a11y
 
       - name: Build
         run: npm run build

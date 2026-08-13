@@ -1,6 +1,11 @@
 ---
 // Menu button + slide-over mobile menu. Rendered as siblings of the site chrome
 // (see SiteHeader) so the general-sibling CSS selectors keep matching.
+//
+// Links come from SITE.nav.mobile / SITE.nav.mobileCtas — edit src/site.config.ts,
+// not this file.
+import { SITE } from "../site.config";
+import NavLink from "./NavLink.astro";
 ---
 
 <button
@@ -17,14 +22,19 @@
 </button>
 
 <!-- Mobile menu: sibling of site-chrome so parent padding-inline can't constrain it -->
-<div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation">
+<!-- aria-modal is set only while the menu is open (see the script). Asserting it
+     permanently would claim the rest of the page is inert even on desktop, where
+     this menu is never shown and the button is display:none. -->
+<div class="mobile-menu" id="mobile-menu" role="dialog" aria-label="Navigation">
   <nav class="mobile-menu-links" aria-label="Mobile navigation">
-    <a href="/about" class="mobile-menu-link">About</a>
-    <a href="/faq" class="mobile-menu-link">FAQ</a>
+    {SITE.nav.mobile.map((link) => <NavLink link={link} class="mobile-menu-link" />)}
   </nav>
   <div class="mobile-menu-ctas">
-    <a href="/join" class="cta-primary">Join us</a>
-    <a href="/schedule" class="cta-secondary">View schedule</a>
+    {
+      SITE.nav.mobileCtas.map((link, i) => (
+        <NavLink link={link} class={i === 0 ? "cta-primary" : "cta-secondary"} />
+      ))
+    }
   </div>
 </div>
 
@@ -64,6 +74,7 @@
 
   function openMobileMenu() {
     mobileMenu!.classList.add("is-open");
+    mobileMenu!.setAttribute("aria-modal", "true");
     menuBtn!.setAttribute("aria-expanded", "true");
     menuBtn!.setAttribute("aria-label", "Close menu");
     document.body.style.overflow = "hidden";
@@ -75,6 +86,7 @@
   }
   function closeMobileMenu() {
     mobileMenu!.classList.remove("is-open");
+    mobileMenu!.removeAttribute("aria-modal");
     menuBtn!.setAttribute("aria-expanded", "false");
     menuBtn!.setAttribute("aria-label", "Open menu");
     document.body.style.overflow = "";
@@ -90,9 +102,34 @@
     mobileMenu?.classList.contains("is-open") ? closeMobileMenu() : openMobileMenu();
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && mobileMenu?.classList.contains("is-open")) {
+    if (!mobileMenu?.classList.contains("is-open")) return;
+
+    if (e.key === "Escape") {
       closeMobileMenu();
       menuBtn?.focus(); // return focus for keyboard users closing via Escape
+      return;
+    }
+
+    // Wrap Tab inside the dialog. `inert` on the background already stops focus
+    // reaching page content, but it does not stop Tab leaving the document for
+    // the browser's own chrome and re-entering at the top — which, in a dialog
+    // claiming aria-modal="true", loses the user. The menu button is excluded
+    // from the inerting (it is the close control), so it belongs in the cycle.
+    if (e.key !== "Tab") return;
+    const focusables = [
+      menuBtn,
+      ...mobileMenu.querySelectorAll<HTMLElement>("a[href], button:not([disabled])"),
+    ].filter((el): el is HTMLElement => !!el);
+    if (focusables.length === 0) return;
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
     }
   });
 </script>

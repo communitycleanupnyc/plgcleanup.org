@@ -1,8 +1,9 @@
 ---
-name: Elana
-quote: A sense of real community
-image: ../../assets/testimonials/elana.jpg
-order: 4
+title: "Elana"
+caption: "A sense of real community"
+alt: "Portrait of Elana"
+image: ../../assets/gallery/elana.jpg
+order: 8
 ---
 It was through Trash Club that I was able to feel a sense of real community here after having moved to the neighborhood. Picking up trash is the smallest part of it. 
 

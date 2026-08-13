@@ -1,8 +1,9 @@
 ---
-name: Megan
-quote: Turned the place I live into a neighborhood community
-image: ../../assets/testimonials/megan.jpg
-order: 10
+title: "Megan"
+caption: "Turned the place I live into a neighborhood community"
+alt: "Portrait of Megan"
+image: ../../assets/gallery/megan.jpg
+order: 13
 ---
 When so many of the world’s problems feel big and out of control, it’s nice to make what little difference you can for your block. 
 

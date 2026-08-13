@@ -1,8 +1,9 @@
 ---
-name: Rachael
-quote: I feel bolstered by the people
-image: ../../assets/testimonials/rachael.jpg
-order: 3
+title: "Rachael"
+caption: "I feel bolstered by the people"
+alt: "Portrait of Rachael"
+image: ../../assets/gallery/rachael.jpg
+order: 6
 ---
 I’ve only attended Community Cleanup PLG a few times, but each time I feel bolstered by the people I interact with, and the act of helping to care for our neighborhood. 
 

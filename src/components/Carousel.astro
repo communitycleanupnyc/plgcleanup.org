@@ -2,6 +2,8 @@
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
 import type { CarouselProps } from "./carousel.types";
+import { DEFAULT_CAROUSEL_LABELS } from "./carousel.types";
+import SectionHeading from "./SectionHeading.astro";
 import { lqip } from "../lib/lqip";
 
 const {
@@ -11,13 +13,27 @@ const {
   enablePopup = true,
   heading,
   sizePx = { mobile: 400, desktop: 460 },
+  labels = {},
+  id = "carousel",
 } = Astro.props as CarouselProps;
 
+// Every user-facing string, with generic defaults. Nothing about the content
+// this carousel happens to be showing is baked into the component.
+const L = { ...DEFAULT_CAROUSEL_LABELS, ...labels };
+const withTitle = (template: string, title: string) => template.replaceAll("{title}", title);
+
 const N = items.length;
-// A fixed id, not a random one: there is one carousel per page, and a random id
-// made every build emit different HTML for identical content — which defeats
-// diffing a build against the last one to see what actually changed.
-const headingId = "carousel-heading";
+// Each slide announces its position, so a screen reader user who lands on one
+// out of context knows where they are. Same template as the visible counter.
+const slidePosition = (index: number) =>
+  L.counter.replaceAll("{n}", String(index + 1)).replaceAll("{total}", String(N));
+// Ids derived from the `id` prop, not randomised: a random id made every build
+// emit different HTML for identical content, which defeats diffing a build
+// against the last one to see what actually changed. Two carousels on one page
+// need different `id` props so their panel ids don't collide.
+const headingId = `${id}-heading`;
+const viewportId = `${id}-viewport`;
+const panelId = (index: number) => `${id}-panel-${index}`;
 
 const DENSITIES = [1, 2, 3];
 
@@ -45,20 +61,28 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
 
 {
   N > 0 && (
+    /* No explicit role: a <section> with an accessible name is already a
+       `region` landmark, which is worth keeping — aria-roledescription just makes
+       a screen reader announce that region as "carousel". aria-roledescription is
+       ignored on an UNNAMED section, which is why the aria-label fallback matters
+       when there is no heading. */
     <section
       class="carousel-section"
+      aria-roledescription="carousel"
       aria-labelledby={heading ? headingId : undefined}
+      aria-label={heading ? undefined : L.carousel}
       data-carousel
       data-variant={variant}
       data-grayscale={String(grayscale)}
       data-enable-popup={String(enablePopup)}
+      data-counter-label={L.counter}
       style={`--size-d:${sizePx.desktop}px; --size-m:${sizePx.mobile}px`}
     >
       <header class="carousel-header">
         {heading && (
-          <h2 id={headingId} class="carousel-heading">
+          <SectionHeading id={headingId} class="carousel-heading">
             {heading}
-          </h2>
+          </SectionHeading>
         )}
         <p class="carousel-counter" aria-live="polite" />
         <div class="carousel-controls">
@@ -84,7 +108,12 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                 and only the stem changes. Shortening the shaft alone would just
                 push the glyph off-centre in its box.
               · OVERALL LENGTH — --arrow-w on its own. */}
-          <button class="carousel-arrow" data-dir="prev" aria-label="Previous">
+          <button
+            class="carousel-arrow"
+            data-dir="prev"
+            aria-controls={viewportId}
+            aria-label={L.prev}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="30.23"
@@ -103,7 +132,12 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
             </svg>
           </button>
           {/* Mirror of the prev glyph — see the note above it. */}
-          <button class="carousel-arrow" data-dir="next" aria-label="Next">
+          <button
+            class="carousel-arrow"
+            data-dir="next"
+            aria-controls={viewportId}
+            aria-label={L.next}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="30.23"
@@ -125,7 +159,7 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
       </header>
 
       <div class="embla">
-        <div class="embla__viewport">
+        <div class="embla__viewport" id={viewportId}>
           <ul class="embla__container" role="list">
             {items.map((item, index) => {
               const info = renderInfo(item.img);
@@ -143,12 +177,14 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                 <li
                   class="embla__slide card"
                   data-index={index}
+                  aria-roledescription="slide"
+                  aria-label={slidePosition(index)}
                   style={item.focusPosition ? `--pos:${item.focusPosition}` : undefined}
                 >
                   <div class="card__media">
                     <Image
                       src={item.img}
-                      alt={`Portrait of ${item.name}, Community Cleanup PLG volunteer`}
+                      alt={item.alt}
                       width={info.fallbackW}
                       height={info.fallbackH}
                       widths={info.widths}
@@ -169,10 +205,10 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                         out and ready to composite, and still keeps it out of the tab
                         order and the accessibility tree. */}
                     {enablePopup && Body && (
-                      <div class="card__panel" id={`carousel-panel-${index}`}>
+                      <div class="card__panel" id={panelId(index)}>
                         <button
                           class="card__panel-close"
-                          aria-label={`Close ${item.name}'s testimonial`}
+                          aria-label={withTitle(L.close, item.title)}
                         >
                           <svg
                             width="20"
@@ -197,7 +233,7 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                           class="card__panel-body"
                           tabindex="0"
                           role="region"
-                          aria-label={`${item.name}'s testimonial`}
+                          aria-label={withTitle(L.region, item.title)}
                         >
                           <Body />
                         </div>
@@ -206,9 +242,9 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                   </div>
                   <div class="card__caption">
                     <div class="card__caption-text">
-                      <p class="card__name">{item.name}</p>
+                      <p class="card__name">{item.title}</p>
                       <p class="card__quote">
-                        “{item.quote}
+                        “{item.caption}
                         {enablePopup && Body && <span class="card__quote-more"> […]</span>}”
                       </p>
                     </div>
@@ -216,8 +252,8 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                       <button
                         class="card__toggle"
                         aria-expanded="false"
-                        aria-controls={`carousel-panel-${index}`}
-                        aria-label={`Read ${item.name}'s testimonial`}
+                        aria-controls={panelId(index)}
+                        aria-label={withTitle(L.open, item.title)}
                       >
                         <svg
                           class="card__toggle-icon"
@@ -275,7 +311,7 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
 
     width: var(--site-w);
     margin-left: var(--site-ml);
-    margin-bottom: clamp(2rem, 7vw, 3rem);
+    margin-bottom: var(--space-block);
   }
 
   .carousel-header {
@@ -287,33 +323,16 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     --heading-size: 1.2rem;
     --heading-lh: 1.2;
     --heading-box: calc(var(--heading-size) * var(--heading-lh));
+    /* The heading here is a <SectionHeading>; these two inherit into it and
+       adapt it to this flex row — no bottom margin, and it takes the free
+       space so the counter and arrows sit hard right. */
+    --heading-gap: 0;
+    --heading-flex: 1;
 
     display: flex;
     align-items: center;
     gap: 1rem;
     margin-bottom: 1.25rem;
-  }
-
-  .carousel-heading {
-    font-size: var(--heading-size);
-    line-height: var(--heading-lh);
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text);
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-  }
-
-  .carousel-heading::before {
-    content: "";
-    display: block;
-    flex-shrink: 0;
-    width: 1.25rem;
-    height: 0.75rem;
-    background: var(--text);
   }
 
   .carousel-counter {
@@ -351,8 +370,8 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     color: var(--bg);
     cursor: pointer;
     transition:
-      background-color 225ms ease,
-      color 225ms ease;
+      background-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
   }
 
   .carousel-arrow svg {
@@ -415,14 +434,15 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     position: relative;
     overflow: hidden;
   }
-  /* Resting: grayscale + slightly dimmed. The active slide (exactly one at a time,
-     driven by JS via .is-active) goes full colour + full opacity. The opacity shift
-     means an image that is *already* black-and-white still visibly "highlights" —
-     no per-image colour detection needed. Highlight is applied ONLY through
-     .is-active (no CSS :hover), which is what guarantees a single highlight. */
+  /* Resting: slightly dimmed, and desaturated when the `grayscale` prop is on.
+     The active slide (exactly one at a time, driven by JS via .is-active) goes
+     full colour + full opacity. The opacity shift means an image that is
+     *already* black-and-white still visibly "highlights" — no per-image colour
+     detection needed, and it is what carries the highlight when grayscale is
+     off. Highlight is applied ONLY through .is-active (no CSS :hover), which is
+     what guarantees a single highlight. */
   .card__media img {
     display: block;
-    filter: grayscale(1);
     opacity: 0.7;
     /* --hl-dur is set per interaction in JS: 0ms for taps / advance-swipes / pressing
        the next image, a smooth crossfade for hover, back-swipes and (extra-smooth) the
@@ -431,17 +451,15 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
       filter var(--hl-dur, 225ms) cubic-bezier(0.6, 0, 0.4, 1),
       opacity var(--hl-dur, 225ms) cubic-bezier(0.6, 0, 0.4, 1);
   }
+  /* Only when the `grayscale` prop is on. The .is-active rule below has the same
+     specificity and comes later, so the highlighted slide wins and returns to
+     colour — keep them in this order. */
+  .carousel-section[data-grayscale="true"] .card__media img {
+    filter: grayscale(1);
+  }
   .embla__slide.is-active .card__media img {
     filter: grayscale(0);
     opacity: 1;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .card__media img,
-    .card__panel,
-    .card__toggle-icon {
-      transition: none;
-    }
   }
 
   /* NATURAL: uniform height, auto width, no crop */
@@ -511,11 +529,11 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
   .card__name {
     font-family: var(--font-display);
     font-optical-sizing: auto;
-    font-size: 1.0625rem;
+    font-size: var(--fs-body);
     font-weight: 500;
     letter-spacing: -0.01em;
     color: var(--text);
-    transition: color 225ms ease;
+    transition: color var(--dur-fast) var(--ease-out);
   }
   .card__quote {
     font-size: 0.875rem;
@@ -529,14 +547,14 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
        leave a widow like "neighborhood" on its own line. */
     max-width: 28ch;
     text-wrap: balance;
-    transition: color 225ms ease;
+    transition: color var(--dur-fast) var(--ease-out);
   }
   /* Bracketed-ellipsis cue that the quote continues — same colour as the quote
      at rest; it (and the name + quote) go accent when the caption is hovered. */
   .card__quote-more {
     white-space: nowrap;
     color: inherit;
-    transition: color 225ms ease;
+    transition: color var(--dur-fast) var(--ease-out);
   }
   /* Hover only on hover-capable devices — on touch, :hover sticks after a tap, so the
      name/quote/[…] would stay green while the panel is open. Touch gets :active, which
@@ -568,17 +586,19 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     opacity: 0.85;
     cursor: pointer;
     transition:
-      color 225ms ease,
-      opacity 225ms ease;
+      color var(--dur-fast) var(--ease-out),
+      opacity var(--dur-fast) var(--ease-out);
   }
   /* Greens on keyboard focus, on hover (hover-capable devices only, so a tap doesn't
      leave it stuck), and — via :active — a press flash on touch that clears on release. */
+  /* No `outline: none` on :focus-visible — this is an icon-only button, so the
+     colour swap alone would be a 1.64:1 change and not a focus indicator at all.
+     The global ring in base.css applies. */
   .card__toggle:focus-visible,
   .card__toggle:active,
   .card__caption:active .card__toggle {
     opacity: 1;
     color: var(--accent);
-    outline: none;
   }
   @media (hover: hover) {
     .card__toggle:hover,
@@ -639,7 +659,7 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     position: absolute;
     inset: 0;
     z-index: 2;
-    background: #000;
+    background: var(--bg);
     color: var(--text);
     overflow: hidden;
     translate: 0 100%;
@@ -716,7 +736,7 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
     /* Reserve a wider right gutter so the text column ends clear of the close
        button and scrollbar. */
     padding-right: var(--panel-gutter);
-    font-size: 0.9375rem;
+    font-size: var(--fs-sm);
     line-height: 1.6;
     font-weight: 300;
   }
@@ -736,7 +756,7 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
   @media (hover: hover) and (pointer: fine) {
     .card__panel-body {
       scrollbar-width: thin;
-      scrollbar-color: rgba(226, 226, 226, 0.35) transparent;
+      scrollbar-color: color-mix(in srgb, var(--text) 35%, transparent) transparent;
     }
     .card__panel-body::-webkit-scrollbar {
       width: var(--panel-scrollbar-w);
@@ -745,11 +765,11 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
       background: transparent;
     }
     .card__panel-body::-webkit-scrollbar-thumb {
-      background: rgba(226, 226, 226, 0.3);
+      background: color-mix(in srgb, var(--text) 30%, transparent);
       border-radius: 3px;
     }
     .card__panel-body::-webkit-scrollbar-thumb:hover {
-      background: rgba(226, 226, 226, 0.5);
+      background: color-mix(in srgb, var(--text) 50%, transparent);
     }
   }
 
@@ -783,11 +803,32 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
       opacity 150ms ease,
       color 150ms ease;
   }
+  /* Keeps the global focus ring (base.css) — see the note on .card__toggle. */
   .card__panel-close:hover,
   .card__panel-close:focus-visible {
     opacity: 1;
     color: var(--accent);
-    outline: none;
+  }
+  /* ── Reduced motion ──────────────────────────────────────────────────────
+     MUST STAY LAST IN THIS FILE. These selectors have the same specificity as
+     the base rules they override (.card__panel, .card__toggle-icon), so the
+     cascade is decided by source order alone — sitting earlier in the file, as
+     this block used to, it silently did nothing for either of them.
+
+     Suppresses MOTION: the panel's slide-up (a translate) and the caret's
+     rotate. Both travel across the screen, which is what can trigger vestibular
+     symptoms, and both read fine as an instant change.
+
+     The photo crossfade (.card__media img) is deliberately absent. It animates
+     `filter` and `opacity` only — nothing moves. A cross-fade is the standard
+     REPLACEMENT that reduced-motion guidance recommends in place of movement,
+     not something to remove; suppressing it made the hover highlight snap on
+     instantly for every visitor with the OS setting enabled. */
+  @media (prefers-reduced-motion: reduce) {
+    .card__panel,
+    .card__toggle-icon {
+      transition: none;
+    }
   }
 </style>
 

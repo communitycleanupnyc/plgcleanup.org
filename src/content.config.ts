@@ -21,20 +21,21 @@ const pages = defineCollection({
   }),
 });
 
-// Testimonials shown in the home-page carousel. One Markdown file per person:
-// frontmatter holds their name, pull-quote, and photo; the Markdown body is the
-// longer testimonial shown in the reveal panel.
+// The image gallery shown in the carousel (Carousel.astro). One Markdown file
+// per item: frontmatter holds its title, caption, photo, and alt text; the
+// Markdown body, if present, is the longer text shown in the reveal panel.
 //
-// There is deliberately no `alt` field. Every photo here is a portrait of the
-// named volunteer, so Carousel.astro derives the alt text from `name` — an
-// editor can't leave it blank, can't type "…" into it, and can't forget to
-// update it when the photo changes.
-const testimonials = defineCollection({
-  loader: glob({ pattern: "*.md", base: "./src/content/testimonials" }),
+// `alt` is required and authored per photo. Alt text describes THIS image to
+// someone who can't see it, so it can't be generated from the title — "Portrait
+// of Abby" and "Abby laughing while emptying a grabber into a blue bag" are not
+// interchangeable. Write what is in the frame; don't start with "Image of".
+const gallery = defineCollection({
+  loader: glob({ pattern: "*.md", base: "./src/content/gallery" }),
   schema: ({ image }) =>
     z.object({
-      name: filled("name"),
-      quote: filled("quote"),
+      title: filled("title"),
+      caption: filled("caption"),
+      alt: filled("alt"),
       // Optional CSS object-position for the cropped photo, e.g. "50% 30%".
       // Absent, empty, or blank all mean "centered" (Carousel.astro falls back
       // to "50% 50%"): a bare or emptied `focusPosition:` line left behind by a
@@ -57,4 +58,4 @@ const testimonials = defineCollection({
     }),
 });
 
-export const collections = { pages, testimonials };
+export const collections = { pages, gallery };

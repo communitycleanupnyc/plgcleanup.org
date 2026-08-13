@@ -1,29 +1,31 @@
 import { getCollection } from "astro:content";
-import { RANDOMIZE_OG_IMAGE } from "../config";
+import { SITE } from "../site.config";
 
 // Social share image (Open Graph / Twitter) for iMessage, WhatsApp, SMS, etc.
 //
-// By default this is the first testimonial in carousel order (lowest `order`),
-// so link previews stay stable across builds. Flip RANDOMIZE_OG_IMAGE
-// (src/config.ts) to feature a random volunteer, chosen fresh per build.
+// By default this is the first gallery item in carousel order (lowest `order`),
+// so link previews stay stable across builds. Flip features.randomizeOgImage
+// (src/site.config.ts) to feature a random one, chosen fresh per build.
 // Base.astro renders the chosen photo into a high-res share image with Sharp.
-const testimonials = await getCollection("testimonials");
+const gallery = await getCollection("gallery");
 // Base.astro renders this on every page, so an empty collection wouldn't fail
 // one page — it would crash the whole build with a bare "cannot read image of
 // undefined". Say what actually needs doing instead.
-if (testimonials.length === 0) {
+if (gallery.length === 0) {
   throw new Error(
-    "[testimonials] The social share image features a testimonial photo, but src/content/testimonials/ is empty. Add at least one testimonial.",
+    "[gallery] The social share image is built from a gallery photo, but src/content/gallery/ is empty. Add at least one item.",
   );
 }
-const byOrder = [...testimonials].sort((a, b) => a.data.order - b.data.order);
-const pick = RANDOMIZE_OG_IMAGE
-  ? testimonials[Math.floor(Math.random() * testimonials.length)]
+const byOrder = [...gallery].sort((a, b) => a.data.order - b.data.order);
+const pick = SITE.features.randomizeOgImage
+  ? gallery[Math.floor(Math.random() * gallery.length)]
   : byOrder[0];
 
 export const featured = {
   image: pick.data.image,
-  name: pick.data.name,
+  title: pick.data.title,
+  // The item's authored alt, used verbatim as <meta property="og:image:alt">.
+  alt: pick.data.alt,
 };
 
 // 1200×1200 is the canonical high-res OG size and displays large on iMessage and

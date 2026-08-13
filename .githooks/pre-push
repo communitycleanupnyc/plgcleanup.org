@@ -1,12 +1,17 @@
 #!/bin/sh
-# Mirror CI before pushing so `main` never goes red: formatting, types, build,
-# and the SEO/launch gate (asset existence, canonical/sitemap drift, 404,
-# placeholder links, stale Event schema, shipped TODOs…).
+# Mirror CI before pushing so `main` never goes red: formatting, types, colour
+# contrast, build, and the SEO/launch gate (asset existence, canonical/sitemap
+# drift, 404, placeholder links, stale Event schema, shipped TODOs, and the
+# structural accessibility checks).
 # Runs only on push (not every commit), so the extra seconds are infrequent.
 # Bypass once with: git push --no-verify
 # SEO_SKIP_FRESH / SEO_SKIP_PLACEHOLDER mirror the workflow env (ci.yml): before
-# launch they downgrade the stale-Event check and the placeholder-testimonial
-# check to warnings, so a past event.json date or an unwritten testimonial can't
-# block pushes. Drop them here AND in ci.yml / site-checks.yml at launch to arm
-# the gate for real — see LAUNCH.md step A.4.
-npm run format:check && npm run check && npm run build && SEO_SKIP_FRESH=1 SEO_SKIP_PLACEHOLDER=1 npm run audit
+# launch they downgrade the stale-Event check and the placeholder-copy check to
+# warnings, so a past event.json date or an unwritten pull quote can't block
+# pushes. Drop them here AND in ci.yml / site-checks.yml at launch to arm the
+# gate for real — see LAUNCH.md step A.4.
+npm run format:check &&
+	npm run check &&
+	npm run a11y &&
+	npm run build &&
+	SEO_SKIP_FRESH=1 SEO_SKIP_PLACEHOLDER=1 npm run audit

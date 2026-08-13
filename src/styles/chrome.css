@@ -16,7 +16,7 @@
   left: 0;
   right: 0;
   transform: translateY(-100%);
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--dur-slide) var(--ease-standard);
 }
 .site-chrome.is-fixed.is-revealed {
   transform: translateY(0);
@@ -43,7 +43,7 @@
   left: 0;
   right: 0;
   transform: translateY(0);
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--dur-slide) var(--ease-standard);
 }
 .site-chrome.static-nav.is-hidden {
   transform: translateY(-100%);
@@ -187,10 +187,9 @@
 .ticker__toggle:focus-visible {
   color: var(--accent);
 }
+/* The focus ring itself now comes from the global :focus-visible rule in
+   base.css — this only squares off the corner the UA would otherwise round. */
 .ticker__toggle:focus-visible {
-  outline: 2px solid var(--accent);
-  color: var(--accent);
-  outline-offset: 2px;
   border-radius: 0;
 }
 
@@ -214,12 +213,12 @@
 }
 .ticker__icon--play path + path {
   fill: var(--text);
-  transition: fill 225ms ease;
+  transition: fill var(--dur-fast) var(--ease-out);
 }
 .ticker__icon--pause path + path {
   stroke: var(--text);
   stroke-width: 2.75;
-  transition: stroke 225ms ease;
+  transition: stroke var(--dur-fast) var(--ease-out);
 }
 .ticker__toggle:hover .ticker__icon--play path + path,
 .ticker__toggle:focus-visible .ticker__icon--play path + path {
@@ -257,16 +256,17 @@
   align-items: center;
   text-decoration: none;
   color: var(--text);
-  transition: color 225ms ease;
+  transition: color var(--dur-fast) var(--ease-out);
 }
+/* No `outline: none` on :focus-visible — the colour swap alone is a 1.64:1
+   change, which is not a focus indicator. The global ring in base.css applies. */
 .nav-home:hover,
 .nav-home:focus-visible {
   color: var(--accent);
-  outline: none;
 }
 
 .nav-wordmark {
-  font-size: 1.1rem;
+  font-size: var(--fs-md);
   font-weight: 300;
   letter-spacing: 0.05rem;
   margin-left: 0.6rem;
@@ -298,7 +298,7 @@
   display: inline-flex;
   align-items: center;
   line-height: 1;
-  font-size: 1.1rem;
+  font-size: var(--fs-md);
   font-weight: 350;
   letter-spacing: 0rem;
   text-transform: uppercase;
@@ -307,8 +307,8 @@
   border-radius: var(--hover-radius);
   padding: 0.413rem 0.963rem;
   transition:
-    background-color 225ms ease,
-    color 225ms ease;
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 .nav-link:hover,
 .nav-link:focus-visible {
@@ -321,7 +321,7 @@
   display: inline-flex;
   align-items: center;
   line-height: 1;
-  font-size: 1.1rem;
+  font-size: var(--fs-md);
   font-weight: 350;
   letter-spacing: 0rem;
   text-transform: uppercase;
@@ -331,7 +331,7 @@
   padding: 0.413rem 0.963rem;
   margin-left: 0;
   border-radius: 0;
-  transition: background-color 225ms ease;
+  transition: background-color var(--dur-fast) var(--ease-out);
 }
 .nav-btn:hover,
 .nav-btn:focus-visible {
@@ -345,7 +345,7 @@
 .site-footer {
   border-top: 1.5px solid var(--line);
   margin-top: auto;
-  padding-top: clamp(2rem, 5vw, 3rem);
+  padding-top: var(--space-gap);
 }
 
 .footer-grid {
@@ -366,7 +366,7 @@
 }
 
 .footer-col a {
-  font-size: 1rem;
+  font-size: var(--fs-base);
   font-weight: 400;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -376,8 +376,8 @@
   border-radius: var(--hover-radius);
   padding: 0.5625rem 0.5rem;
   transition:
-    background-color 225ms ease,
-    color 225ms ease;
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 .footer-col a:hover,
 .footer-col a:focus-visible {
@@ -388,7 +388,7 @@
 }
 
 .footer-right {
-  font-size: 1rem;
+  font-size: var(--fs-base);
   font-weight: 200;
   letter-spacing: 0em;
   text-align: right;
@@ -437,8 +437,8 @@
   padding: 0.5rem;
   line-height: 0;
   transition:
-    color 225ms ease,
-    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-slide) var(--ease-standard);
 }
 /* JS sets this class to keep button in sync with chrome show/hide */
 .nav-menu-btn.is-nav-hidden {
@@ -464,9 +464,9 @@
 .site-chrome.is-fixed ~ .nav-menu-btn.is-nav-hidden {
   transform: translateY(-200%);
 }
+/* Keeps the global focus ring (base.css) — see the note on .nav-home. */
 .nav-menu-btn:focus-visible {
   color: var(--accent);
-  outline: none;
 }
 @media (hover: hover) {
   .nav-menu-btn:hover {
@@ -489,9 +489,9 @@
   border-radius: 0px;
   transform-origin: center;
   transition:
-    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transform var(--dur-slide) var(--ease-standard),
+    top var(--dur-slide) var(--ease-standard),
+    bottom var(--dur-slide) var(--ease-standard);
 }
 .menu-icon__bar--top {
   top: 0.25rem;
@@ -580,6 +580,28 @@
   }
 }
 
+/* The rest of the chrome's motion, on every device: the header sliding in and
+   out on scroll, and the hamburger morphing into an ✕. Both are transform
+   animations of a large element, which is exactly what reduced-motion is for.
+   The ticker marquee is deliberately NOT here — it starts paused and is under
+   explicit user control, which is the better answer than suppressing it.
+
+   0.01ms, NOT `transition: none`. The scroll script in SiteHeader.astro finishes
+   the fixed→compact swap in a `transitionend` handler; a transition that never
+   runs never fires that event, and the header would stay parked off-screen for
+   exactly the people this rule is meant to help. A near-zero duration is
+   visually instant AND still fires the event. */
+@media (prefers-reduced-motion: reduce) {
+  .site-chrome,
+  .site-chrome.is-fixed,
+  .site-chrome.static-nav,
+  .nav-menu-btn,
+  .site-chrome.is-fixed ~ .nav-menu-btn,
+  .menu-icon__bar {
+    transition-duration: 0.01ms !important;
+  }
+}
+
 .mobile-menu-links {
   flex: 1;
   display: flex;
@@ -600,8 +622,8 @@
   padding: 0.25rem 1rem;
   border-radius: var(--hover-radius);
   transition:
-    background-color 225ms ease,
-    color 225ms ease;
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 .mobile-menu-link:hover,
 .mobile-menu-link:focus-visible {
@@ -619,10 +641,10 @@
 .mobile-menu-ctas .cta-primary {
   background: var(--accent);
   color: var(--bg);
-  font-size: 1.5rem;
+  font-size: var(--fs-lg);
   transition:
-    background-color 225ms ease,
-    color 225ms ease;
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 .mobile-menu-ctas .cta-primary:hover,
 .mobile-menu-ctas .cta-primary:focus-visible {
@@ -633,10 +655,10 @@
 .mobile-menu-ctas .cta-secondary {
   background: var(--surface);
   color: var(--text);
-  font-size: 1.5rem;
+  font-size: var(--fs-lg);
   transition:
-    background-color 225ms ease,
-    color 225ms ease;
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 .mobile-menu-ctas .cta-secondary:hover,
 .mobile-menu-ctas .cta-secondary:focus-visible {
@@ -695,7 +717,7 @@
   /* Preserve the layout slide-in/out transition on the menu button
        so it tracks the nav bar on scroll. Only colour transitions are killed. */
   .nav-menu-btn {
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: transform var(--dur-slide) var(--ease-standard) !important;
   }
   .footer-col a:focus,
   .nav-link:focus,

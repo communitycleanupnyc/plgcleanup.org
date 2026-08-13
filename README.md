@@ -34,6 +34,9 @@ via Dependabot PRs that CI checks before you merge.
 - [Commands](#commands)
 - [Repository layout](#repository-layout)
 - [How a few things work](#how-a-few-things-work)
+- [Reusing this as a template](#reusing-this-as-a-template) — making it a different site
+- [Accessibility](#accessibility)
+  - [Checking accessibility by hand](#checking-accessibility-by-hand)
 - [Search Engine Optimization](#search-engine-optimization)
 - [Deployment & CI](#deployment--ci)
 
@@ -49,14 +52,15 @@ Everything an organizer normally changes is plain text you can edit on GitHub (c
 click the ✏️ pencil, change the words, **Commit changes** — the site rebuilds itself). If an
 edit has a mistake, the build fails and nothing broken goes live.
 
-| To change…                                                                                               | Edit this                                                                                                                                                                                                                   |
-| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The next cleanup's **date, time, place**                                                                 | In [Pages CMS](#pages-cms-form-based-editing), open **Event details** — or edit `src/data/event.json` directly. Bad dates/times fail the build with a message naming the field.                                             |
-| **Statistics** (pounds collected, volunteer count)                                                       | In [Pages CMS](#pages-cms-form-based-editing), open **Statistics** — or edit `src/data/stats.json` directly. Plain numbers, no commas.                                                                                      |
-| Any **prose page** — About, FAQ, Schedule, Terms, Partners, Service hours, Lost & found, NYC trash clubs | The matching file in `src/content/pages/` (e.g. `faq.md`). Write normal Markdown. **The filename is the web address** — `faq.md` is at `/faq` — so renaming a file moves the page.                                          |
-| **Testimonials** in the home-page carousel                                                               | One file per person in `src/content/testimonials/` (e.g. `jaan.md`): the top block holds their name, quote, and photo; the text below is the full testimonial. The photo's alt text is written automatically from the name. |
-| A testimonial **photo**                                                                                  | Add the image to `src/assets/testimonials/` and point the person's `image:` at it.                                                                                                                                          |
-| **Site settings** (e.g. randomize the carousel order each build)                                         | `src/config.ts` — flip a `true`/`false` toggle; each is documented in the file.                                                                                                                                             |
+| To change…                                                                                               | Edit this                                                                                                                                                                                                   |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The next cleanup's **date, time, place**                                                                 | In [Pages CMS](#pages-cms-form-based-editing), open **Event details** — or edit `src/data/event.json` directly. Bad dates/times fail the build with a message naming the field.                             |
+| **Statistics** (pounds collected, volunteer count)                                                       | In [Pages CMS](#pages-cms-form-based-editing), open **Statistics** — or edit `src/data/stats.json` directly. Plain numbers, no commas.                                                                      |
+| Any **prose page** — About, FAQ, Schedule, Terms, Partners, Service hours, Lost & found, NYC trash clubs | The matching file in `src/content/pages/` (e.g. `faq.md`). Write normal Markdown. **The filename is the web address** — `faq.md` is at `/faq` — so renaming a file moves the page.                          |
+| **Gallery items** in the home-page carousel                                                              | One file per item in `src/content/gallery/` (e.g. `jaan.md`): the top block holds the title, pull quote, photo, and the photo's description; the text below is the full text shown when the card is opened. |
+| A gallery **photo**                                                                                      | Add the image to `src/assets/gallery/` and point that item's `image:` at it. Write the `alt:` line too — it describes the picture for people who can't see it.                                              |
+| The site **name, navigation, or social links**                                                           | `src/site.config.ts` — one file holding everything that makes this site _this_ site. Every menu and the footer read from it.                                                                                |
+| **Site settings** (e.g. randomize the carousel order each build)                                         | `SITE.features` in `src/site.config.ts` — flip a `true`/`false` toggle; each is documented in the file.                                                                                                     |
 
 Prefer a form-based editor? See Pages CMS below — it edits these same files behind a friendly UI.
 
@@ -101,7 +105,7 @@ your **full name** and the **reason** you need it.
 
 ## Pages CMS (form-based editing)
 
-[Pages CMS](https://pagescms.org) gives non-technical editors a form UI for the **testimonials**,
+[Pages CMS](https://pagescms.org) gives non-technical editors a form UI for the **gallery**,
 the **prose pages**, the **event details**, and the **statistics** — all backed by the same plain
 files git already tracks (`src/content/**`, `src/data/event.json`, `src/data/stats.json`). It's
 configured in `.pages.yml`.
@@ -175,18 +179,26 @@ npm run dev       # local dev server (also reachable from your phone on the same
 npm run build     # production build → dist/
 npm run preview   # serve the built dist/ locally
 npm run check     # type-check (astro check)
+npm run a11y      # colour-contrast gate — reads src/styles/tokens.css, no build needed
 npm run format    # auto-format with Prettier
 npm run audit     # the launch gate — see below (the pre-push hook runs this too)
 npm run gen:logo  # regenerate favicon/touch-icon/logo.webp from public/images/logo.svg
 ```
 
-`npm run audit` runs `scripts/seo-audit.mjs` over the built `dist/`. It is this
-project's test suite (there is deliberately no test framework) and it fails the
-build on: broken internal links and missing assets, canonical/sitemap drift, a
-missing 404, duplicate titles or descriptions, placeholder text (`todo`, `xyz`,
-`example.com`), junk image alt text, and an Event schema that has gone stale or
-gone missing. It infers the expected hostname from the built page itself, so it
-follows `astro.config.mjs` automatically.
+`npm run audit` runs `scripts/seo-audit.mjs` over the built `dist/`. Together
+with `npm run a11y` it is this project's test suite (there is deliberately no
+test framework). It fails the build on: broken internal links and missing
+assets, canonical/sitemap drift, a missing 404, duplicate titles or
+descriptions, placeholder text (`todo`, `xyz`, `example.com`), junk image alt
+text, an Event schema that has gone stale or gone missing, and the structural
+accessibility problems listed under [Accessibility](#accessibility). It infers
+the expected hostname from the built page itself, so it follows
+`astro.config.mjs` automatically.
+
+`npm run a11y` runs `scripts/contrast-check.mjs`, which parses the `:root` block
+of `src/styles/tokens.css` and recomputes the WCAG contrast ratio of every
+colour pairing the site renders. Add a pairing to `PAIRS` in that script whenever
+you introduce one.
 
 ---
 
@@ -194,13 +206,14 @@ follows `astro.config.mjs` automatically.
 
 ```
 src/
-  config.ts                ← site settings (toggles, e.g. randomize the carousel)
+  site.config.ts           ← WHO THIS SITE IS: name, description, nav, social
+                             links, structured data, feature switches. Start here.
   content.config.ts        ← schemas for the Markdown collections below
   content/
     pages/*.md             ← every prose page (About, FAQ, Schedule, Terms,
                              Partners, Service hours, Lost & found, NYC trash
                              clubs) — the filename is the URL
-    testimonials/*.md       ← one per person, shown in the home carousel
+    gallery/*.md           ← one per item, shown in the home carousel
   data/
     event.json             ← the editable event facts (date/time/place) — Pages CMS writes this
     event.ts               ← reads event.json; derives the map link, times, ISO stamps
@@ -212,10 +225,11 @@ src/
   lib/
     countdown.client.ts    ← recomputes the countdown in the browser so it never goes stale
     lqip.ts                ← build-time blur-up image placeholders
-    og.ts                  ← picks the testimonial featured in the social share image
+    og.ts                  ← picks the gallery photo featured in the social share image
   styles/
-    tokens.css             ← design tokens (colors, spacing, fonts) — the one place to reskin
-    base.css               ← reset, base typography, links, shared buttons
+    tokens.css             ← design tokens (colors, type, spacing, motion) — reskin here
+    fonts.css              ← the @font-face blocks, with the font-swap recipe on top
+    base.css               ← reset, base typography, links, focus ring, shared buttons
     chrome.css             ← ticker, nav, footer, mobile menu
   layouts/
     Base.astro             ← thin shell: <head>, style imports, header/slot/footer
@@ -223,8 +237,17 @@ src/
     SiteHeader.astro       ← ticker + top nav (+ their client script)
     MobileMenu.astro       ← hamburger button + slide-over menu (+ its script)
     SiteFooter.astro       ← footer
+    Ticker.astro           ← the stats ticker band (markup + script); delete-able as one file
+    NavLink.astro          ← one nav/footer link, incl. safe external-link handling
+    Logo.astro             ← the logo mark — the only file that draws it
+    Section.astro          ← the content column + its spacing options
+    SectionHeading.astro   ← section label with the square bullet
+    Button.astro           ← the CTA buttons
+    Hero.astro             ← headline + supporting paragraphs
+    FeatureGrid.astro      ← N-column grid of short text blocks
     Prose.astro            ← wrapper that styles rendered Markdown pages
-    Carousel.astro         ← testimonial carousel (markup + scoped CSS)
+    Carousel.astro         ← the gallery carousel (markup + scoped CSS)
+    carousel.types.ts      ← its props, item shape, and default labels
     carousel.client.ts     ← the carousel's client behavior
   pages/
     index.astro            ← home (hero, why-volunteer, carousel)
@@ -235,6 +258,10 @@ public/
   favicon.svg, fonts/*.woff2, images/*   ← static assets served as-is
   _headers                               ← baseline security headers (Cloudflare Pages)
   robots.txt                             ← points crawlers at the sitemap
+
+scripts/
+  seo-audit.mjs            ← the launch gate: SEO, links, assets, accessibility structure
+  contrast-check.mjs       ← recomputes the WCAG contrast of every colour pairing
 ```
 
 Also at the repo root: **`LAUNCH.md`** (the go-live + domain-cutover runbook) and
@@ -247,7 +274,7 @@ or component; only genuinely shared styles are global (`src/styles/`).
 
 ## How a few things work
 
-- **Content Collections** (`src/content.config.ts`) validate every page and testimonial at
+- **Content Collections** (`src/content.config.ts`) validate every page and gallery item at
   build time — a missing photo or malformed field fails the build instead of shipping broken.
 - **`event.ts`** is the single source of truth for the event. The editable facts live in
   `event.json` (edited via Pages CMS); `event.ts` validates them, parses the friendly date/time,
@@ -260,14 +287,115 @@ or component; only genuinely shared styles are global (`src/styles/`).
   visitor's clock — the static HTML never goes stale between deploys, and no scheduled rebuild is
   needed.
 - **Carousel** — Embla owns the scroll physics; a small state machine keeps exactly one slide
-  highlighted ("last interaction wins"). Testimonial bodies are Markdown, rendered server-side.
+  highlighted ("last interaction wins"). Item bodies are Markdown, rendered server-side. It takes
+  every string it speaks as a prop, so it carries no copy of its own and can be reused as-is.
 - **Site chrome** — `SiteHeader` and `MobileMenu` render as siblings so the general-sibling CSS
   that coordinates the scroll-aware nav keeps working; their scripts are plain (no framework).
-- **Design tokens** — restyle the whole site from `src/styles/tokens.css` (colors, fonts, the
-  `--font-body`/`--font-display` pair, and the content-column width).
+- **Design tokens** — restyle the whole site from `src/styles/tokens.css` (colors, the type and
+  spacing scales, motion, the focus ring, and the content-column width). `npm run a11y` rechecks
+  the contrast of every colour pairing straight from that file.
 - **Social share image** — the link preview on iMessage/WhatsApp/etc. features the first
-  testimonial (by carousel order), generated as a 1200×1200 JPEG (Sharp, face-aware crop). Flip
-  `RANDOMIZE_OG_IMAGE` in `src/config.ts` to feature a random volunteer per build. See `src/lib/og.ts`.
+  gallery photo (by carousel order), generated as a 1200×1200 JPEG (Sharp, face-aware crop). Flip
+  `features.randomizeOgImage` in `src/site.config.ts` to feature a random photo per build. See `src/lib/og.ts`.
+
+---
+
+## Reusing this as a template
+
+The presentation layer is deliberately separable from this particular
+organization. To make it a different site:
+
+1. **`src/site.config.ts`** — name, description, theme colour, navigation,
+   social links, structured-data type, feature switches. The header, mobile
+   menu, footer, and `<head>` all read from here; nothing else holds a brand
+   name or a link.
+2. **`src/styles/tokens.css`** — colours, type scale, spacing, motion, focus
+   ring, column width. Run `npm run a11y` afterwards; it recomputes the WCAG
+   contrast of every pairing and fails on a regression.
+3. **`src/styles/fonts.css`** — the swap recipe is in the comment at the top:
+   drop `.woff2` files in `public/fonts/`, rewrite the two `@font-face` blocks,
+   then point `--font-body` / `--font-display` and `SITE.fonts` at them.
+4. **`src/components/Logo.astro`** — replace the `<svg>`. It's the only file
+   that draws the mark. Favicons are `public/favicon.svg`, `favicon.png`, and
+   `apple-touch-icon.png` (`npm run gen:logo` regenerates the raster ones).
+5. **`src/content/`** — `pages/*.md` for prose pages, `gallery/*.md` plus photos
+   in `src/assets/gallery/` for the carousel.
+6. **`.pages.yml`** — if the editors use Pages CMS, mirror any field changes
+   here. The nesting is fussy; a wrong shape parses fine and does nothing.
+
+Two values are **not** in `site.config.ts`, because they're read outside the
+Astro build and must be changed by hand:
+
+- `site:` in **`astro.config.mjs`** — the canonical origin.
+- the `Sitemap:` line in **`public/robots.txt`** — same origin, written literally.
+
+Build pages by composing the kit in `src/components/` (`Section`,
+`SectionHeading`, `Hero`, `FeatureGrid`, `Button`, `Carousel`) rather than
+writing fresh markup and a fresh `<style>` block — see "The component kit" in
+`CLAUDE.md` for the list and the two Astro gotchas that bite when extending it.
+
+---
+
+## Accessibility
+
+The site targets **WCAG 2.2 AA**. What's automated, and what isn't:
+
+**Checked on every build** (`npm run a11y`, then `npm run audit`):
+
+- Contrast of every colour pairing the site renders, recomputed from
+  `tokens.css` — including the focus ring, which must clear 3:1.
+- `<html lang>`, one `<h1>` per page, no skipped heading levels.
+- Images without `alt`, and alt text that is junk (`"..."`, `"photo"`).
+- `aria-labelledby` / `aria-controls` / `aria-describedby` pointing at ids that
+  don't exist, and duplicate ids.
+- Links and buttons with no accessible name.
+- Positive `tabindex`, `<iframe>` without a `title`, and a viewport that
+  disables zoom.
+
+**Built in, but not machine-checkable here:** a skip link, labelled landmarks,
+`aria-roledescription` on the carousel with per-slide position labels, arrow /
+Home / End keys on the carousel, off-screen slides taken out of the tab order and
+the screen-reader tree, `inert` on the page behind an open mobile menu, focus
+returned to the control that opened a panel, and `prefers-reduced-motion`
+honoured for the carousel panel, the header, and the hamburger.
+
+Two decisions in the carousel look like bugs and are not. Both have a comment at
+the code:
+
+- **Off-screen slides use `aria-hidden` + `tabindex="-1"`, not `inert`.** `inert`
+  is the tidy one-attribute version, but it also makes the subtree
+  non-hit-testable, so a slide that is inert when the pointer enters it never
+  fires `pointerenter` and never runs its crossfade.
+- **`prefers-reduced-motion` does NOT suppress the photo crossfade.** It
+  suppresses the panel's slide-up and the caret's rotate — things that _move_.
+  The crossfade only animates `filter` and `opacity`; nothing travels, and a
+  cross-fade is the standard replacement reduced-motion guidance recommends
+  _instead of_ movement. Suppressing it made the hover highlight snap on
+  instantly for everyone with the OS setting enabled. The
+  `@media (prefers-reduced-motion: reduce)` block must also stay **last** in
+  `Carousel.astro` — it has the same specificity as the rules it overrides, so
+  source order is the only thing that makes it win.
+
+(The stats ticker is exempt from reduced-motion on purpose too: it starts paused
+and has its own play/pause button, which beats suppressing it.)
+
+### Checking accessibility by hand
+
+Nothing in CI runs a browser, so after touching the carousel, the mobile menu,
+or anything focus-related, run `npm run preview` and walk through this:
+
+1. Tab from the very top. The skip link appears first, and **every** control
+   shows a visible focus ring — including the logo, the hamburger, and the
+   carousel's toggle and close buttons.
+2. In the carousel: ← and → move it, Home and End jump to the ends, and Tab does
+   **not** reach slides that are scrolled out of view.
+3. Open a card's panel, press **Escape** — focus lands back on the toggle that
+   opened it, not at the top of the page.
+4. Open a card's panel, then click a carousel arrow — focus is not lost.
+5. Open the mobile menu (narrow window): Tab cycles inside it and never reaches
+   the page behind; Escape closes it and returns focus to the button.
+6. With VoiceOver (Safari): the carousel announces as a carousel, slides
+   announce "N of M", and each photo reads its own alt text.
 
 ---
 
@@ -301,7 +429,7 @@ adding a build step and a silent design-range footgun. Not worth it; revisit onl
   deploys. **Build cache is enabled** (project → Settings → Build → Build cache), which persists
   `node_modules` between deploys. This skips reinstalling Sharp and — because Astro caches every
   processed image in `node_modules/.astro` — only _changed_ photos are re-encoded. Adding one
-  testimonial re-processes one image instead of all of them, so steady-state builds stay a few
+  gallery item re-processes one image instead of all of them, so steady-state builds stay a few
   seconds rather than ~40. The source photos are 2000×3000, matching the largest variant we
   generate, so they're already right-sized — don't downscale them or the retina output softens.
 - **Branch protection** (`main`): **block force pushes** and **block deletions** — the two things
@@ -502,7 +630,7 @@ reminder somewhere real (June and December work) and spend twenty minutes:
    `typescript` never upgrade themselves (see Deployment & CI). Ask the Claude
    agent to read the migration guide and do one of them, then run
    `npm run preview` and click through the **mobile menu**, the **carousel**
-   (open a testimonial, use the arrows, swipe) and the **countdown copy** — CI
+   (open a card, use the arrows, swipe) and the **countdown copy** — CI
    builds the site but never clicks it, so those three are what a bad major
    breaks silently. One at a time, not all four at once.
 2. **Check the Node version.** `.nvmrc` pins the Node release Cloudflare builds
@@ -534,12 +662,12 @@ scattered comments, and delete a line when it's done.
 
 **Before launch**
 
-- [ ] **Write real quotes for six testimonials.** `chelsie.md`, `delaney.md`,
-      `isaiah.md`, `spencer.md` are `name: "xyz"` with `"..."` everywhere;
-      `kevin.md` has a real name but `"..."` for both quote and body; `abby.md`
-      has a real quote but its body is one sentence repeated 20 times, and its
-      name reads `"Abby …"`. All six are live on the home-page carousel today.
-      Either write them or delete the files (at least one testimonial must
+- [ ] **Write real quotes for six gallery items.** `chelsie.md`, `delaney.md`,
+      `isaiah.md`, `spencer.md` are `title: "xyz"` with `"..."` everywhere;
+      `kevin.md` has a real title but `"..."` for both caption and body;
+      `abby.md` has a real caption but its body is one sentence repeated 20
+      times, and its title reads `"Abby …"`. All six are live on the carousel.
+      Either write them or delete the files (at least one gallery item must
       remain) — then do the next item. (Molly's was filled in on 2026-08-04.)
 - [ ] **Arm the launch gate.** Remove `SEO_SKIP_PLACEHOLDER` and `SEO_SKIP_FRESH`
       per `LAUNCH.md` step A.4. Until then the audit only warns about the above.
@@ -549,6 +677,11 @@ scattered comments, and delete a line when it's done.
 - [ ] **Confirm the cleanup date.** `src/data/event.json` is set to `2026-08-09`,
       a Sunday. The countdown now handles both weekend days correctly either way.
 - [ ] Everything in **[LAUNCH.md](LAUNCH.md)** sections A and B.
+
+- [ ] **Write real `alt` text for the gallery photos.** Every item now has a
+      required `alt:` field, seeded as "Portrait of {name}" during the rename.
+      That is accurate but thin — replace each with a description of what is
+      actually in the frame. See the guidance in `.pages.yml` / `content.config.ts`.
 
 **Content, whenever**
 
