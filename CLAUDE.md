@@ -87,7 +87,18 @@ Things that will silently break if you don't know them:
   more, because alt describes the _picture_, which a title can't stand in for.
   Don't regenerate it from another field, and don't make the field optional.
 - **At least one gallery item must exist** — the social share image is built from
-  the lowest-`order` one (`src/lib/og.ts`).
+  a gallery photo (`src/lib/gallery.ts` → `src/lib/og.ts`).
+- **The carousel's lead photo and the social share image are the same photo, and
+  `src/lib/gallery.ts` is the only file that decides which.** Both the homepage
+  and `og.ts` read `galleryOrder`/`lead` from it, so a link preview always shows
+  what is at the top of the page. Don't give either one its own pick — a second
+  `Math.random()` in `og.ts` is exactly the drift this replaced.
+- **The lead photo rotates by the calendar day, not by build.** `deal()` seeds a
+  Fisher–Yates from the cycle number so every build inside a day agrees without
+  storing anything; over N days (N = number of photos) each leads exactly once,
+  then the deck is reshuffled. Two builds on the same UTC day therefore share a
+  lead photo — that is the design, not a stale cache. The daily redeploy cron in
+  `.github/workflows/site-checks.yml` is what advances it.
 - **Never delete an audit check to make CI pass.** `scripts/seo-audit.mjs` and
   `scripts/contrast-check.mjs` are the launch gate. If one fails, the site is
   wrong, not the script.
@@ -138,13 +149,15 @@ Two things to know when writing a component here:
   `SITE.nav` in `src/site.config.ts`.
 - **Add a gallery item:** drop the photo in `src/assets/gallery/`, create
   `src/content/gallery/<name>.md` with `title`, `caption`, `alt`, `image`,
-  `order` (unique; lowest becomes the share image) and a Markdown body.
+  `order` (unique; the fallback order when `features.rotateGallery` is off) and
+  a Markdown body.
 - **Remove a gallery item:** delete the `.md`; the unused photo is pruned from
   the build automatically. At least one must remain.
 - **Rename the site / change nav / swap social links:** `src/site.config.ts`.
-- **Turn a feature off:** `SITE.features` — the ticker, the gallery shuffle, the
-  random share image. Flip it, confirm the build is green, then delete the
-  feature's code and data if it's never coming back.
+- **Turn a feature off:** `SITE.features` — the ticker, the gallery rotation
+  (`rotateGallery`, which drives the carousel order, the lead photo, and the
+  social share image together). Flip it, confirm the build is green, then delete
+  the feature's code and data if it's never coming back.
 - **Change the event:** `src/data/event.json` — `date` as `yyyy-mm-dd`, times like
   `10:00am` or `2pm`. Bad values fail the build with a message naming the field.
 - **Update stats:** `src/data/stats.json` — plain numbers, no commas.

@@ -60,7 +60,7 @@ edit has a mistake, the build fails and nothing broken goes live.
 | **Gallery items** in the home-page carousel                                                              | One file per item in `src/content/gallery/` (e.g. `jaan.md`): the top block holds the title, pull quote, photo, and the photo's description; the text below is the full text shown when the card is opened. |
 | A gallery **photo**                                                                                      | Add the image to `src/assets/gallery/` and point that item's `image:` at it. Write the `alt:` line too — it describes the picture for people who can't see it.                                              |
 | The site **name, navigation, or social links**                                                           | `src/site.config.ts` — one file holding everything that makes this site _this_ site. Every menu and the footer read from it.                                                                                |
-| **Site settings** (e.g. randomize the carousel order each build)                                         | `SITE.features` in `src/site.config.ts` — flip a `true`/`false` toggle; each is documented in the file.                                                                                                     |
+| **Site settings** (e.g. rotating the carousel and the link-preview photo)                                | `SITE.features` in `src/site.config.ts` — flip a `true`/`false` toggle; each is documented in the file.                                                                                                     |
 
 Prefer a form-based editor? See Pages CMS below — it edits these same files behind a friendly UI.
 
@@ -225,7 +225,8 @@ src/
   lib/
     countdown.client.ts    ← recomputes the countdown in the browser so it never goes stale
     lqip.ts                ← build-time blur-up image placeholders
-    og.ts                  ← picks the gallery photo featured in the social share image
+    gallery.ts             ← the carousel's running order + which photo leads it (and so shares)
+    og.ts                  ← turns that lead photo into the social share image
   styles/
     tokens.css             ← design tokens (colors, type, spacing, motion) — reskin here
     fonts.css              ← the @font-face blocks, with the font-swap recipe on top
@@ -294,9 +295,13 @@ or component; only genuinely shared styles are global (`src/styles/`).
 - **Design tokens** — restyle the whole site from `src/styles/tokens.css` (colors, the type and
   spacing scales, motion, the focus ring, and the content-column width). `npm run a11y` rechecks
   the contrast of every colour pairing straight from that file.
-- **Social share image** — the link preview on iMessage/WhatsApp/etc. features the first
-  gallery photo (by carousel order), generated as a 1200×1200 JPEG (Sharp, face-aware crop). Flip
-  `features.randomizeOgImage` in `src/site.config.ts` to feature a random photo per build. See `src/lib/og.ts`.
+- **Social share image** — the link preview on iMessage/WhatsApp/Facebook/etc. is always the photo
+  leading the carousel, generated as a 1200×1200 JPEG (Sharp, face-aware crop). With
+  `features.rotateGallery` on (the default), that lead photo takes turns: each gallery photo leads
+  for one day, and once everyone has had a turn the deck is reshuffled and the round starts again —
+  so nobody is featured twice running and nobody waits months. The rest of the carousel is
+  re-shuffled on every build. Turn the switch off in `src/site.config.ts` and the lowest-`order`
+  photo leads forever. See `src/lib/gallery.ts` and `src/lib/og.ts`.
 
 ---
 

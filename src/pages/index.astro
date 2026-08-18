@@ -9,31 +9,18 @@ import SectionHeading from "../components/SectionHeading.astro";
 import FeatureGrid from "../components/FeatureGrid.astro";
 import Button from "../components/Button.astro";
 import type { CarouselItem } from "../components/carousel.types";
-import { getCollection, render } from "astro:content";
+import { render } from "astro:content";
 import { VOLUNTEER_COUNT } from "../data/stats";
 import { CLEANUP_ISO, CLEANUP_END_ISO } from "../data/event";
 import { computeCountdown, renderCtaLabel } from "../data/countdown";
-import { SITE } from "../site.config";
-
-// Fisher–Yates: a uniform random permutation (a fresh copy, doesn't mutate input).
-function shuffle<T>(items: readonly T[]): T[] {
-  const a = [...items];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+import { galleryOrder } from "../lib/gallery";
 
 // Carousel items come from src/content/gallery/*.md (see src/content.config.ts).
 // The image() schema validates every photo at build time, so a missing or
 // misnamed image fails the build loudly — no hand-rolled checks needed.
-// Order is the `order` field by default; features.randomizeGallery
-// (src/site.config.ts) shuffles them fresh on every build instead.
-const gallery = await getCollection("gallery");
-const entries = SITE.features.randomizeGallery
-  ? shuffle(gallery)
-  : gallery.sort((a, b) => a.data.order - b.data.order);
+// The running order — and so which photo leads the carousel and becomes the
+// social share image — is decided in one place: src/lib/gallery.ts.
+const entries = galleryOrder;
 
 // The schema can't see the Markdown body, so guard it here: a blank body
 // would render an empty reveal panel. Fail the build loudly instead.

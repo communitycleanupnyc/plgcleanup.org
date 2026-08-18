@@ -137,14 +137,21 @@ export const SITE = {
      */
     ticker: true,
     /**
-     * Shuffle the gallery into a new random order on every build.
-     * Off (default) → items appear in the `order` set in each Markdown file.
+     * Rotate the gallery. One switch, three effects, because they are the same
+     * decision: the photo that leads the homepage carousel is also the photo in
+     * every link preview (WhatsApp, iMessage, Facebook, Slack — the Open Graph
+     * image), and the rest of the carousel is dealt a fresh random order on
+     * every build.
+     *
+     * The lead photo is not a coin flip. Each photo leads for exactly one day
+     * per cycle, and when everyone has had a turn the deck is reshuffled and the
+     * cycle restarts — so with N photos, N days is one full round. The daily
+     * Cloudflare redeploy is what advances it; two builds on the same day lead
+     * with the same photo. Full explanation in src/lib/gallery.ts.
+     *
+     * Off → items appear in the `order` set in each Markdown file and the
+     * lowest-`order` one is the share image, unchanging.
      */
-    randomizeGallery: false,
-    /**
-     * Pick a random gallery photo for the social share (Open Graph) image.
-     * Off (default) → the lowest-`order` item, so link previews stay stable.
-     */
-    randomizeOgImage: false,
+    rotateGallery: true,
   },
 } as const;
