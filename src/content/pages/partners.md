@@ -14,6 +14,7 @@ Want to partner with us? [Email us](mailto:communitycleanupplg@gmail.com).
 
 - **[Prospect Lefferts Gardens Neighborhood Association](https://www.plgna.org/)**
 - **Maple Street Community Garden** — hosts our tool cart, and people volunteering at both trash club and the garden is common.
+- **[Hamlet](https://www.instagram.com/hamletcoffeecompany/)** is one of our favorite cafes in the neighborhood where we stop before, during, or after our cleanups :)
 - Awesome
 - Antilles Cafe
-- Bobbed Bandit
+- **[Bobbed Bandit](https://www.instagram.com/thebobbedbandit/)** is a favorite of ours for hosting larger events such as trashy hours, post-trashathon hangouts and celebrating community birthdays 🥳
