@@ -76,15 +76,9 @@ export interface Cleanup {
    */
   timeFrom: string;
   timeTo: string;
-  /** The whole date in one line, "Sunday, August 23, 2026" — /join's heading. */
+  /** "Sunday, August 23, 2026" and "Sunday, August 23". */
   longDate: string;
-  /**
-   * The same date in its two halves, "Sunday" and "August 23". /schedule gives
-   * each half a column, which is also why neither carries the comma that would
-   * join them.
-   */
-  weekday: string;
-  monthDay: string;
+  shortDate: string;
   /** The "Get directions" link — built from the corner. */
   mapsUrl: string;
   /**
@@ -136,14 +130,8 @@ function toCleanup(row: (typeof rows)[number]): Cleanup {
     time: `${time.from}–${time.to}`,
     timeFrom: time.from,
     timeTo: time.to,
-    longDate: formatDate(start, {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    }),
-    weekday: formatDate(start, { weekday: "long" }),
-    monthDay: formatDate(start, { month: "long", day: "numeric" }),
+    longDate: formatDate(start, { year: "numeric" }),
+    shortDate: formatDate(start),
     mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`,
     mapsEmbedUrl: `https://www.google.com/maps?q=${encodeURIComponent(mapsQuery)}&output=embed`,
   };
@@ -176,9 +164,15 @@ export const UPCOMING_CLEANUPS: Cleanup[] = CLEANUPS.filter((c) => c.end > new D
  */
 export const NEXT_CLEANUP: Cleanup = UPCOMING_CLEANUPS[0] ?? CLEANUPS[CLEANUPS.length - 1];
 
-/** Read an instant as a New York date, in whichever parts the caller asks for. */
-function formatDate(d: Date, parts: Intl.DateTimeFormatOptions) {
-  return new Intl.DateTimeFormat("en-US", { timeZone: TIME_ZONE, ...parts }).format(d);
+/** Format one instant as a New York date, e.g. "Sunday, August 23". */
+function formatDate(d: Date, extra: Intl.DateTimeFormatOptions = {}) {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: TIME_ZONE,
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    ...extra,
+  }).format(d);
 }
 
 /** Read "2026-06-20" into its year, month, and day, or explain the mistake. */
