@@ -19,7 +19,7 @@ The repo currently ships with its automated checks disabled so that a past event
 date and unfinished gallery copy can't fail every build during setup. This
 section turns them all back on. **Nothing here protects anything until it's done.**
 
-1. **[you] Create the Cloudflare deploy hook.** Cloudflare dashboard → Workers &
+1. ✅ **Done 2026-08-23.** **[you] Create the Cloudflare deploy hook.** Cloudflare dashboard → Workers &
    Pages → the `plgcleanup` project → **Settings → Builds → Deploy hooks** →
    create one (any name, branch `main`). Copy the URL it gives you, then in
    GitHub → repo → **Settings → Secrets and variables → Actions → New repository
@@ -32,12 +32,13 @@ section turns them all back on. **Nothing here protects anything until it's done
    next month or two; the site picks the next one by itself and lists the next
    four on /schedule. (Or use Pages CMS → **Schedule**.)
 
-3. **Turn the crons back on.** `.github/workflows/site-checks.yml` — uncomment
-   the two `- cron:` lines in the `on:` block.
+3. ✅ **Done 2026-08-23. The crons are on.** `.github/workflows/site-checks.yml`
+   runs the Monday audit + links check and the daily redeploy.
 
-   ⚠ **Uncomment them byte-for-byte.** The `links` and `redeploy` jobs decide
-   whether to run by string-comparing `github.event.schedule` against these exact
-   expressions. A stray space and the job stops running, with no error anywhere.
+   ⚠ If you ever edit a `- cron:` line, change its guard to match. The `links` and
+   `redeploy` jobs decide whether to run by string-comparing
+   `github.event.schedule` against those exact expressions. A stray space and the
+   job stops running, with no error anywhere.
 
 4. **Delete the pre-launch escape hatches.** Three files, same two variables:
    - `.github/workflows/ci.yml` → remove `SEO_SKIP_FRESH` and

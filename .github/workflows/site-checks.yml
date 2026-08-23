@@ -39,13 +39,13 @@
 name: site checks
 
 on:
-  # Crons paused pre-launch (2026-07-25): the redeploy needs the
-  # CF_PAGES_DEPLOY_HOOK secret (not yet set) and there is no future cleanup to
-  # flip past; the Monday tripwire is redundant while SEO_SKIP_FRESH relaxes the
-  # freshness gate. Restore both at launch — uncomment BYTE-IDENTICALLY, since
-  # the job guards below string-match these lines (LAUNCH.md A.3):
-  #   - cron: "0 12 * * 1"  # Mondays 12:00 UTC — audit tripwire + links
-  #   - cron: "30 20 * * *" # Daily 20:30 UTC (~4:30pm EDT / 3:30pm EST) — redeploy
+  # Live since 2026-08-23 (LAUNCH.md A.3). Two rhythms, because the jobs below
+  # need two: a weekly one for the checks that read the site, and a daily one for
+  # the rebuild that keeps it current. Each job picks its cron by string-matching
+  # github.event.schedule against these exact expressions — see the NOTE above.
+  schedule:
+    - cron: "0 12 * * 1" # Mondays 12:00 UTC — audit tripwire + links
+    - cron: "30 20 * * *" # Daily 20:30 UTC (~4:30pm EDT / 3:30pm EST) — redeploy
   workflow_dispatch: # lets you run the weekly links check on demand
 
 permissions:
