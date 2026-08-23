@@ -8,45 +8,12 @@
 // it renders data. Its copy lives here, the way /join's does.
 import Base from "../layouts/Base.astro";
 import Button from "../components/Button.astro";
-import { UPCOMING_CLEANUPS, type Cleanup } from "../data/schedule";
-import { SITE } from "../site.config";
+import { UPCOMING_CLEANUPS } from "../data/schedule";
 
 // How many cleanups the page lists. The rest stay in the form — an editor can
 // add dates months ahead without making this page a wall of text.
 const HOW_MANY = 4;
 const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
-
-// The two links a calendar entry carries, built from the canonical origin in
-// astro.config.mjs rather than typed here — an entry someone saves today outlives
-// any number of edits to this page.
-const joinUrl = new URL("/join", Astro.site).href;
-const scheduleUrl = new URL("/schedule", Astro.site).href;
-
-/**
- * Google's "add to calendar" template link: one URL that opens a prefilled new
- * event in whichever Google account the reader is already signed into, with
- * nothing to install and no file to download.
- *
- * https://calendar.google.com/calendar/render?action=TEMPLATE&text=…&dates=…
- * `dates` wants a compact UTC pair, "20260912T140000Z/20260912T150000Z" — the
- * ISO stamps schedule.ts already derives, with their punctuation dropped.
- */
-function calendarUrl(cleanup: Cleanup) {
-  const stamp = (iso: string) => iso.replace(/[-:]|\.\d{3}/g, "");
-  const params = new URLSearchParams({
-    action: "TEMPLATE",
-    text: SITE.name,
-    dates: `${stamp(cleanup.iso)}/${stamp(cleanup.endIso)}`,
-    location: `${cleanup.corner}, Brooklyn, NY`,
-    details: [
-      `${cleanup.weekday} ${cleanup.monthDay}, ${cleanup.time} — ${cleanup.corner}.`,
-      "",
-      `Upcoming cleanup link: ${joinUrl}`,
-      `Cleanup schedule: ${scheduleUrl}`,
-    ].join("\n"),
-  });
-  return `https://calendar.google.com/calendar/render?${params}`;
-}
 ---
 
 <Base
@@ -91,7 +58,7 @@ function calendarUrl(cleanup: Cleanup) {
                       </Button>
                     ) : (
                       <Button
-                        href={calendarUrl(cleanup)}
+                        href={cleanup.calendarUrl}
                         variant="small"
                         target="_blank"
                         rel="noopener noreferrer"

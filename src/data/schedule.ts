@@ -25,6 +25,7 @@
 
 import { z } from "astro/zod";
 import scheduleData from "./schedule.json";
+import { SITE } from "../site.config";
 
 // Validate the editable values up front, so a missing or wrong-typed field fails
 // the build with a clear message naming the field — the same safety net the
@@ -93,11 +94,24 @@ export interface Cleanup {
    * from schedule.json the way a hand-pasted embed code did.
    */
   mapsEmbedUrl: string;
+  /**
+   * The "add to calendar" link — one URL that opens a prefilled new event in
+   * whichever Google account the reader is already signed into, with nothing to
+   * install and no file to download. Built here rather than on a page because
+   * both /join and /schedule offer it.
+   */
+  calendarUrl: string;
 }
 
 // Every cleanup is in Brooklyn, in New York (Eastern) time.
 const CLEANUP_CITY = "Brooklyn, NY";
 const TIME_ZONE = "America/New_York";
+
+// The site's canonical origin, from `site` in astro.config.mjs. A calendar entry
+// outlives any number of edits to this site, so the links inside one are built
+// from that single source rather than typed out anywhere.
+const JOIN_URL = new URL("/join", import.meta.env.SITE).href;
+const SCHEDULE_URL = new URL("/schedule", import.meta.env.SITE).href;
 
 /** Turn one edited row into everything the pages need from it. */
 function toCleanup(row: (typeof rows)[number]): Cleanup {
@@ -121,6 +135,9 @@ function toCleanup(row: (typeof rows)[number]): Cleanup {
 
   const time = formatTimeRange(start, end);
 
+  const weekday = formatDate(start, { weekday: "long" });
+  const monthDay = formatDate(start, { month: "long", day: "numeric" });
+
   /** The place everyone searches for, e.g. "Rogers Ave and Fenimore St, Brooklyn, NY". */
   const mapsQuery = `${corner.replace(/ & /g, " and ")}, ${CLEANUP_CITY}`;
 
@@ -142,10 +159,16 @@ function toCleanup(row: (typeof rows)[number]): Cleanup {
       day: "numeric",
       year: "numeric",
     }),
-    weekday: formatDate(start, { weekday: "long" }),
-    monthDay: formatDate(start, { month: "long", day: "numeric" }),
+    weekday,
+    monthDay,
     mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`,
     mapsEmbedUrl: `https://www.google.com/maps?q=${encodeURIComponent(mapsQuery)}&output=embed`,
+    calendarUrl: googleCalendarUrl({
+      start,
+      end,
+      corner,
+      when: `${weekday} ${monthDay}, ${time.from}–${time.to}`,
+    }),
   };
 }
 
@@ -175,6 +198,32 @@ export const UPCOMING_CLEANUPS: Cleanup[] = CLEANUPS.filter((c) => c.end > new D
  * still render while the countdown reads "past" and the audit script complains.
  */
 export const NEXT_CLEANUP: Cleanup = UPCOMING_CLEANUPS[0] ?? CLEANUPS[CLEANUPS.length - 1];
+
+/**
+ * Google's "add to calendar" template link, the one that needs no account setup
+ * and no download:
+ *
+ *   https://calendar.google.com/calendar/render?action=TEMPLATE&text=…&dates=…
+ *
+ * `dates` wants a compact UTC pair, "20260912T140000Z/20260912T150000Z" — the
+ * ISO stamps above with their punctuation dropped.
+ */
+function googleCalendarUrl(cleanup: { start: Date; end: Date; corner: string; when: string }) {
+  const stamp = (d: Date) => d.toISOString().replace(/[-:]|\.\d{3}/g, "");
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: SITE.name,
+    dates: `${stamp(cleanup.start)}/${stamp(cleanup.end)}`,
+    location: `${cleanup.corner}, ${CLEANUP_CITY}`,
+    details: [
+      `${cleanup.when} — ${cleanup.corner}.`,
+      "",
+      `Upcoming cleanup link: ${JOIN_URL}`,
+      `Cleanup schedule: ${SCHEDULE_URL}`,
+    ].join("\n"),
+  });
+  return `https://calendar.google.com/calendar/render?${params}`;
+}
 
 /** Read an instant as a New York date, in whichever parts the caller asks for. */
 function formatDate(d: Date, parts: Intl.DateTimeFormatOptions) {

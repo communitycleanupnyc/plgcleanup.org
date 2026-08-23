@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import Button from "../components/Button.astro";
 import { Image } from "astro:assets";
 import cart from "../assets/cart.webp";
 import { NEXT_CLEANUP } from "../data/schedule";
@@ -85,9 +86,14 @@ const eventSchema = {
     <div class="join-details">
       <div class="join-detail">
         <p class="join-detail-label">When</p>
-        <p class="join-detail-value">
-          {next.longDate}<br />{next.time}
-        </p>
+        <div class="join-when">
+          <p class="join-detail-value">
+            {next.longDate}<br />{next.time}
+          </p>
+          <Button href={next.calendarUrl} variant="small" target="_blank" rel="noopener noreferrer"
+            >Add to calendar</Button
+          >
+        </div>
       </div>
       <div class="join-cart-cell">
         <Image
@@ -232,6 +238,18 @@ const eventSchema = {
     font-size: clamp(1.1rem, 2vw, 1.4rem);
     font-weight: 300;
     line-height: 1.45;
+  }
+
+  /* The date, the time, and the button that saves them, in one column as wide as
+     its widest line — which is the date, unless the button's label is longer.
+     A grid, so the button fills that column instead of hugging its label: the
+     button ends up exactly as wide as "Saturday, August 29, 2026". Capped at the
+     cell so a narrow screen wraps the date rather than overflowing. */
+  .join-when {
+    display: grid;
+    gap: 0.9rem;
+    width: max-content;
+    max-width: 100%;
   }
 
   .join-reassurance {

@@ -16,8 +16,8 @@ Once in a while, we hold _trashy hours_ and meet at a local business that we [pa
 ## Values
 
 - We clean from a place of mutual care and respect for the environment. We don’t police neighbors’ choices or trash habits.
-- We are open to all community members, and are available to talk and share with who we interact with.
-- We are an inclusive space that shares names and pronouns, and accommodates access needs.
+- We are open to all community members, and talk and share with anyone we meet.
+- We are an inclusive space: we share names and pronouns, and accommodate access needs.
 
 
 ## Team
