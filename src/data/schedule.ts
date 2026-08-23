@@ -68,8 +68,14 @@ export interface Cleanup {
    */
   isoLocal: string;
   endIsoLocal: string;
-  /** The time as readers see it, e.g. "10–11am" — built from the start/end. */
+  /** The time as readers see it, e.g. "10–11 am" — built from the start/end. */
   time: string;
+  /**
+   * The same range as its two halves, "10" and "11 am". /schedule puts the dash
+   * between them in a column of its own so every row's dash lines up.
+   */
+  timeFrom: string;
+  timeTo: string;
   /** "Sunday, August 23, 2026" and "Sunday, August 23". */
   longDate: string;
   shortDate: string;
@@ -107,6 +113,8 @@ function toCleanup(row: (typeof rows)[number]): Cleanup {
     );
   }
 
+  const time = formatTimeRange(start, end);
+
   /** The place everyone searches for, e.g. "Rogers Ave and Fenimore St, Brooklyn, NY". */
   const mapsQuery = `${corner.replace(/ & /g, " and ")}, ${CLEANUP_CITY}`;
 
@@ -119,7 +127,9 @@ function toCleanup(row: (typeof rows)[number]): Cleanup {
     endIso: end.toISOString(),
     isoLocal: easternIsoString(start),
     endIsoLocal: easternIsoString(end),
-    time: formatTimeRange(start, end),
+    time: `${time.from}–${time.to}`,
+    timeFrom: time.from,
+    timeTo: time.to,
     longDate: formatDate(start, { year: "numeric" }),
     shortDate: formatDate(start),
     mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`,
@@ -277,10 +287,20 @@ function formatClock(p: { hour: string; minute: string }) {
   return p.minute === "00" ? p.hour : `${p.hour}:${p.minute}`;
 }
 
-/** Format a start–end range as "10–11am", hiding a repeated am/pm on the start. */
+/**
+ * Split a start–end range into its two halves: "10" and "11 am", or "10 am" and
+ * "2 pm" when the two straddle noon and the start's am/pm can't be left implied.
+ * Halves rather than one string so /schedule can column the dash; /join joins
+ * them back up.
+ *
+ * The space before am/pm is a non-breaking one — "11" and "am" belong on the
+ * same line however narrow the column holding them gets.
+ */
 function formatTimeRange(start: Date, end: Date) {
   const s = etClockParts(start);
   const e = etClockParts(end);
-  const startStr = s.period === e.period ? formatClock(s) : `${formatClock(s)}${s.period}`;
-  return `${startStr}–${formatClock(e)}${e.period}`;
+  return {
+    from: s.period === e.period ? formatClock(s) : `${formatClock(s)}\u00a0${s.period}`,
+    to: `${formatClock(e)}\u00a0${e.period}`,
+  };
 }

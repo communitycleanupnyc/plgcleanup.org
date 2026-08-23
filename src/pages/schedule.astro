@@ -35,6 +35,9 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
             // The first row is the cleanup /join describes, so the row itself is
             // the link there. The rest are plain text: one place to click beats
             // four, and every corner is a tap away on /join when its turn comes.
+            //
+            // The time is three cells, not one: the dash gets a column of its
+            // own, which is what lines every row's dash up.
             const Row = i === 0 ? "a" : "div";
             return (
               <li class="schedule-item">
@@ -43,7 +46,11 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
                     {cleanup.shortDate}
                     {i === 0 && <span class="schedule-tag">Next</span>}
                   </span>
-                  <span class="schedule-time">{cleanup.time}</span>
+                  <span class="schedule-time">
+                    <span class="schedule-from">{cleanup.timeFrom}</span>
+                    <span class="schedule-dash">–</span>
+                    <span class="schedule-to">{cleanup.timeTo}</span>
+                  </span>
                   <span class="schedule-corner">{cleanup.corner}</span>
                 </Row>
               </li>
@@ -132,8 +139,13 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
      stacks its three cells the way the narrow layout does — long, not broken. */
   .schedule-list {
     display: grid;
-    grid-template-columns: auto auto 1fr;
-    column-gap: clamp(1rem, 3vw, 2.5rem);
+    /* Five tracks, three columns: the time's start, dash, and end each get a
+       track, which is what lines the dashes up — the dash track is one glyph
+       wide and shared by every row, and the start beside it is right-aligned.
+       The gap is zero so the range reads tight; the space between the three
+       visible columns comes from padding on the cells that end them. */
+    grid-template-columns: auto max-content max-content max-content 1fr;
+    column-gap: 0;
     list-style: none;
     margin: var(--space-gap) 0;
     padding: 0;
@@ -147,6 +159,17 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
     grid-template-columns: subgrid;
   }
 
+  /* The time spans the three middle tracks and hands them straight to its own
+     three cells. It stays a grid at every width, which is also why the range
+     reads "10–11 am" with its three tags on separate lines: whitespace between
+     grid items is never rendered. */
+  .schedule-time {
+    display: grid;
+    grid-column: span 3;
+    grid-template-columns: subgrid;
+    align-items: baseline;
+  }
+
   .schedule-item {
     margin: 0;
     border-top: 1px solid var(--line);
@@ -158,9 +181,23 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
     padding: 0.9rem 0;
   }
 
+  /* Too narrow for columns: the row stops being a grid and its three parts take
+     a line each. The time keeps a little grid of its own so its own three cells
+     stay side by side instead of stacking three deep. */
   @media (max-width: 560px) {
-    .schedule-list {
-      grid-template-columns: 1fr;
+    .schedule-item,
+    .schedule-row {
+      display: block;
+    }
+    .schedule-date,
+    .schedule-corner {
+      display: block;
+    }
+    /* No shared tracks left to line up against, so the time sizes its own. */
+    .schedule-time {
+      grid-column: auto;
+      grid-template-columns: repeat(3, max-content);
+      justify-content: start;
     }
   }
 
@@ -170,6 +207,17 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
     font-size: clamp(1.1rem, 2vw, 1.4rem);
     font-weight: 300;
     line-height: 1.45;
+  }
+
+  /* The space between the three visible columns, since the grid's own gap has
+     to stay at zero for the time to read as one range. */
+  .schedule-date,
+  .schedule-to {
+    padding-right: clamp(1rem, 3vw, 2.5rem);
+  }
+
+  .schedule-from {
+    justify-self: end;
   }
 
   /* "Next" — the one cleanup /join is about. */
