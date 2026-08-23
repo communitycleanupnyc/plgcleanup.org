@@ -151,7 +151,9 @@ content:
       min: 1
       collapsible:
         collapsed: true
-        summary: "{fields.date} · {fields.corner}"
+        # Every row is legible without opening it, so the whole schedule — past
+        # rows included — reads as a list you can check and prune.
+        summary: "{fields.date} · {fields.startTime} · {fields.corner}"
     fields:
       # A date picker, not free text: Pages CMS saves yyyy-MM-dd, which is exactly
       # what schedule.ts parses. The regex stays as well — edits made through the
