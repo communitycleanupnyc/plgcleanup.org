@@ -87,23 +87,38 @@ export function computeCountdown(now: Date, startIso: string, endIso: string): C
 
   // Cleanups run on either weekend day, so "this weekend" can't be a single-day
   // comparison against Saturday — that silently drops every Sunday cleanup down
-  // to the generic "in five days" copy. Instead, map any day onto the Saturday
-  // of the weekend it belongs to and compare weekends. Sunday (dow 0) belongs to
-  // the weekend that started the day before; every other day looks forward.
-  const weekendSaturday = (dayMs: number) => {
+  // to the generic "in five days" copy. Map each day onto the Saturday of its
+  // weekend instead, and compare weekends.
+  //
+  // The two directions differ, and that is the whole trick. A cleanup on a
+  // Sunday belongs to the weekend that started the day before it. A VISITOR on a
+  // Sunday has that weekend behind them: the weekend they mean by "this" is the
+  // one coming up. So the cleanup looks back and the visitor always looks
+  // forward. Reading the visitor backwards too is what made the Saturday six
+  // days away read as "next Saturday" to anyone who opened the site on a Sunday.
+  const cleanupWeekend = (dayMs: number) => {
     const dow = new Date(dayMs).getUTCDay();
     return dow === 0 ? dayMs - 86_400_000 : dayMs + (6 - dow) * 86_400_000;
   };
-  const thisWeekendMs = weekendSaturday(todayMs);
+  const comingSaturday = (dayMs: number) => {
+    const dow = new Date(dayMs).getUTCDay();
+    return dayMs + ((6 - dow) % 7) * 86_400_000;
+  };
+  const thisWeekendMs = comingSaturday(todayMs);
   const nextWeekendMs = thisWeekendMs + 7 * 86_400_000;
-  const cleanupWeekendMs = weekendSaturday(cleanupDayMs);
+  const cleanupWeekendMs = cleanupWeekend(cleanupDayMs);
 
-  const dayName = new Intl.DateTimeFormat("en-US", {
-    timeZone: TIME_ZONE,
-    weekday: "long",
-  }).format(new Date(startIso));
-  if (cleanupWeekendMs === thisWeekendMs) return { tag: "this-weekend", dayName };
-  if (cleanupWeekendMs === nextWeekendMs) return { tag: "next-weekend", dayName };
+  // Exactly a week out lands on the same weekday the visitor is reading on, and
+  // "this Sunday" heard on a Sunday means today. Skip the weekday wording and
+  // let the "in a week" line below say it plainly.
+  if (N !== 7) {
+    const dayName = new Intl.DateTimeFormat("en-US", {
+      timeZone: TIME_ZONE,
+      weekday: "long",
+    }).format(new Date(startIso));
+    if (cleanupWeekendMs === thisWeekendMs) return { tag: "this-weekend", dayName };
+    if (cleanupWeekendMs === nextWeekendMs) return { tag: "next-weekend", dayName };
+  }
 
   const word = N >= 0 && N < NUMBER_WORDS.length ? NUMBER_WORDS[N] : String(N);
   const monthName = new Intl.DateTimeFormat("en-US", {
