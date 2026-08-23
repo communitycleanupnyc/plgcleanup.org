@@ -175,6 +175,10 @@ Two things to know when writing a component here:
   the whole job. Bad values fail the build with a message naming the row. The
   Pages CMS form for it is the `schedule` entry in `.pages.yml`.
 - **Update stats:** `src/data/stats.json` — plain numbers, no commas.
+- **Change how wide a page of words is:** `--content-w` in `src/styles/tokens.css`
+  — 65% of the window on a desktop, the full site width on a phone. Every page
+  but the home page opts in with `--site-w: var(--content-w)` on its container,
+  and the left offset follows on its own.
 - **Change colors/spacing/type:** `src/styles/tokens.css`, then `npm run a11y`.
   `--surface` is for backgrounds, `--text-muted` for dim text and icons; don't
   cross them (a previous version of this file conflated them and shipped a

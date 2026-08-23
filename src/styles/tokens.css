@@ -74,6 +74,15 @@
   /* Content column: width + derived left-offset for the 95→90vw breakout */
   --site-w: 94vw;
   --site-ml: calc(50% - var(--site-w) / 2);
+  /* The column every page BUT the home page runs in: 65% of the window, so a
+     page of words sits centred instead of hugging the left edge of a 94vw band.
+     A page opts in by setting `--site-w: var(--content-w)` on its container —
+     --site-ml above is written in terms of --site-w, so the offset follows it
+     with nothing else to change. Written as a literal, not var(--site-w): a
+     token that refers to the one overriding it is a cycle, and CSS drops both.
+     Phones keep the full width (see the media query at the foot of this file);
+     65% of a 390px screen is a sliver. */
+  --content-w: 94vw;
   /* Reading-width cap on <main>. Widen it for an image-led site. */
   --main-max-w: 900px;
   --ticker-h: 3.3rem;
@@ -81,4 +90,12 @@
   /* Corner radius on nav links, footer links, and CTA buttons. 0 is a
      deliberate choice, not an oversight — the design is square-cornered. */
   --hover-radius: 0;
+}
+
+/* Desktop only: narrow the content-page column. Below this the pages keep the
+   full site width, which is all a phone has room for. */
+@media (min-width: 900px) {
+  :root {
+    --content-w: 65vw;
+  }
 }

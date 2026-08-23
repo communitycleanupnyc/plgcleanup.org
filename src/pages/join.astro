@@ -151,6 +151,8 @@ const eventSchema = {
   /* /join page details grid. */
   .join-page {
     position: relative;
+    /* The content-page column — see .prose in src/components/Prose.astro. */
+    --site-w: var(--content-w);
     width: var(--site-w);
     margin-left: var(--site-ml);
     padding-top: var(--space-section);

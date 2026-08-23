@@ -7,7 +7,6 @@
 // The page is its own route, not a Markdown file in src/content/pages/, because
 // it renders data. Its copy lives here, the way /join's does.
 import Base from "../layouts/Base.astro";
-import Button from "../components/Button.astro";
 import { UPCOMING_CLEANUPS } from "../data/schedule";
 
 // How many cleanups the page lists. The rest stay in the form — an editor can
@@ -32,20 +31,24 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
     {
       cleanups.length > 0 ? (
         <ol class="schedule-list">
-          {cleanups.map((cleanup, i) => (
-            <li class="schedule-item">
-              <p class="schedule-date">
-                {cleanup.shortDate}
-                {i === 0 && <span class="schedule-tag">Next</span>}
-              </p>
-              <p class="schedule-place">
-                {cleanup.time} ·{" "}
-                <a href={cleanup.mapsUrl} target="_blank" rel="noopener noreferrer">
-                  {cleanup.corner}
-                </a>
-              </p>
-            </li>
-          ))}
+          {cleanups.map((cleanup, i) => {
+            // The first row is the cleanup /join describes, so the row itself is
+            // the link there. The rest are plain text: one place to click beats
+            // four, and every corner is a tap away on /join when its turn comes.
+            const Row = i === 0 ? "a" : "div";
+            return (
+              <li class="schedule-item">
+                <Row class="schedule-row" href={i === 0 ? "/join" : undefined}>
+                  <span class="schedule-date">
+                    {cleanup.shortDate}
+                    {i === 0 && <span class="schedule-tag">Next</span>}
+                  </span>
+                  <span class="schedule-time">{cleanup.time}</span>
+                  <span class="schedule-corner">{cleanup.corner}</span>
+                </Row>
+              </li>
+            );
+          })}
         </ol>
       ) : (
         <p class="schedule-empty">
@@ -79,17 +82,17 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
         >partner</a
       > with instead. Those get announced in the newsletter and on Instagram like any other cleanup.
     </p>
-
-    <p class="schedule-cta"><Button href="/join">See the next cleanup</Button></p>
   </div>
 </Base>
 
 <style>
   /* /schedule — the date list and the copy around it. */
   .schedule-page {
+    /* The narrower column every page but the home page runs in; --site-ml in
+       tokens.css is written in terms of --site-w, so the offset follows. */
+    --site-w: var(--content-w);
     width: var(--site-w);
     margin-left: var(--site-ml);
-    max-width: 68ch;
     padding-top: var(--space-section);
     padding-bottom: var(--space-block);
   }
@@ -121,42 +124,57 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
     margin-bottom: 0.375rem;
   }
 
-  /* The dates. One row per cleanup: the day on the left, the time and corner on
-     the right, stacking under 560px. */
+  /* The dates: three columns — day, time, corner — collapsing to one under
+     560px. The LIST owns the columns and the rows inherit them with `subgrid`,
+     which is the whole point: a grid per row would size each row's columns to
+     its own text, and "Saturday, September 12" and "Sunday, October 4" would
+     start their times in different places. Where subgrid is missing, a row
+     stacks its three cells the way the narrow layout does — long, not broken. */
   .schedule-list {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    column-gap: clamp(1rem, 3vw, 2.5rem);
     list-style: none;
     margin: var(--space-gap) 0;
     padding: 0;
     border-bottom: 1px solid var(--line);
   }
 
-  .schedule-item {
+  .schedule-item,
+  .schedule-row {
     display: grid;
-    grid-template-columns: minmax(0, 20ch) 1fr;
-    gap: 0.25rem 1.5rem;
-    align-items: baseline;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+  }
+
+  .schedule-item {
     margin: 0;
-    padding: 0.9rem 0;
     border-top: 1px solid var(--line);
   }
 
+  .schedule-row {
+    row-gap: 0.25rem;
+    align-items: baseline;
+    padding: 0.9rem 0;
+  }
+
   @media (max-width: 560px) {
-    .schedule-item {
+    .schedule-list {
       grid-template-columns: 1fr;
     }
   }
 
-  .schedule-page .schedule-date,
-  .schedule-page .schedule-place {
+  .schedule-date,
+  .schedule-time,
+  .schedule-corner {
     font-size: clamp(1.1rem, 2vw, 1.4rem);
     font-weight: 300;
     line-height: 1.45;
-    margin-bottom: 0;
   }
 
   /* "Next" — the one cleanup /join is about. */
   .schedule-tag {
-    margin-left: 0.6rem;
+    margin-left: 0.5rem;
     font-size: var(--fs-sm);
     font-weight: 400;
     letter-spacing: 0.04em;
@@ -164,7 +182,29 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
     color: var(--text-muted);
   }
 
-  .schedule-cta {
-    margin-top: var(--space-gap);
+  /* That row is the link to /join. It takes the site's own link hover — accent
+     fill, background-coloured text — laid over the whole row instead of a word
+     inside it, so what you can click is the whole thing. No inline padding on
+     purpose: this row is a subgrid, and padding would pull its columns in from
+     the ones every other row lines up with. */
+  a.schedule-row {
+    color: inherit;
+    text-decoration: none;
+    transition:
+      background-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  a.schedule-row:hover,
+  a.schedule-row:focus-visible {
+    background-color: var(--accent);
+    color: var(--bg);
+    outline: none;
+  }
+
+  /* The tag is dim against the page and would be unreadable on the fill. */
+  a.schedule-row:hover .schedule-tag,
+  a.schedule-row:focus-visible .schedule-tag {
+    color: inherit;
   }
 </style>

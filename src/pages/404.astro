@@ -21,12 +21,13 @@ import Section from "../components/Section.astro";
 
 <style>
   .notfound {
+    /* The content-page column — see .prose in src/components/Prose.astro. */
+    --site-w: var(--content-w);
     padding-bottom: var(--space-block);
   }
   .notfound p {
     font-size: var(--fs-body);
     line-height: 1.55;
     margin-top: 1rem;
-    max-width: 60ch;
   }
 </style>

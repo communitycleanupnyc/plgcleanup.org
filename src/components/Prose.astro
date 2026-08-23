@@ -23,9 +23,11 @@ const { backHref = "/", backLabel = "← Back home" } = Astro.props;
 
 <style>
   .prose {
+    /* The content-page column (tokens.css). --site-ml is written in terms of
+       --site-w, so the left offset follows this override on its own. */
+    --site-w: var(--content-w);
     width: var(--site-w);
     margin-left: var(--site-ml);
-    max-width: 68ch;
     padding-top: var(--space-section);
     padding-bottom: var(--space-block);
   }
