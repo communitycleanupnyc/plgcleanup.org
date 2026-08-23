@@ -7,6 +7,7 @@
 // The page is its own route, not a Markdown file in src/content/pages/, because
 // it renders data. Its copy lives here, the way /join's does.
 import Base from "../layouts/Base.astro";
+import Button from "../components/Button.astro";
 import { UPCOMING_CLEANUPS, type Cleanup } from "../data/schedule";
 import { SITE } from "../site.config";
 
@@ -83,21 +84,23 @@ function calendarUrl(cleanup: Cleanup) {
                     <span class="schedule-to">{cleanup.timeTo}</span>
                   </span>
                   <span class="schedule-corner">{cleanup.corner}</span>
-                  {i === 0 ? (
-                    <a class="schedule-btn" href="/join">
-                      Join
-                    </a>
-                  ) : (
-                    <a
-                      class="schedule-btn"
-                      href={calendarUrl(cleanup)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`Add the ${cleanup.weekday} ${cleanup.monthDay} cleanup to your calendar`}
-                    >
-                      Add to calendar
-                    </a>
-                  )}
+                  <span class="schedule-action">
+                    {i === 0 ? (
+                      <Button href="/join" variant="small">
+                        Join
+                      </Button>
+                    ) : (
+                      <Button
+                        href={calendarUrl(cleanup)}
+                        variant="small"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Add the ${cleanup.weekday} ${cleanup.monthDay} cleanup to your calendar`}
+                      >
+                        Add to calendar
+                      </Button>
+                    )}
+                  </span>
                 </div>
               </li>
             );
@@ -177,8 +180,8 @@ function calendarUrl(cleanup: Cleanup) {
     margin-bottom: 0.375rem;
   }
 
-  /* The dates: four columns — weekday, month and day, time, corner — collapsing
-     under 560px. The LIST owns the columns and the rows inherit them with
+  /* The dates: five columns — weekday, month and day, time, corner, button —
+     collapsing under 560px. The LIST owns the columns and the rows inherit them with
      `subgrid`, which is the whole point: a grid per row would size each row's
      columns to its own text, and "Saturday" and "Sunday" would start their
      months in different places. Where subgrid is missing, a row stacks its cells
@@ -190,8 +193,7 @@ function calendarUrl(cleanup: Cleanup) {
        shared by every row, and the start beside it is right-aligned. The gap is
        zero so a range reads tight; the space between the visible columns is one
        padding value on the cells that end them, so they sit the same distance
-       apart. The last track holds the buttons, which come out the same width as
-       each other because they share it. */
+       apart. The last track holds the buttons. */
     grid-template-columns: auto auto max-content max-content max-content 1fr auto;
     column-gap: 0;
     list-style: none;
@@ -248,9 +250,9 @@ function calendarUrl(cleanup: Cleanup) {
     .schedule-corner {
       padding-right: 0;
     }
-    /* On its own line under the row, at its own width rather than the phone's. */
-    .schedule-btn {
-      width: max-content;
+    /* On its own line under the row rather than off to one side. */
+    .schedule-action {
+      display: block;
       margin-top: 0.6rem;
     }
     /* No shared tracks left to line up against, so the time sizes its own. */
@@ -283,34 +285,14 @@ function calendarUrl(cleanup: Cleanup) {
     justify-self: end;
   }
 
-  /* The row's own button — the same one the nav and the home page use: the body
-     face, uppercase, square, light on dark, accent on hover. Scaled down to sit
-     inside a row rather than span a column. Stretched, not shrink-wrapped, so
-     every row's button is the width of the widest. */
-  .schedule-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-body);
-    font-size: var(--fs-base);
-    font-weight: 400;
-    line-height: 1;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    color: var(--bg);
-    background: var(--btn-light);
-    text-decoration: none;
-    padding: 0.55rem 0.9rem;
-    border-radius: var(--hover-radius);
-    transition:
-      background-color var(--dur-fast) var(--ease-out),
-      color var(--dur-fast) var(--ease-out);
-  }
-
-  .schedule-btn:hover,
-  .schedule-btn:focus-visible {
-    background: var(--accent);
-    outline: none;
+  /* The button itself is <Button variant="small"> — the header's Join button,
+     same size, same everything (.cta-small in base.css). This page only says
+     where it sits: hard right of the row, hugging its own text.
+     The cell exists because Astro's scoped styles don't cross into a component:
+     a class handed to <Button> would compile with this page's scope id and never
+     match the anchor the component renders. Position the wrapper instead. */
+  .schedule-action {
+    justify-self: end;
+    align-self: center;
   }
 </style>

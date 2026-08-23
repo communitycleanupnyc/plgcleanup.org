@@ -171,6 +171,32 @@ h1 {
   outline: none;
 }
 
+/* The small one, for a button that sits inside a line of text rather than
+   spanning a column. Same values as .nav-btn in chrome.css — that is the point:
+   the header's Join button and this are meant to be the same button at the same
+   size. Change one and change the other. */
+.cta-small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  font-weight: 350;
+  letter-spacing: 0rem;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--btn-light);
+  text-decoration: none;
+  padding: 0.413rem 0.963rem;
+  border-radius: var(--hover-radius);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.cta-small:hover,
+.cta-small:focus-visible {
+  background: var(--accent);
+  outline: none;
+}
 .cta-secondary {
   display: block;
   text-align: center;

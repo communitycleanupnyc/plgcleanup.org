@@ -724,6 +724,7 @@
   .nav-btn:focus,
   .cta-primary:focus,
   .cta-secondary:focus,
+  .cta-small:focus,
   .mobile-menu-link:focus {
     background-color: var(--accent);
     color: var(--bg);
