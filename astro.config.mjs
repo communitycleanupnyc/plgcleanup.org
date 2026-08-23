@@ -6,7 +6,7 @@ import deleteUnusedImages from "./src/integrations/delete-unused-images/index.js
 export default defineConfig({
   // Canonical production origin — used to build absolute URLs (e.g. the social
   // share image) at build time. No trailing slash (see below).
-  site: "https://plgcleanup.pages.dev",
+  site: "https://plgcleanup.org",
   output: "static",
   // Clean, trailing-slash-free URLs (/about, not /about/) — nicer to share.
   // `format: "file"` emits flat about.html instead of about/index.html, so

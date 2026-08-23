@@ -5,13 +5,13 @@
 # structural accessibility checks).
 # Runs only on push (not every commit), so the extra seconds are infrequent.
 # Bypass once with: git push --no-verify
-# SEO_SKIP_FRESH / SEO_SKIP_PLACEHOLDER mirror the workflow env (ci.yml): before
-# launch they downgrade the stale-Event check and the placeholder-copy check to
-# warnings, so a past event.json date or an unwritten pull quote can't block
-# pushes. Drop them here AND in ci.yml / site-checks.yml at launch to arm the
-# gate for real — see LAUNCH.md step A.4.
+# SEO_SKIP_PLACEHOLDER mirrors the workflow env (ci.yml): it downgrades the
+# placeholder-copy check to a warning, and exists now for exactly one file —
+# src/content/gallery/kevin.md, whose pull quote and body are still "...".
+# Write that quote or delete the file, then drop this variable here AND in
+# ci.yml / site-checks.yml to finish arming the gate (LAUNCH.md step A.4).
 npm run format:check &&
 	npm run check &&
 	npm run a11y &&
 	npm run build &&
-	SEO_SKIP_FRESH=1 SEO_SKIP_PLACEHOLDER=1 npm run audit
+	SEO_SKIP_PLACEHOLDER=1 npm run audit

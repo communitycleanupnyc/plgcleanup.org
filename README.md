@@ -2,7 +2,7 @@
 
 Community Cleanup PLG — a static [Astro](https://astro.build) site for a Brooklyn
 neighborhood cleanup group.
-Live: **https://plgcleanup.pages.dev/** (Cloudflare Pages, auto-deploys on push to `main`).
+Live: **https://plgcleanup.org/** (Cloudflare Pages, auto-deploys on push to `main`).
 
 The site is built to last with very little maintenance: a tiny dependency set, standard
 Astro conventions, all content in plain Markdown, and dependencies that update themselves
@@ -468,9 +468,9 @@ adding a build step and a silent design-range footgun. Not worth it; revisit onl
   external-link check** (lychee) catches rotted outbound links. A **daily
   redeploy** rebuilds the site so the baked-in copy ("Join us this Sunday", the
   countdown line, the Event schema) keeps up with the calendar — and so /join
-  moves on to the next cleanup in the schedule by itself. **These crons are commented out until launch** — see `LAUNCH.md`.
-- **Going live / moving to plgcleanup.org**: everything for that is sequenced in
-  **[LAUNCH.md](LAUNCH.md)**, including the pre-launch switches that are still off.
+  moves on to the next cleanup in the schedule by itself.
+- **How the site went live on plgcleanup.org** (2026-08-23) is recorded in
+  **[LAUNCH.md](LAUNCH.md)**, along with the few steps still owed to a human.
 - **Git hooks** (`.githooks/`, zero-dependency, activated by `npm install` via the `prepare`
   script): **pre-commit** auto-formats staged files with Prettier so commits are always clean;
   **pre-push** runs the full CI locally (format + types + build + the SEO audit) so `main`
@@ -677,24 +677,26 @@ above starts from nothing.
 The running list of things known to need a human. Keep it here rather than in
 scattered comments, and delete a line when it's done.
 
-**Before launch**
+**Left over from launch**
 
-- [ ] **Write real quotes for six gallery items.** `chelsie.md`, `delaney.md`,
-      `isaiah.md`, `spencer.md` are `title: "xyz"` with `"..."` everywhere;
-      `kevin.md` has a real title but `"..."` for both caption and body;
-      `abby.md` has a real caption but its body is one sentence repeated 20
-      times, and its title reads `"Abby …"`. All six are live on the carousel.
-      Either write them or delete the files (at least one gallery item must
-      remain) — then do the next item. (Molly's was filled in on 2026-08-04.)
-- [ ] **Arm the launch gate.** Remove `SEO_SKIP_PLACEHOLDER` and `SEO_SKIP_FRESH`
-      per `LAUNCH.md` step A.4. Until then the audit only warns about the above.
+- [ ] **Write a real quote for `kevin.md`.** It is the last gallery item still
+      holding placeholder copy: `"..."` for both the pull quote and the body, and
+      the seeded "Portrait of Kevin" for its alt text. It is live on the carousel.
+      Write it or delete the file (the photo is pruned with it, and at least one
+      gallery item must remain) — then do the next item. The other five were
+      filled in between 2026-08-04 and the launch.
+- [ ] **Finish arming the launch gate.** `SEO_SKIP_FRESH` is gone; remove
+      `SEO_SKIP_PLACEHOLDER` too, per `LAUNCH.md` step A.4, once Kevin's quote is
+      written. Until then the audit only warns about that one file.
 - [ ] **Review the Volunteering Terms.** `src/content/pages/terms.md` was drafted
       by the Claude agent, not by a lawyer — read it and make it say what you
       actually mean, especially the photo-consent and under-18 paragraphs.
-- [ ] **Keep the schedule fed.** `src/data/schedule.json` runs to `2026-10-04`.
+- [ ] **Keep the schedule fed.** `src/data/schedule.json` runs to `2026-11-02`.
       Add more in Pages CMS → **Schedule**; the audit warns whenever the last
       date is under three weeks away.
-- [ ] Everything in **[LAUNCH.md](LAUNCH.md)** sections A and B.
+- [ ] What is left in **[LAUNCH.md](LAUNCH.md)**: A.5 (issue watchers), and B.4
+      to B.6 (the pages.dev bulk redirect, HSTS, Search Console). The domain
+      cutover itself is done.
 
 - [ ] **Write real `alt` text for the gallery photos.** Every item now has a
       required `alt:` field, seeded as "Portrait of {name}" during the rename.

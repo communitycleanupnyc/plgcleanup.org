@@ -21,11 +21,12 @@ permissions:
   issues: write # for the failure notice below; nothing else writes
 
 env:
-  SITE: https://plgcleanup.pages.dev # ← flip to https://plgcleanup.org at cutover (LAUNCH.md B.3)
-  # Pre-launch escape hatches — both are deleted at launch (LAUNCH.md A.4).
-  # FRESH: lets a past date in schedule.json warn instead of failing every push.
-  # PLACEHOLDER: lets the not-yet-written gallery copy warn instead of failing.
-  SEO_SKIP_FRESH: "1"
+  SITE: https://plgcleanup.org
+  # The last pre-launch escape hatch: it lets the one gallery item still
+  # awaiting copy (kevin.md, quoted as "...") warn instead of failing every
+  # push. Write that quote or delete the file, then delete this line — the
+  # placeholder check is the half of the launch gate that is still asleep
+  # (LAUNCH.md A.4).
   SEO_SKIP_PLACEHOLDER: "1"
 
 jobs:

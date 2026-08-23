@@ -1,12 +1,13 @@
 # Launch runbook
 
-Everything that has to happen to take this site live on **plgcleanup.org**, in
-order. Until section A is done, several safety nets in this repo are deliberately
-switched off — they are inert scaffolding, not working protection.
+Everything that had to happen to take this site live on **plgcleanup.org**, in
+order. **The cutover happened on 2026-08-23** — the domain is attached, the repo
+points at it, and every check below is armed except the one noted in A.4. What
+is left is marked **[you]**, and this file is now mostly a record of how the
+site was set up.
 
 Steps marked **[you]** happen in a browser (Cloudflare, Google, GitHub settings);
-everything else is a file in this repo, named with its exact location. Do A and B
-in the same sitting: half a cutover is worse than neither half.
+everything else is a file in this repo, named with its exact location.
 
 Section C is reference only — how to rebuild the Cloudflare project if it is ever
 lost.
@@ -15,9 +16,9 @@ lost.
 
 ## A. Go-live — re-arm the safety nets
 
-The repo currently ships with its automated checks disabled so that a past event
-date and unfinished gallery copy can't fail every build during setup. This
-section turns them all back on. **Nothing here protects anything until it's done.**
+The repo used to ship with its automated checks disabled so that a past event
+date and unfinished gallery copy couldn't fail every build during setup. They
+are back on now, bar the one exception in step 4.
 
 1. ✅ **Done 2026-08-23.** **[you] Create the Cloudflare deploy hook.** Cloudflare dashboard → Workers &
    Pages → the `plgcleanup` project → **Settings → Builds → Deploy hooks** →
@@ -27,7 +28,7 @@ section turns them all back on. **Nothing here protects anything until it's done
 
    Without this, step 3's daily redeploy silently fails every day.
 
-2. **Set real cleanup dates.** `src/data/schedule.json`, in the `cleanups` list —
+2. ✅ **Done 2026-08-23.** **Set real cleanup dates.** `src/data/schedule.json`, in the `cleanups` list —
    one row per cleanup:
    date as `yyyy-mm-dd`, times like `10:00am`, and the street corner. List the
    next month or two; the site picks the next one by itself and lists the next
@@ -41,19 +42,22 @@ section turns them all back on. **Nothing here protects anything until it's done
    `github.event.schedule` against those exact expressions. A stray space and the
    job stops running, with no error anywhere.
 
-4. **Delete the pre-launch escape hatches.** Three files, same two variables:
-   - `.github/workflows/ci.yml` → remove `SEO_SKIP_FRESH` and
-     `SEO_SKIP_PLACEHOLDER` from the `env:` block.
-   - `.github/workflows/site-checks.yml` → same two, same place.
-   - `.githooks/pre-push` → remove both from the `npm run audit` line.
+4. ⚠ **Half done 2026-08-23. One variable to go.** `SEO_SKIP_FRESH` is gone from
+   all three files, so the build now refuses to ship a page containing "todo" or a
+   schedule with nothing upcoming in it.
 
-   Until this is done, the Monday tripwire in `site-checks.yml` cannot fail, which
-   means it is decorative. **This is the single most important step in this file.**
+   `SEO_SKIP_PLACEHOLDER` is still set, and it is holding open the placeholder
+   check for exactly one file: **`src/content/gallery/kevin.md`**, whose pull
+   quote and body are both `"..."` and whose alt text is still the seeded
+   "Portrait of Kevin". Write that quote, or delete the file — the photo is
+   pruned from the build with it. Then remove the variable from all three:
+   - `.github/workflows/ci.yml` → the `env:` block
+   - `.github/workflows/site-checks.yml` → same place
+   - `.githooks/pre-push` → the `npm run audit` line
 
-   The build will now refuse to ship a page containing "todo", a gallery item named
-   "xyz" or quoted as "...", or an event date in the past. If it fails here, that
-   is the gate doing its job — finish the content rather than putting the
-   variables back.
+   Until that last removal, the placeholder half of the Monday tripwire only
+   warns. The audit names the file on every run, so it can't be forgotten
+   quietly.
 
 5. **[you] Make sure failures reach a person.** Every organizer with repo access:
    GitHub → this repo → **Watch → Custom → ✓ Issues**. When a scheduled check or
@@ -71,7 +75,7 @@ section turns them all back on. **Nothing here protects anything until it's done
 
 ## B. Domain cutover — same deploy
 
-1. **[you] Attach both hostnames.** Cloudflare Pages project → **Custom domains**
+1. ✅ **Done 2026-08-23.** **[you] Attach both hostnames.** Cloudflare Pages project → **Custom domains**
    → add `plgcleanup.org` **and** `www.plgcleanup.org`. Then in the
    `plgcleanup.org` zone → **Rules → Redirect Rules**, add a 301 from `www.` to
    the apex preserving path and query.
@@ -79,11 +83,11 @@ section turns them all back on. **Nothing here protects anything until it's done
    Don't skip `www`. If it isn't attached, `www.plgcleanup.org` is NXDOMAIN — and
    that's the form people type off a flyer.
 
-2. **Point the site at the new origin.** In `astro.config.mjs`, set `site` to
+2. ✅ **Done 2026-08-23.** **Point the site at the new origin.** In `astro.config.mjs`, set `site` to
    `https://plgcleanup.org`. Canonical URLs, OG tags, the sitemap, and the
    audit's expected host all derive from this one line.
 
-3. **Update the four places that hardcode that hostname:**
+3. ✅ **Done 2026-08-23.** **Update the four places that hardcode that hostname:**
    - `.github/workflows/site-checks.yml` → `env.SITE`
    - `.github/workflows/ci.yml` → `env.SITE`
    - `public/robots.txt` → the `Sitemap:` line

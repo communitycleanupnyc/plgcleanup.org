@@ -17,15 +17,15 @@ change for "still works, untouched, in two years" over cleverness.
 Run all of this before claiming a change works:
 
 ```sh
-npm run check && npm run a11y && npm run build && SEO_SKIP_FRESH=1 SEO_SKIP_PLACEHOLDER=1 npm run audit
+npm run check && npm run a11y && npm run build && SEO_SKIP_PLACEHOLDER=1 npm run audit
 ```
 
 `scripts/seo-audit.mjs` is the test suite — there is no test framework, by
 decision. `scripts/contrast-check.mjs` (`npm run a11y`) is the second half of it:
 it recomputes the WCAG contrast ratio of every colour pairing the site renders,
-straight from `src/styles/tokens.css`. Drop both env vars once LAUNCH.md step
-A.4 is done (they exist only because a past event date and unwritten gallery
-copy would otherwise fail every build pre-launch).
+straight from `src/styles/tokens.css`. Drop the one env var once LAUNCH.md step
+A.4 is done — it exists only because `src/content/gallery/kevin.md` is still
+quoted as "..." and would otherwise fail every build.
 
 **Neither script runs a browser**, so nothing in the automated gate exercises
 client JavaScript, focus order, or keyboard behaviour. After changing the
@@ -212,8 +212,8 @@ in `npm run preview`, because nothing in CI exercises client JavaScript.
 
 ## Pointers
 
-- `LAUNCH.md` — the go-live and domain-cutover runbook, and the pre-launch
-  switches that are still off.
+- `LAUNCH.md` — how the site went live on plgcleanup.org (done 2026-08-23), and
+  the handful of steps still owed to a human.
 - `README.md` — editor-facing docs, the stack, dependency pins, the twice-a-year
   maintenance checklist, and the running TODO list.
 - `.github/workflows/site-checks.yml` — what the scheduled checks do and why.

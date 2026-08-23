@@ -53,13 +53,11 @@ permissions:
   issues: write # the audit job's failure notice; nothing else writes
 
 env:
-  SITE: https://plgcleanup.pages.dev # ← flip to https://plgcleanup.org at cutover (LAUNCH.md B.3)
-  # Pre-launch: downgrade the stale-Event check from error → warning so a past
-  # event date can't fail the run. Remove at launch to re-arm the tripwire
-  # (LAUNCH.md A.4) — without that removal the whole `audit` job is decorative.
-  SEO_SKIP_FRESH: "1"
-  # Pre-launch: several gallery items are still awaiting real copy. Remove at
-  # launch (LAUNCH.md A.4).
+  SITE: https://plgcleanup.org
+  # The last pre-launch escape hatch: one gallery item is still awaiting copy
+  # (kevin.md, quoted as "..."). Write it or delete the file, then delete this
+  # line — until then the placeholder half of the Monday tripwire only warns
+  # (LAUNCH.md A.4). The stale-schedule half is armed.
   SEO_SKIP_PLACEHOLDER: "1"
 
 jobs:
