@@ -1,10 +1,11 @@
 # Launch runbook
 
 Everything that had to happen to take this site live on **plgcleanup.org**, in
-order. **The cutover happened on 2026-08-23** — the domain is attached, the repo
-points at it, and every check below is armed except the one noted in A.4. What
-is left is marked **[you]**, and this file is now mostly a record of how the
-site was set up.
+order. **The cutover happened on 2026-08-23** — the apex serves the site, the
+repo points at it, and every check below is armed except the one noted in A.4.
+Two things still need a person: `www` answers 522 (B.1), and the old pages.dev
+host still serves a second copy of the site (B.4). The rest of this file is a
+record of how the site was set up.
 
 Steps marked **[you]** happen in a browser (Cloudflare, Google, GitHub settings);
 everything else is a file in this repo, named with its exact location.
@@ -75,13 +76,21 @@ are back on now, bar the one exception in step 4.
 
 ## B. Domain cutover — same deploy
 
-1. ✅ **Done 2026-08-23.** **[you] Attach both hostnames.** Cloudflare Pages project → **Custom domains**
-   → add `plgcleanup.org` **and** `www.plgcleanup.org`. Then in the
-   `plgcleanup.org` zone → **Rules → Redirect Rules**, add a 301 from `www.` to
-   the apex preserving path and query.
+1. ⚠ **Apex done 2026-08-23; `www` is still broken.** **[you] Attach both
+   hostnames.** Cloudflare Pages project → **Custom domains** → add
+   `plgcleanup.org` **and** `www.plgcleanup.org`. Then in the `plgcleanup.org`
+   zone → **Rules → Redirect Rules**, add a 301 from `www.` to the apex
+   preserving path and query.
 
-   Don't skip `www`. If it isn't attached, `www.plgcleanup.org` is NXDOMAIN — and
-   that's the form people type off a flyer.
+   `plgcleanup.org` serves the site. `www.plgcleanup.org` resolves to the
+   Cloudflare edge but answers **522** — the edge has no origin to send it to,
+   which means the hostname is proxied in DNS but is not attached to the Pages
+   project, and no redirect rule is catching it first. That is the form people
+   type off a flyer, so it is worth fixing today. Check with:
+
+   ```sh
+   curl -sI https://www.plgcleanup.org/about   # want: 301 → https://plgcleanup.org/about
+   ```
 
 2. ✅ **Done 2026-08-23.** **Point the site at the new origin.** In `astro.config.mjs`, set `site` to
    `https://plgcleanup.org`. Canonical URLs, OG tags, the sitemap, and the
