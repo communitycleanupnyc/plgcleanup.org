@@ -59,8 +59,8 @@ explicitly asks:
   the build is the gate. Do not add branch-protection review rules or CODEOWNERS.
 - **`overrides.esbuild` in package.json** is load-bearing — see "Dependency pins"
   in the README before touching it.
-- **The logic in `src/data/event.ts` below its header comment.** The DST handling
-  is subtle and correct.
+- **The logic in `src/data/schedule.ts` below its header comment.** The DST
+  handling is subtle and correct.
 
 ## Invariants
 
@@ -80,8 +80,16 @@ Things that will silently break if you don't know them:
   background by walking `document.body.children`. Wrapping either one in a
   container silently breaks the scroll behaviour and the focus containment.
 - **Filenames are URLs.** Every `src/content/pages/*.md` auto-routes via
-  `src/pages/[slug].astro` (`faq.md` → `/faq`). `index`, `join`, and `404` are
-  reserved — `[slug].astro` throws a friendly error if a content file claims one.
+  `src/pages/[slug].astro` (`faq.md` → `/faq`). `index`, `join`, `schedule`, and
+  `404` are reserved — those pages render data, so they have their own files, and
+  `[slug].astro` throws a friendly error if a content file claims one.
+- **The site picks the next cleanup; a human only ever adds dates.**
+  `src/data/schedule.json` is a list of cleanups, and `src/data/schedule.ts`
+  exports the first one that hasn't finished (`NEXT_CLEANUP`) plus the rest
+  (`UPCOMING_CLEANUPS`). The home CTA, `/join`, and the countdown read the first;
+  `/schedule` lists the next four. The daily redeploy cron is what advances it, so
+  nothing needs editing after a cleanup happens. Don't reintroduce a
+  "current event" field that someone has to move.
 - **Gallery `alt` text is authored per photo and required** by the schema in
   `src/content.config.ts`. It used to be derived from the name; it isn't any
   more, because alt describes the _picture_, which a title can't stand in for.
@@ -158,8 +166,11 @@ Two things to know when writing a component here:
   (`rotateGallery`, which drives the carousel order, the lead photo, and the
   social share image together). Flip it, confirm the build is green, then delete
   the feature's code and data if it's never coming back.
-- **Change the event:** `src/data/event.json` — `date` as `yyyy-mm-dd`, times like
-  `10:00am` or `2pm`. Bad values fail the build with a message naming the field.
+- **Change the schedule:** `src/data/schedule.json` — one row per cleanup
+  (`date` as `yyyy-mm-dd`, times like `10:00am` or `2pm`, `corner`). Rows sort
+  themselves by date and past ones are ignored, so adding next month's dates is
+  the whole job. Bad values fail the build with a message naming the row. The
+  Pages CMS form for it is the `schedule` entry in `.pages.yml`.
 - **Update stats:** `src/data/stats.json` — plain numbers, no commas.
 - **Change colors/spacing/type:** `src/styles/tokens.css`, then `npm run a11y`.
   `--surface` is for backgrounds, `--text-muted` for dim text and icons; don't

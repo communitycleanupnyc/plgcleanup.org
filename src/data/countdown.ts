@@ -2,8 +2,8 @@
 // /join. Pure and self-contained (no imports) so the SAME code runs at build time
 // in .astro frontmatter AND in the browser via src/lib/countdown.client.ts, which
 // recomputes it on load so the wording never goes stale between deploys. Keeping
-// this file dependency-free is deliberate: it must not pull event.ts/zod into the
-// client bundle.
+// this file dependency-free is deliberate: it must not pull schedule.ts or zod
+// into the client bundle.
 
 const NUMBER_WORDS = [
   "zero",

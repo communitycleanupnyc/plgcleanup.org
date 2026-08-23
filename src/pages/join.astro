@@ -2,51 +2,37 @@
 import Base from "../layouts/Base.astro";
 import { Image } from "astro:assets";
 import cart from "../assets/cart.webp";
-import {
-  CLEANUP_ISO,
-  CLEANUP_END_ISO,
-  CLEANUP_ISO_LOCAL,
-  CLEANUP_END_ISO_LOCAL,
-  CLEANUP_TIME,
-  CLEANUP_CORNER,
-  CLEANUP_MAPS_URL,
-  CLEANUP_MAPS_EMBED_URL,
-} from "../data/event";
+import { NEXT_CLEANUP } from "../data/schedule";
 import { computeCountdown, renderJoinCountdown } from "../data/countdown";
 import { SITE } from "../site.config";
 
-const cleanupDate = new Date(CLEANUP_ISO);
+// The next cleanup still to come — src/data/schedule.ts picks it out of the
+// schedule, so this page never names a date of its own.
+const next = NEXT_CLEANUP;
+
 // Rendered at build time and recomputed on load by ../lib/countdown.client.ts.
-const state = computeCountdown(new Date(), CLEANUP_ISO, CLEANUP_END_ISO);
+const state = computeCountdown(new Date(), next.iso, next.endIso);
 const countdownLine = renderJoinCountdown(state);
 
-const joinDisplayDate = new Intl.DateTimeFormat("en-US", {
-  timeZone: "America/New_York",
-  weekday: "long",
-  month: "long",
-  day: "numeric",
-  year: "numeric",
-}).format(cleanupDate);
-
 // Event structured data — the one schema type with a visible SERP surface
-// (Google event listings). Built from the same event.ts values shown on the page.
+// (Google event listings). Built from the same schedule.ts values shown on the page.
 //
-// Dropped entirely once the cleanup is over: there is no "next" event to flip to
-// (event.json holds exactly one), and an EventScheduled node for a date that has
-// already passed is worse in search results than no node at all. The daily
-// rebuild in .github/workflows/site-checks.yml is what makes this take effect
-// without anyone pushing a commit.
+// Dropped once the cleanup is over, because an EventScheduled node for a date
+// that has already passed is worse in search results than no node at all. That
+// only happens when the schedule has run out of future dates — otherwise the
+// daily rebuild in .github/workflows/site-checks.yml moves this page on to the
+// next cleanup without anyone pushing a commit.
 const isPastEvent = state.tag === "past";
 const eventUrl = new URL("/join", Astro.site).href;
 const eventSchema = {
   "@context": "https://schema.org",
   "@type": "Event",
-  name: `${SITE.name} — ${CLEANUP_CORNER}`,
+  name: `${SITE.name} — ${next.corner}`,
   description:
     "A one-hour volunteer street cleanup in Prospect Lefferts Gardens, Brooklyn. No registration; all supplies provided. Just show up.",
   // Local time + offset, not UTC — the form Google's Event docs ask for.
-  startDate: CLEANUP_ISO_LOCAL,
-  endDate: CLEANUP_END_ISO_LOCAL,
+  startDate: next.isoLocal,
+  endDate: next.endIsoLocal,
   eventStatus: "https://schema.org/EventScheduled",
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
   isAccessibleForFree: true,
@@ -54,10 +40,10 @@ const eventSchema = {
   image: new URL(SITE.schema.logo, Astro.site).href,
   location: {
     "@type": "Place",
-    name: CLEANUP_CORNER,
+    name: next.corner,
     address: {
       "@type": "PostalAddress",
-      streetAddress: CLEANUP_CORNER,
+      streetAddress: next.corner,
       addressLocality: "Brooklyn",
       addressRegion: "NY",
       addressCountry: "US",
@@ -84,8 +70,8 @@ const eventSchema = {
           class="join-countdown"
           data-countdown
           data-variant="join"
-          data-start={CLEANUP_ISO}
-          data-end={CLEANUP_END_ISO}
+          data-start={next.iso}
+          data-end={next.endIso}
         >
           {countdownLine}
         </p>
@@ -100,7 +86,7 @@ const eventSchema = {
       <div class="join-detail">
         <p class="join-detail-label">When</p>
         <p class="join-detail-value">
-          {joinDisplayDate}<br />{CLEANUP_TIME}
+          {next.longDate}<br />{next.time}
         </p>
       </div>
       <div class="join-cart-cell">
@@ -120,16 +106,15 @@ const eventSchema = {
       <div class="join-detail join-where">
         <p class="join-detail-label">Where</p>
         <p class="join-detail-value">
-          <a href={CLEANUP_MAPS_URL} target="_blank" rel="noopener noreferrer">{CLEANUP_CORNER}</a
-          ><br />
+          <a href={next.mapsUrl} target="_blank" rel="noopener noreferrer">{next.corner}</a><br />
           Prospect Lefferts Gardens<br />Brooklyn, New York
         </p>
       </div>
       <div class="join-map-cell">
         <iframe
-          src={CLEANUP_MAPS_EMBED_URL}
+          src={next.mapsEmbedUrl}
           class="join-map"
-          title={`Map: ${CLEANUP_CORNER}, Brooklyn, NY`}
+          title={`Map: ${next.corner}, Brooklyn, NY`}
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
           allowfullscreen></iframe>

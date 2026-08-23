@@ -11,7 +11,8 @@
  *
  * Exit codes: 0 = clean or warnings only, 1 = errors.
  * Env:
- *   SEO_SKIP_FRESH=1       downgrades stale-Event-schema errors to warnings.
+ *   SEO_SKIP_FRESH=1       downgrades stale-Event-schema and empty-schedule
+ *                          errors to warnings.
  *   SEO_SKIP_PLACEHOLDER=1 downgrades the placeholder-content errors ("xyz"
  *                          names, "…"-only pull quotes) to warnings. Set
  *                          pre-launch only, while real gallery copy is
@@ -466,8 +467,8 @@ for (const page of htmlFiles) {
 // the node whenever dist itself still describes an upcoming event.
 //
 // The event's end timestamp is read back out of dist, not src: every
-// [data-countdown] element carries data-end, baked from src/data/event.ts. That
-// keeps this check honest about what actually shipped.
+// [data-countdown] element carries data-end, baked from src/data/schedule.ts.
+// That keeps this check honest about what actually shipped.
 if (fileSet.has("join.html")) {
   let latestEnd = null;
   for (const page of htmlFiles)
@@ -480,6 +481,47 @@ if (fileSet.has("join.html")) {
       "join.html",
       `No Event JSON-LD, but the build describes an upcoming cleanup ending ${latestEnd.toISOString()}. Google event listings need the schema — check the eventSchema block in src/pages/join.astro.`,
     );
+}
+
+// --------------------------------------------------------- schedule runway ---
+// The one check that reads src/ instead of dist/, deliberately. Everything above
+// asks "is what shipped correct?"; this asks "is anyone still feeding it?" —
+// which is the failure mode of a volunteer site. src/data/schedule.json holds
+// every cleanup anyone has scheduled, and the site walks it forward on its own,
+// so the site only goes stale when that list runs dry. Warn while there is still
+// time to act; error once it has.
+const SCHEDULE_FILE = "src/data/schedule.json";
+const LOW_WATER_DAYS = 21; // one monthly edit's worth of notice
+if (existsSync(SCHEDULE_FILE)) {
+  let rows = null;
+  try {
+    rows = JSON.parse(readFileSync(SCHEDULE_FILE, "utf8"));
+  } catch (e) {
+    err(SCHEDULE_FILE, `Not valid JSON: ${e.message}`);
+  }
+  if (Array.isArray(rows)) {
+    // Date-only comparison in New York, where the cleanups are: "YYYY-MM-DD"
+    // strings sort correctly as text, so today's date is the whole comparison.
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(
+      new Date(),
+    );
+    const upcoming = rows
+      .map((r) => String(r?.date ?? ""))
+      .filter((d) => d >= today)
+      .sort();
+    const last = upcoming.at(-1);
+    if (!last) {
+      const msg = `No upcoming cleanups: every date in ${SCHEDULE_FILE} has passed, so the site is advertising an event that already happened. Add the next dates in Pages CMS → "Schedule".`;
+      process.env.SEO_SKIP_FRESH ? warn(SCHEDULE_FILE, msg) : err(SCHEDULE_FILE, msg);
+    } else {
+      const daysLeft = Math.round((Date.parse(last) - Date.parse(today)) / 86_400_000);
+      if (daysLeft < LOW_WATER_DAYS)
+        warn(
+          SCHEDULE_FILE,
+          `The schedule runs out on ${last} — ${daysLeft === 0 ? "that is today" : `${daysLeft} day${daysLeft === 1 ? "" : "s"} from now`}. Add next month's cleanups in Pages CMS → "Schedule".`,
+        );
+    }
+  }
 }
 
 // ---------------------------------------------------------------- report ---

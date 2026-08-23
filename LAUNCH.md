@@ -27,9 +27,10 @@ section turns them all back on. **Nothing here protects anything until it's done
 
    Without this, step 3's daily redeploy silently fails every day.
 
-2. **Set a real cleanup date.** `src/data/event.json` — the date, times, and
-   street corner of the next actual cleanup. Date as `yyyy-mm-dd`, times like
-   `10:00am`. (Or use Pages CMS → **Event details**.)
+2. **Set real cleanup dates.** `src/data/schedule.json` — one row per cleanup:
+   date as `yyyy-mm-dd`, times like `10:00am`, and the street corner. List the
+   next month or two; the site picks the next one by itself and lists the next
+   four on /schedule. (Or use Pages CMS → **Schedule**.)
 
 3. **Turn the crons back on.** `.github/workflows/site-checks.yml` — uncomment
    the two `- cron:` lines in the `on:` block.

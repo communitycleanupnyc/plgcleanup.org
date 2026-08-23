@@ -11,7 +11,7 @@ import Button from "../components/Button.astro";
 import type { CarouselItem } from "../components/carousel.types";
 import { render } from "astro:content";
 import { VOLUNTEER_COUNT } from "../data/stats";
-import { CLEANUP_ISO, CLEANUP_END_ISO } from "../data/event";
+import { NEXT_CLEANUP } from "../data/schedule";
 import { computeCountdown, renderCtaLabel } from "../data/countdown";
 import { galleryOrder } from "../lib/gallery";
 
@@ -47,7 +47,7 @@ const items: CarouselItem[] = await Promise.all(
 // The CTA label carries the countdown ("Join us this Saturday"): it's baked in
 // at build time here and recomputed on load by ../lib/countdown.client.ts
 // (imported below) so it never goes stale between deploys.
-const state = computeCountdown(new Date(), CLEANUP_ISO, CLEANUP_END_ISO);
+const state = computeCountdown(new Date(), NEXT_CLEANUP.iso, NEXT_CLEANUP.endIso);
 const ctaLabel = renderCtaLabel(state);
 ---
 
@@ -82,8 +82,8 @@ const ctaLabel = renderCtaLabel(state);
       href="/join"
       data-countdown
       data-variant="cta"
-      data-start={CLEANUP_ISO}
-      data-end={CLEANUP_END_ISO}>{ctaLabel}</Button
+      data-start={NEXT_CLEANUP.iso}
+      data-end={NEXT_CLEANUP.endIso}>{ctaLabel}</Button
     >
     <Button href="/schedule" variant="secondary">View schedule</Button>
   </div>

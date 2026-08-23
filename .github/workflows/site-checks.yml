@@ -4,21 +4,23 @@
 # owns push/PR (build + SEO gate). These three jobs run on a clock instead:
 #
 #  1) audit — Monday cron + on-demand. Rebuilds and runs the SEO/launch gate with
-#     the freshness check ARMED, so if nobody rolled event.json forward, this
-#     fails. That is the whole point of the job: it is the tripwire for the site
-#     being quietly abandoned.
+#     the freshness check ARMED, so if nobody has added the next cleanups to
+#     schedule.json, this fails. That is the whole point of the job: it is the
+#     tripwire for the site being quietly abandoned. It warns three weeks before
+#     the schedule runs dry and errors once it has.
 #  2) links — external-link check (lychee). External links rot on time, not on
 #     your commits, and the check is flaky (rate limits, bot walls), so it runs
 #     weekly and on-demand only — never gating a normal push/PR.
 #  3) redeploy — daily, ~30 min after any afternoon cleanup could end. Triggers a
 #     fresh Cloudflare Pages build so the baked-in HTML catches up with the
 #     calendar: the CTA label ("Join us this Sunday"), the /join countdown line,
-#     and the removal of the Event JSON-LD once the cleanup is past. It does NOT
-#     advance to "the next cleanup" — event.json holds exactly one date and only a
-#     human changes it. Daily (not weekly) caps that staleness at 24h no matter
-#     which day the cleanup lands on; ~365 builds/yr against Pages' 500/month
-#     limit costs nothing. JS visitors get all of this live from
-#     countdown.client.ts regardless — this is for crawlers and no-JS visitors.
+#     and — once a cleanup is past — the move to the next date in
+#     src/data/schedule.json. That advance is automatic: the build picks the first
+#     cleanup that hasn't finished, so a human only ever adds dates, never moves
+#     them. Daily (not weekly) caps that staleness at 24h no matter which day the
+#     cleanup lands on; ~365 builds/yr against Pages' 500/month limit costs
+#     nothing. JS visitors get all of this live from countdown.client.ts
+#     regardless — this is for crawlers and no-JS visitors.
 #
 # WHEN SOMETHING BREAKS: the `audit` job opens a GitHub issue on failure. Email
 # from a failed scheduled run goes ONLY to whoever last committed to this file,
@@ -38,7 +40,7 @@ name: site checks
 
 on:
   # Crons paused pre-launch (2026-07-25): the redeploy needs the
-  # CF_PAGES_DEPLOY_HOOK secret (not yet set) and there is no future event to
+  # CF_PAGES_DEPLOY_HOOK secret (not yet set) and there is no future cleanup to
   # flip past; the Monday tripwire is redundant while SEO_SKIP_FRESH relaxes the
   # freshness gate. Restore both at launch — uncomment BYTE-IDENTICALLY, since
   # the job guards below string-match these lines (LAUNCH.md A.3):
@@ -89,12 +91,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          title="Site check failed — is the next cleanup date set?"
+          title="Site check failed — are the next cleanup dates set?"
           body="The weekly automatic check of the site failed.
 
-          The most likely cause by far: **the cleanup date in \`src/data/event.json\`
-          is in the past**, so the site is advertising an event that already
-          happened. Edit it in Pages CMS (\"Event details\") or directly on GitHub.
+          The most likely cause by far: **the schedule has run out**. Every date in
+          \`src/data/schedule.json\` is in the past, so the site is advertising a
+          cleanup that already happened. Add the next ones in Pages CMS
+          (\"Schedule\") or directly on GitHub.
 
           Full details: $RUN_URL"
           existing=$(gh issue list --state open --search "in:title $title" --json number --jq '.[0].number')

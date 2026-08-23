@@ -23,7 +23,7 @@ permissions:
 env:
   SITE: https://plgcleanup.pages.dev # ← flip to https://plgcleanup.org at cutover (LAUNCH.md B.3)
   # Pre-launch escape hatches — both are deleted at launch (LAUNCH.md A.4).
-  # FRESH: lets a past event.json date warn instead of failing every push.
+  # FRESH: lets a past date in schedule.json warn instead of failing every push.
   # PLACEHOLDER: lets the not-yet-written gallery copy warn instead of failing.
   SEO_SKIP_FRESH: "1"
   SEO_SKIP_PLACEHOLDER: "1"

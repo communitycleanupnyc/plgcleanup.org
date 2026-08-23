@@ -2,7 +2,7 @@
 // value that reflects the deploy date; on load (and periodically) we recompute it
 // from the event's start/end timestamps so it's always right for the visitor's
 // clock — no scheduled rebuilds. Imports only the pure logic in ../data/countdown,
-// so zod/event.ts never reach the client bundle.
+// so zod/schedule.ts never reach the client bundle.
 import { computeCountdown, renderJoinCountdown, renderCtaLabel } from "../data/countdown";
 
 // Each countdown element carries data-start / data-end (event ISO timestamps) and

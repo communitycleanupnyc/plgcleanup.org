@@ -1,0 +1,44 @@
+[
+  {
+    "date": "2026-08-15",
+    "startTime": "10:00am",
+    "endTime": "11:00am",
+    "corner": "Bedford Ave & Empire Blvd"
+  },
+  {
+    "date": "2026-08-23",
+    "startTime": "2pm",
+    "endTime": "3pm",
+    "corner": "Flatbush Ave & Fenimore St"
+  },
+  {
+    "date": "2026-08-29",
+    "startTime": "10:00am",
+    "endTime": "11:00am",
+    "corner": "Nostrand Ave & Empire Blvd"
+  },
+  {
+    "date": "2026-09-12",
+    "startTime": "10:00am",
+    "endTime": "11:00am",
+    "corner": "Bedford Ave & Midwood St"
+  },
+  {
+    "date": "2026-09-20",
+    "startTime": "2pm",
+    "endTime": "3pm",
+    "corner": "Nostrand Ave & Clarkson Ave"
+  },
+  {
+    "date": "2026-09-26",
+    "startTime": "10:00am",
+    "endTime": "11:00am",
+    "corner": "New York Ave & Maple St"
+  },
+  {
+    "date": "2026-10-04",
+    "startTime": "2pm",
+    "endTime": "3pm",
+    "corner": "Nostrand Ave & Fenimore St"
+  }
+]

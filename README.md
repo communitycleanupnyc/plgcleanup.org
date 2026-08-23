@@ -52,15 +52,15 @@ Everything an organizer normally changes is plain text you can edit on GitHub (c
 click the ✏️ pencil, change the words, **Commit changes** — the site rebuilds itself). If an
 edit has a mistake, the build fails and nothing broken goes live.
 
-| To change…                                                                                               | Edit this                                                                                                                                                                                                   |
-| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The next cleanup's **date, time, place**                                                                 | In [Pages CMS](#pages-cms-form-based-editing), open **Event details** — or edit `src/data/event.json` directly. Bad dates/times fail the build with a message naming the field.                             |
-| **Statistics** (pounds collected, volunteer count)                                                       | In [Pages CMS](#pages-cms-form-based-editing), open **Statistics** — or edit `src/data/stats.json` directly. Plain numbers, no commas.                                                                      |
-| Any **prose page** — About, FAQ, Schedule, Terms, Partners, Service hours, Lost & found, NYC trash clubs | The matching file in `src/content/pages/` (e.g. `faq.md`). Write normal Markdown. **The filename is the web address** — `faq.md` is at `/faq` — so renaming a file moves the page.                          |
-| **Gallery items** in the home-page carousel                                                              | One file per item in `src/content/gallery/` (e.g. `jaan.md`): the top block holds the title, pull quote, photo, and the photo's description; the text below is the full text shown when the card is opened. |
-| A gallery **photo**                                                                                      | Add the image to `src/assets/gallery/` and point that item's `image:` at it. Write the `alt:` line too — it describes the picture for people who can't see it.                                              |
-| The site **name, navigation, or social links**                                                           | `src/site.config.ts` — one file holding everything that makes this site _this_ site. Every menu and the footer read from it.                                                                                |
-| **Site settings** (e.g. rotating the carousel and the link-preview photo)                                | `SITE.features` in `src/site.config.ts` — flip a `true`/`false` toggle; each is documented in the file.                                                                                                     |
+| To change…                                                                                     | Edit this                                                                                                                                                                                                                                                        |
+| ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The **cleanup schedule** (dates, times, corners)                                               | In [Pages CMS](#pages-cms-form-based-editing), open **Schedule** — or edit `src/data/schedule.json` directly. One row per cleanup; the site shows the next four and picks the first one for /join. Bad dates/times fail the build with a message naming the row. |
+| **Statistics** (pounds collected, volunteer count)                                             | In [Pages CMS](#pages-cms-form-based-editing), open **Statistics** — or edit `src/data/stats.json` directly. Plain numbers, no commas.                                                                                                                           |
+| Any **prose page** — About, FAQ, Terms, Partners, Service hours, Lost & found, NYC trash clubs | The matching file in `src/content/pages/` (e.g. `faq.md`). Write normal Markdown. **The filename is the web address** — `faq.md` is at `/faq` — so renaming a file moves the page.                                                                               |
+| **Gallery items** in the home-page carousel                                                    | One file per item in `src/content/gallery/` (e.g. `jaan.md`): the top block holds the title, pull quote, photo, and the photo's description; the text below is the full text shown when the card is opened.                                                      |
+| A gallery **photo**                                                                            | Add the image to `src/assets/gallery/` and point that item's `image:` at it. Write the `alt:` line too — it describes the picture for people who can't see it.                                                                                                   |
+| The site **name, navigation, or social links**                                                 | `src/site.config.ts` — one file holding everything that makes this site _this_ site. Every menu and the footer read from it.                                                                                                                                     |
+| **Site settings** (e.g. rotating the carousel and the link-preview photo)                      | `SITE.features` in `src/site.config.ts` — flip a `true`/`false` toggle; each is documented in the file.                                                                                                                                                          |
 
 Prefer a form-based editor? See Pages CMS below — it edits these same files behind a friendly UI.
 
@@ -106,9 +106,16 @@ your **full name** and the **reason** you need it.
 ## Pages CMS (form-based editing)
 
 [Pages CMS](https://pagescms.org) gives non-technical editors a form UI for the **gallery**,
-the **prose pages**, the **event details**, and the **statistics** — all backed by the same plain
-files git already tracks (`src/content/**`, `src/data/event.json`, `src/data/stats.json`). It's
+the **prose pages**, the **schedule**, and the **statistics** — all backed by the same plain
+files git already tracks (`src/content/**`, `src/data/schedule.json`, `src/data/stats.json`). It's
 configured in `.pages.yml`.
+
+**The monthly job** is **Schedule**: add a row per cleanup — date, start time, end time, street
+corner — for the month ahead. The times default to the usual hour, so most rows need a date and a
+corner. Rows can go in in any order; the site sorts them by date, points /join and the countdown at
+the first one still to come, lists the next four on /schedule, and ignores dates that have passed.
+Nothing needs moving after a cleanup happens, and old rows can be deleted whenever. The audit warns
+three weeks before the last date, so the reminder arrives before the site goes stale.
 
 **Activate it (one-time):**
 
@@ -134,7 +141,7 @@ writing that CMS's config against the same files; no content migration.
 | --------- | -------------------------------------------------------------------------------------------- |
 | Framework | Astro 6, `output: "static"`                                                                  |
 | Runtime   | Node 24 LTS (`.nvmrc`)                                                                       |
-| Content   | Astro Content Collections (Markdown) + `src/data/event.ts` for event logic                   |
+| Content   | Astro Content Collections (Markdown) + `src/data/schedule.ts` for the cleanup dates          |
 | Carousel  | [Embla](https://www.embla-carousel.com/) (`embla-carousel`)                                  |
 | Images    | Astro `<Image>` → Sharp (build-time WebP) + a custom blur-up placeholder (`src/lib/lqip.ts`) |
 | Fonts     | Fraunces (display) + Inter (body) — self-hosted variable woff2 in `public/fonts/`            |
@@ -210,13 +217,13 @@ src/
                              links, structured data, feature switches. Start here.
   content.config.ts        ← schemas for the Markdown collections below
   content/
-    pages/*.md             ← every prose page (About, FAQ, Schedule, Terms,
-                             Partners, Service hours, Lost & found, NYC trash
-                             clubs) — the filename is the URL
+    pages/*.md             ← every prose page (About, FAQ, Terms, Partners,
+                             Service hours, Lost & found, NYC trash clubs)
+                             — the filename is the URL
     gallery/*.md           ← one per item, shown in the home carousel
   data/
-    event.json             ← the editable event facts (date/time/place) — Pages CMS writes this
-    event.ts               ← reads event.json; derives the map link, times, ISO stamps
+    schedule.json          ← every cleanup, one row each (date/times/corner) — Pages CMS writes this
+    schedule.ts            ← reads schedule.json; picks the next cleanup, derives map links + times
     stats.json             ← editable running totals (pounds collected, volunteers) — Pages CMS writes this
     stats.ts               ← reads stats.json; validates + formats the numbers for display
     countdown.ts           ← pure "in 3 days / tomorrow / right now" logic + copy (build + browser)
@@ -252,7 +259,8 @@ src/
     carousel.client.ts     ← the carousel's client behavior
   pages/
     index.astro            ← home (hero, why-volunteer, carousel)
-    join.astro             ← /join (when/where + map)
+    join.astro             ← /join (the next cleanup: when/where + map)
+    schedule.astro         ← /schedule (the next four cleanups)
     [slug].astro           ← renders each Markdown file in content/pages/
 
 public/
@@ -277,9 +285,12 @@ or component; only genuinely shared styles are global (`src/styles/`).
 
 - **Content Collections** (`src/content.config.ts`) validate every page and gallery item at
   build time — a missing photo or malformed field fails the build instead of shipping broken.
-- **`event.ts`** is the single source of truth for the event. The editable facts live in
-  `event.json` (edited via Pages CMS); `event.ts` validates them, parses the friendly date/time,
-  handles New York daylight saving, and builds the "Get directions" map link. Running totals
+- **`schedule.ts`** is the single source of truth for the cleanups. The editable rows live in
+  `schedule.json` (edited via Pages CMS); `schedule.ts` validates them, parses the friendly
+  date/time, handles New York daylight saving, and builds each "Get directions" map link. It sorts
+  the rows and exports the first one that hasn't finished as `NEXT_CLEANUP` — so the home CTA,
+  /join, and the countdown follow the calendar without anyone moving a date; the daily redeploy
+  (see [Deployment & CI](#deployment--ci)) is what walks them forward. Running totals
   (pounds, volunteers) live in `stats.ts` / `stats.json`.
 - **Live countdown** — `countdown.ts` turns the event time into the "in N days / tomorrow / this
   Saturday" copy (home hero, its CTA button, and `/join`). It's pure and dependency-free, so the
@@ -451,12 +462,13 @@ adding a build step and a silent design-range footgun. Not worth it; revisit onl
   above).
 - **Scheduled site checks** (`.github/workflows/site-checks.yml`): three jobs that
   run on a clock, not on your commits. A **Monday audit** re-runs the launch gate
-  with the event-freshness check armed — if nobody has rolled the cleanup date
-  forward, it fails and files an issue, which is the tripwire against the site
-  quietly going stale. A **weekly external-link check** (lychee) catches rotted
-  outbound links. A **daily redeploy** rebuilds the site so the baked-in copy
-  ("Join us this Sunday", the countdown line, the Event schema) keeps up with the
-  calendar. **These crons are commented out until launch** — see `LAUNCH.md`.
+  with the freshness check armed — it warns while the schedule has under three
+  weeks of cleanups left, and once every date has passed it fails and files an
+  issue, which is the tripwire against the site quietly going stale. A **weekly
+  external-link check** (lychee) catches rotted outbound links. A **daily
+  redeploy** rebuilds the site so the baked-in copy ("Join us this Sunday", the
+  countdown line, the Event schema) keeps up with the calendar — and so /join
+  moves on to the next cleanup in the schedule by itself. **These crons are commented out until launch** — see `LAUNCH.md`.
 - **Going live / moving to plgcleanup.org**: everything for that is sequenced in
   **[LAUNCH.md](LAUNCH.md)**, including the pre-launch switches that are still off.
 - **Git hooks** (`.githooks/`, zero-dependency, activated by `npm install` via the `prepare`
@@ -679,8 +691,9 @@ scattered comments, and delete a line when it's done.
 - [ ] **Review the Volunteering Terms.** `src/content/pages/terms.md` was drafted
       by the Claude agent, not by a lawyer — read it and make it say what you
       actually mean, especially the photo-consent and under-18 paragraphs.
-- [ ] **Confirm the cleanup date.** `src/data/event.json` is set to `2026-08-09`,
-      a Sunday. The countdown now handles both weekend days correctly either way.
+- [ ] **Fill in the schedule.** `src/data/schedule.json` holds one cleanup
+      (`2026-08-23`). Add the next month or two in Pages CMS → **Schedule**; the
+      audit warns whenever the last date is under three weeks away.
 - [ ] Everything in **[LAUNCH.md](LAUNCH.md)** sections A and B.
 
 - [ ] **Write real `alt` text for the gallery photos.** Every item now has a
