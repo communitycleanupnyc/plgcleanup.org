@@ -84,7 +84,7 @@ Things that will silently break if you don't know them:
   `404` are reserved — those pages render data, so they have their own files, and
   `[slug].astro` throws a friendly error if a content file claims one.
 - **The site picks the next cleanup; a human only ever adds dates.**
-  `src/data/schedule.json` is a list of cleanups, and `src/data/schedule.ts`
+  `src/data/schedule.json` holds a `cleanups` list, and `src/data/schedule.ts`
   exports the first one that hasn't finished (`NEXT_CLEANUP`) plus the rest
   (`UPCOMING_CLEANUPS`). The home CTA, `/join`, and the countdown read the first;
   `/schedule` lists the next four. The daily redeploy cron is what advances it, so
@@ -166,8 +166,11 @@ Two things to know when writing a component here:
   (`rotateGallery`, which drives the carousel order, the lead photo, and the
   social share image together). Flip it, confirm the build is green, then delete
   the feature's code and data if it's never coming back.
-- **Change the schedule:** `src/data/schedule.json` — one row per cleanup
-  (`date` as `yyyy-mm-dd`, times like `10:00am` or `2pm`, `corner`). Rows sort
+- **Change the schedule:** `src/data/schedule.json` — one row per cleanup in the
+  `cleanups` list (`date` as `yyyy-mm-dd`, times like `10:00am` or `2pm`,
+  `corner`). The rows sit under a key rather than at the top level of the file
+  because Pages CMS only gives a list `min` and a collapsed per-row summary when
+  the list is a field; see the comment on the `schedule` entry in `.pages.yml`. Rows sort
   themselves by date and past ones are ignored, so adding next month's dates is
   the whole job. Bad values fail the build with a message naming the row. The
   Pages CMS form for it is the `schedule` entry in `.pages.yml`.

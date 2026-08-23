@@ -495,7 +495,7 @@ const LOW_WATER_DAYS = 21; // one monthly edit's worth of notice
 if (existsSync(SCHEDULE_FILE)) {
   let rows = null;
   try {
-    rows = JSON.parse(readFileSync(SCHEDULE_FILE, "utf8"));
+    rows = JSON.parse(readFileSync(SCHEDULE_FILE, "utf8"))?.cleanups;
   } catch (e) {
     err(SCHEDULE_FILE, `Not valid JSON: ${e.message}`);
   }

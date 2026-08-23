@@ -129,70 +129,80 @@ content:
           message: Leave it blank, or write two percentages separated by a space, like 50% 30% (across, then down).
       - { name: body, label: Full text (reveal panel), type: rich-text, required: true }
 
-  # The monthly job. One row per cleanup, in a top-level JSON array — Pages CMS
-  # renders that as an add/remove/reorder list, and src/data/schedule.ts picks
-  # the next cleanup out of it on every build. Nothing here says which one is
-  # "next": the date does.
+  # The monthly job. Every cleanup lives in one repeatable list, so an editor
+  # adds next month's dates and deletes last month's in the same place, and
+  # src/data/schedule.ts picks the next one out of it on every build. Nothing
+  # here says which cleanup is "next": the date does.
+  #
+  # The list is a FIELD (`cleanups`), not the whole file. Pages CMS can edit a
+  # top-level JSON array too — `list: true` on this entry — but that path tests
+  # `list === true` exactly, so it takes no options: no `min`, and no collapsed
+  # one-line summary per row. A schedule is read as a list far more often than it
+  # is edited, so the summary is worth the extra key in the JSON.
   - name: schedule
     label: Schedule
     type: file
     path: src/data/schedule.json
     format: json
     description: >-
-      Add the cleanups for the month ahead, one row each. The site lists the next
-      four, points the Join page and the countdown at the first one, and ignores
-      rows whose date has passed — so nothing here needs moving after a cleanup
-      happens. Type the rows in any order; the site sorts them by date. Delete
-      old ones whenever you like.
-    list:
-      # At least one row: the Join page has to name a date. `collapsible` is not
-      # optional inside this block — a bare `min:` makes Pages CMS reject the
-      # whole config.
-      min: 1
-      collapsible:
-        collapsed: true
-        # Every row is legible without opening it, so the whole schedule — past
-        # rows included — reads as a list you can check and prune.
-        summary: "{fields.date} · {fields.startTime} · {fields.corner}"
+      Every cleanup, past and future. Add the month ahead, one row each; delete
+      old rows whenever you like. The site lists the next four, points the Join
+      page and the countdown at the first one still to come, and ignores rows
+      whose date has passed — so nothing here needs moving after a cleanup
+      happens. Type the rows in any order; the site sorts them by date.
     fields:
-      # A date picker, not free text: Pages CMS saves yyyy-MM-dd, which is exactly
-      # what schedule.ts parses. The regex stays as well — edits made through the
-      # GitHub web editor bypass this form entirely.
-      - name: date
-        label: Date (year-month-day)
-        type: date
-        required: true
-        description: "The day of the cleanup, e.g. 2026-07-18."
-        pattern:
-          regex: "^\\d{4}-\\d{2}-\\d{2}$"
-          message: Write it like 2026-07-18 (year-month-day).
-      # schedule.ts accepts 12-hour times only ("10:00am", "2pm"). Without these
-      # patterns "14:00" saves fine here and fails the build a minute later.
-      # The defaults are the usual hour, so most rows need the date and the
-      # corner and nothing else.
-      - name: startTime
-        label: Start time
-        type: string
-        required: true
-        default: "2pm"
-        description: "e.g. 10:00am, 9:30am, 2pm"
-        pattern:
-          regex: "^\\s*\\d{1,2}(:[0-5]\\d)?\\s*[AaPp][Mm]\\s*$"
-          message: Write it like 10:00am, 9:30am, or 2pm.
-      - name: endTime
-        label: End time
-        type: string
-        required: true
-        default: "3pm"
-        description: "e.g. 11:00am"
-        pattern:
-          regex: "^\\s*\\d{1,2}(:[0-5]\\d)?\\s*[AaPp][Mm]\\s*$"
-          message: Write it like 10:00am, 9:30am, or 2pm.
-      - name: corner
-        label: Street corner
-        type: string
-        required: true
-        description: "Where everyone meets, e.g. Clarkson Ave & Bedford Ave. The map link is built from it."
+      - name: cleanups
+        label: Cleanups
+        type: object
+        list:
+          # At least one row: the Join page has to name a date. No maximum —
+          # schedule as far ahead as you like. `collapsible` is not optional
+          # inside this block; a bare `min:` makes Pages CMS reject the config.
+          min: 1
+          collapsible:
+            collapsed: true
+            # Every row is legible without opening it, so the whole schedule
+            # reads as a list you can check and prune.
+            summary: "{fields.date} · {fields.startTime} · {fields.corner}"
+        fields:
+          # A date picker, not free text: Pages CMS saves yyyy-MM-dd, which is
+          # exactly what schedule.ts parses. The regex stays as well — edits made
+          # through the GitHub web editor bypass this form entirely.
+          - name: date
+            label: Date (year-month-day)
+            type: date
+            required: true
+            description: "The day of the cleanup, e.g. 2026-07-18."
+            pattern:
+              regex: "^\\d{4}-\\d{2}-\\d{2}$"
+              message: Write it like 2026-07-18 (year-month-day).
+          # schedule.ts accepts 12-hour times only ("10:00am", "2pm"). Without
+          # these patterns "14:00" saves fine here and fails the build a minute
+          # later. The defaults are the usual hour, so most rows need the date
+          # and the corner and nothing else.
+          - name: startTime
+            label: Start time
+            type: string
+            required: true
+            default: "2pm"
+            description: "e.g. 10:00am, 9:30am, 2pm"
+            pattern:
+              regex: "^\\s*\\d{1,2}(:[0-5]\\d)?\\s*[AaPp][Mm]\\s*$"
+              message: Write it like 10:00am, 9:30am, or 2pm.
+          - name: endTime
+            label: End time
+            type: string
+            required: true
+            default: "3pm"
+            description: "e.g. 11:00am"
+            pattern:
+              regex: "^\\s*\\d{1,2}(:[0-5]\\d)?\\s*[AaPp][Mm]\\s*$"
+              message: Write it like 10:00am, 9:30am, or 2pm.
+          - name: corner
+            label: Street corner
+            type: string
+            required: true
+            description: "Where everyone meets, e.g. Clarkson Ave & Bedford Ave. The map link is built from it."
 
   - name: stats
     label: Statistics

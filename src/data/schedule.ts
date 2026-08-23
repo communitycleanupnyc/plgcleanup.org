@@ -2,8 +2,8 @@
 //  THE CLEANUP SCHEDULE
 // ============================================================================
 //
-//  Every cleanup we have a date for lives in src/data/schedule.json — one row
-//  each: date, start time, end time, street corner. Edit them the easy way in
+//  Every cleanup we have a date for lives in the "cleanups" list in
+//  src/data/schedule.json — one row each: date, start time, end time, corner. Edit them the easy way in
 //  Pages CMS (the "Schedule" form), or edit schedule.json directly on GitHub.
 //
 //  The site picks the next cleanup out of that list on its own: the first row
@@ -31,17 +31,20 @@ import scheduleData from "./schedule.json";
 // content collections give the Markdown files.
 const filled = (field: string) => z.string().trim().min(1, `${field} must not be empty.`);
 
-const rows = z
-  .array(
-    z.object({
-      date: filled("The cleanup date"),
-      startTime: filled("The start time"),
-      endTime: filled("The end time"),
-      corner: filled("The street corner"),
-    }),
-    { error: "src/data/schedule.json must be a list of cleanups, in [ … ] brackets." },
-  )
-  .min(1, 'The schedule has no cleanups in it. Add one in the "Schedule" form.')
+const { cleanups: rows } = z
+  .object({
+    cleanups: z
+      .array(
+        z.object({
+          date: filled("The cleanup date"),
+          startTime: filled("The start time"),
+          endTime: filled("The end time"),
+          corner: filled("The street corner"),
+        }),
+        { error: 'src/data/schedule.json must hold a "cleanups" list, in [ … ] brackets.' },
+      )
+      .min(1, 'The schedule has no cleanups in it. Add one in the "Schedule" form.'),
+  })
   .parse(scheduleData);
 
 /** One cleanup: the four edited values, plus everything the pages show. */

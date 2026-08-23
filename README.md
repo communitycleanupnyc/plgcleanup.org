@@ -222,7 +222,7 @@ src/
                              — the filename is the URL
     gallery/*.md           ← one per item, shown in the home carousel
   data/
-    schedule.json          ← every cleanup, one row each (date/times/corner) — Pages CMS writes this
+    schedule.json          ← every cleanup in one `cleanups` list (date/times/corner) — Pages CMS writes this
     schedule.ts            ← reads schedule.json; picks the next cleanup, derives map links + times
     stats.json             ← editable running totals (pounds collected, volunteers) — Pages CMS writes this
     stats.ts               ← reads stats.json; validates + formats the numbers for display
@@ -691,9 +691,9 @@ scattered comments, and delete a line when it's done.
 - [ ] **Review the Volunteering Terms.** `src/content/pages/terms.md` was drafted
       by the Claude agent, not by a lawyer — read it and make it say what you
       actually mean, especially the photo-consent and under-18 paragraphs.
-- [ ] **Fill in the schedule.** `src/data/schedule.json` holds one cleanup
-      (`2026-08-23`). Add the next month or two in Pages CMS → **Schedule**; the
-      audit warns whenever the last date is under three weeks away.
+- [ ] **Keep the schedule fed.** `src/data/schedule.json` runs to `2026-10-04`.
+      Add more in Pages CMS → **Schedule**; the audit warns whenever the last
+      date is under three weeks away.
 - [ ] Everything in **[LAUNCH.md](LAUNCH.md)** sections A and B.
 
 - [ ] **Write real `alt` text for the gallery photos.** Every item now has a

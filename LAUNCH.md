@@ -27,7 +27,8 @@ section turns them all back on. **Nothing here protects anything until it's done
 
    Without this, step 3's daily redeploy silently fails every day.
 
-2. **Set real cleanup dates.** `src/data/schedule.json` — one row per cleanup:
+2. **Set real cleanup dates.** `src/data/schedule.json`, in the `cleanups` list —
+   one row per cleanup:
    date as `yyyy-mm-dd`, times like `10:00am`, and the street corner. List the
    next month or two; the site picks the next one by itself and lists the next
    four on /schedule. (Or use Pages CMS → **Schedule**.)
