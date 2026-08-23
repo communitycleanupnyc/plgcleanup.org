@@ -13,12 +13,12 @@ Our volunteers help pick a different route every weekend where we pick up trash.
 
 Once in a while, we hold _trashy hours_ and meet at a local business that we [partner](/partners) with. Dozens from our neighborhood show up. 
 
-To learn about the next cleanup, you can:
+## Values
 
-- view our [schedule](/schedule) or [upcoming cleanup](/join) page on this site 
-- check our [Instagram](https://www.instagram.com/communitycleanupplg)
-- sign up for our [newsletter](https://communitycleanupplg.substack.com/subscribe) to receive the schedule over email, 
-- or, sign up for our [Discord](https://discord.com/invite/H9her7r8N2) to join our community chat where we also post updates
+- We clean from a place of mutual care and respect for the environment. We don’t police neighbors’ choices or trash habits.
+- We are open to all community members, and are available to talk and share with who we interact with.
+- We are an inclusive space that shares names and pronouns, and accommodates access needs.
+
 
 ## Team
 

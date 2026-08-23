@@ -7,12 +7,45 @@
 // The page is its own route, not a Markdown file in src/content/pages/, because
 // it renders data. Its copy lives here, the way /join's does.
 import Base from "../layouts/Base.astro";
-import { UPCOMING_CLEANUPS } from "../data/schedule";
+import { UPCOMING_CLEANUPS, type Cleanup } from "../data/schedule";
+import { SITE } from "../site.config";
 
 // How many cleanups the page lists. The rest stay in the form — an editor can
 // add dates months ahead without making this page a wall of text.
 const HOW_MANY = 4;
 const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
+
+// The two links a calendar entry carries, built from the canonical origin in
+// astro.config.mjs rather than typed here — an entry someone saves today outlives
+// any number of edits to this page.
+const joinUrl = new URL("/join", Astro.site).href;
+const scheduleUrl = new URL("/schedule", Astro.site).href;
+
+/**
+ * Google's "add to calendar" template link: one URL that opens a prefilled new
+ * event in whichever Google account the reader is already signed into, with
+ * nothing to install and no file to download.
+ *
+ * https://calendar.google.com/calendar/render?action=TEMPLATE&text=…&dates=…
+ * `dates` wants a compact UTC pair, "20260912T140000Z/20260912T150000Z" — the
+ * ISO stamps schedule.ts already derives, with their punctuation dropped.
+ */
+function calendarUrl(cleanup: Cleanup) {
+  const stamp = (iso: string) => iso.replace(/[-:]|\.\d{3}/g, "");
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: SITE.name,
+    dates: `${stamp(cleanup.iso)}/${stamp(cleanup.endIso)}`,
+    location: `${cleanup.corner}, Brooklyn, NY`,
+    details: [
+      `${cleanup.weekday} ${cleanup.monthDay}, ${cleanup.time} — ${cleanup.corner}.`,
+      "",
+      `Upcoming cleanup link: ${joinUrl}`,
+      `Cleanup schedule: ${scheduleUrl}`,
+    ].join("\n"),
+  });
+  return `https://calendar.google.com/calendar/render?${params}`;
+}
 ---
 
 <Base
@@ -32,18 +65,16 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
       cleanups.length > 0 ? (
         <ol class="schedule-list">
           {cleanups.map((cleanup, i) => {
-            // The first row is the cleanup /join describes, so the row itself is
-            // the link there. The rest are plain text: one place to click beats
-            // four, and every corner is a tap away on /join when its turn comes.
+            // The first row is the cleanup /join describes, so its button goes
+            // there; the rest offer the date itself, as a calendar entry.
             //
             // The date and the time are two cells each, not one: the month and
             // the dash get columns of their own, which is what lines every row's
             // months and dashes up. Splitting the date is also what drops the
             // comma that would otherwise sit between "Saturday" and "August 29".
-            const Row = i === 0 ? "a" : "div";
             return (
               <li class="schedule-item">
-                <Row class="schedule-row" href={i === 0 ? "/join" : undefined}>
+                <div class="schedule-row">
                   <span class="schedule-weekday">{cleanup.weekday}</span>
                   <span class="schedule-monthday">{cleanup.monthDay}</span>
                   <span class="schedule-time">
@@ -52,7 +83,22 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
                     <span class="schedule-to">{cleanup.timeTo}</span>
                   </span>
                   <span class="schedule-corner">{cleanup.corner}</span>
-                </Row>
+                  {i === 0 ? (
+                    <a class="schedule-btn" href="/join">
+                      Join
+                    </a>
+                  ) : (
+                    <a
+                      class="schedule-btn"
+                      href={calendarUrl(cleanup)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Add the ${cleanup.weekday} ${cleanup.monthDay} cleanup to your calendar`}
+                    >
+                      Add to calendar
+                    </a>
+                  )}
+                </div>
               </li>
             );
           })}
@@ -139,13 +185,14 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
      the way the narrow layout does — long, not broken. */
   .schedule-list {
     display: grid;
-    /* Six tracks, four columns: the time's start, dash, and end each get one,
+    /* Seven tracks, five columns: the time's start, dash, and end each get one,
        which is what lines the dashes up — the dash track is one glyph wide and
        shared by every row, and the start beside it is right-aligned. The gap is
-       zero so a range reads tight; the space between the four visible columns is
-       one padding value on the cells that end them, so the columns sit the same
-       distance apart. */
-    grid-template-columns: auto auto max-content max-content max-content 1fr;
+       zero so a range reads tight; the space between the visible columns is one
+       padding value on the cells that end them, so they sit the same distance
+       apart. The last track holds the buttons, which come out the same width as
+       each other because they share it. */
+    grid-template-columns: auto auto max-content max-content max-content 1fr auto;
     column-gap: 0;
     list-style: none;
     margin: var(--space-gap) 0;
@@ -197,8 +244,14 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
        held their columns apart would read as a hole. */
     .schedule-weekday,
     .schedule-monthday,
-    .schedule-to {
+    .schedule-to,
+    .schedule-corner {
       padding-right: 0;
+    }
+    /* On its own line under the row, at its own width rather than the phone's. */
+    .schedule-btn {
+      width: max-content;
+      margin-top: 0.6rem;
     }
     /* No shared tracks left to line up against, so the time sizes its own. */
     .schedule-time {
@@ -221,7 +274,8 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
      weekday, the month, the time, and the corner are equally far apart. */
   .schedule-weekday,
   .schedule-monthday,
-  .schedule-to {
+  .schedule-to,
+  .schedule-corner {
     padding-right: clamp(1rem, 3vw, 2.5rem);
   }
 
@@ -229,23 +283,34 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
     justify-self: end;
   }
 
-  /* That row is the link to /join. It takes the site's own link hover — accent
-     fill, background-coloured text — laid over the whole row instead of a word
-     inside it, so what you can click is the whole thing. No inline padding on
-     purpose: this row is a subgrid, and padding would pull its columns in from
-     the ones every other row lines up with. */
-  a.schedule-row {
-    color: inherit;
+  /* The row's own button — the same one the nav and the home page use: the body
+     face, uppercase, square, light on dark, accent on hover. Scaled down to sit
+     inside a row rather than span a column. Stretched, not shrink-wrapped, so
+     every row's button is the width of the widest. */
+  .schedule-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-body);
+    font-size: var(--fs-base);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--bg);
+    background: var(--btn-light);
     text-decoration: none;
+    padding: 0.55rem 0.9rem;
+    border-radius: var(--hover-radius);
     transition:
       background-color var(--dur-fast) var(--ease-out),
       color var(--dur-fast) var(--ease-out);
   }
 
-  a.schedule-row:hover,
-  a.schedule-row:focus-visible {
-    background-color: var(--accent);
-    color: var(--bg);
+  .schedule-btn:hover,
+  .schedule-btn:focus-visible {
+    background: var(--accent);
     outline: none;
   }
 </style>
