@@ -250,9 +250,9 @@ function calendarUrl(cleanup: Cleanup) {
     .schedule-corner {
       padding-right: 0;
     }
-    /* On its own line under the row rather than off to one side. */
+    /* On its own line under the row rather than off to one side. Still a grid,
+       so the buttons stay each other's width down here too. */
     .schedule-action {
-      display: block;
       margin-top: 0.6rem;
     }
     /* No shared tracks left to line up against, so the time sizes its own. */
@@ -292,7 +292,11 @@ function calendarUrl(cleanup: Cleanup) {
      a class handed to <Button> would compile with this page's scope id and never
      match the anchor the component renders. Position the wrapper instead. */
   .schedule-action {
-    justify-self: end;
+    /* A grid of one column, so the button inside fills the cell rather than
+       hugging its own label — which is what makes JOIN and ADD TO CALENDAR the
+       same width. The cell fills the track, and the track is as wide as the
+       widest button in it. */
+    display: grid;
     align-self: center;
   }
 </style>
