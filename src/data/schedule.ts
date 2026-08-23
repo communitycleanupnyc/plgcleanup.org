@@ -212,11 +212,15 @@ function googleCalendarUrl(cleanup: { start: Date; end: Date; corner: string; wh
   const stamp = (d: Date) => d.toISOString().replace(/[-:]|\.\d{3}/g, "");
   const params = new URLSearchParams({
     action: "TEMPLATE",
-    text: SITE.name,
+    text: `Volunteering with ${SITE.name}`,
     dates: `${stamp(cleanup.start)}/${stamp(cleanup.end)}`,
     location: `${cleanup.corner}, ${CLEANUP_CITY}`,
     details: [
       `${cleanup.when} — ${cleanup.corner}.`,
+      "",
+      "No registration needed, supplies are provided - just show up :)",
+      "",
+      "Look for the shopping cart with trash grabbers to find your clean leader and say hi!",
       "",
       `Upcoming cleanup link: ${JOIN_URL}`,
       `Cleanup schedule: ${SCHEDULE_URL}`,
