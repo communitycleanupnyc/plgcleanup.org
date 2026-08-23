@@ -36,22 +36,25 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
             // the link there. The rest are plain text: one place to click beats
             // four, and every corner is a tap away on /join when its turn comes.
             //
-            // The time is three cells, not one: the dash gets a column of its
-            // own, which is what lines every row's dash up.
+            // The date and the time are two cells each, not one: the month and
+            // the dash get columns of their own, which is what lines every row's
+            // months and dashes up. Splitting the date is also what drops the
+            // comma that used to sit between "Saturday" and "August 29".
             const Row = i === 0 ? "a" : "div";
             return (
               <li class="schedule-item">
                 <Row class="schedule-row" href={i === 0 ? "/join" : undefined}>
-                  <span class="schedule-date">
-                    {cleanup.shortDate}
-                    {i === 0 && <span class="schedule-tag">Next</span>}
-                  </span>
+                  <span class="schedule-weekday">{cleanup.weekday}</span>
+                  <span class="schedule-monthday">{cleanup.monthDay}</span>
                   <span class="schedule-time">
                     <span class="schedule-from">{cleanup.timeFrom}</span>
                     <span class="schedule-dash">–</span>
                     <span class="schedule-to">{cleanup.timeTo}</span>
                   </span>
-                  <span class="schedule-corner">{cleanup.corner}</span>
+                  <span class="schedule-corner">
+                    {cleanup.corner}
+                    {i === 0 && <span class="schedule-tag">Next</span>}
+                  </span>
                 </Row>
               </li>
             );
@@ -131,20 +134,20 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
     margin-bottom: 0.375rem;
   }
 
-  /* The dates: three columns — day, time, corner — collapsing to one under
-     560px. The LIST owns the columns and the rows inherit them with `subgrid`,
-     which is the whole point: a grid per row would size each row's columns to
-     its own text, and "Saturday, September 12" and "Sunday, October 4" would
-     start their times in different places. Where subgrid is missing, a row
-     stacks its three cells the way the narrow layout does — long, not broken. */
+  /* The dates: four columns — weekday, month and day, time, corner — collapsing
+     under 560px. The LIST owns the columns and the rows inherit them with
+     `subgrid`, which is the whole point: a grid per row would size each row's
+     columns to its own text, and "Saturday" and "Sunday" would start their
+     months in different places. Where subgrid is missing, a row stacks its cells
+     the way the narrow layout does — long, not broken. */
   .schedule-list {
     display: grid;
-    /* Five tracks, three columns: the time's start, dash, and end each get a
-       track, which is what lines the dashes up — the dash track is one glyph
-       wide and shared by every row, and the start beside it is right-aligned.
-       The gap is zero so the range reads tight; the space between the three
-       visible columns comes from padding on the cells that end them. */
-    grid-template-columns: auto max-content max-content max-content 1fr;
+    /* Six tracks, four columns: the time's start, dash, and end each get one,
+       which is what lines the dashes up — the dash track is one glyph wide and
+       shared by every row, and the start beside it is right-aligned. The gap is
+       zero so a range reads tight; the space between the visible columns is
+       padding on the cells that end them. */
+    grid-template-columns: auto auto max-content max-content max-content 1fr;
     column-gap: 0;
     list-style: none;
     margin: var(--space-gap) 0;
@@ -189,19 +192,23 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
     .schedule-row {
       display: block;
     }
-    .schedule-date,
-    .schedule-corner {
-      display: block;
-    }
     /* No shared tracks left to line up against, so the time sizes its own. */
     .schedule-time {
       grid-column: auto;
       grid-template-columns: repeat(3, max-content);
       justify-content: start;
     }
+    /* The weekday and the month are words in a line again, so the spacing that
+       held their columns apart would read as a hole. */
+    .schedule-weekday,
+    .schedule-monthday,
+    .schedule-to {
+      padding-right: 0;
+    }
   }
 
-  .schedule-date,
+  .schedule-weekday,
+  .schedule-monthday,
   .schedule-time,
   .schedule-corner {
     font-size: clamp(1.1rem, 2vw, 1.4rem);
@@ -209,11 +216,24 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
     line-height: 1.45;
   }
 
-  /* The space between the three visible columns, since the grid's own gap has
-     to stay at zero for the time to read as one range. */
-  .schedule-date,
+  /* The space between the visible columns, since the grid's own gap has to stay
+     at zero for the time to read as one range. The weekday's is smaller: it and
+     the month are two columns but one date, and should read as one. */
+  .schedule-monthday,
   .schedule-to {
     padding-right: clamp(1rem, 3vw, 2.5rem);
+  }
+
+  .schedule-weekday {
+    padding-right: 0.6em;
+  }
+
+  /* The corner shares its cell with the "Next" tag. That cell sits in the row's
+     one flexible track, so marking a row costs the fixed columns nothing. */
+  .schedule-corner {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
   }
 
   .schedule-from {
@@ -222,7 +242,6 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
 
   /* "Next" — the one cleanup /join is about. */
   .schedule-tag {
-    margin-left: 0.5rem;
     font-size: var(--fs-sm);
     font-weight: 400;
     letter-spacing: 0.04em;
