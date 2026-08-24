@@ -145,6 +145,7 @@ these before writing a new `<style>` block; none of them contain site copy.
 | `NavLink.astro`        | One nav/footer link from a `SiteLink`; owns the `external` rel handling.         |
 | `Logo.astro`           | The logo mark. The only file that draws it.                                      |
 | `Prose.astro`          | Markdown column for content pages.                                               |
+| `Raccoon.astro`        | The raccoon easter egg. Decoration; the caller positions it.                     |
 
 Two things to know when writing a component here:
 
@@ -175,6 +176,15 @@ Two things to know when writing a component here:
   Markdown pipeline doesn't fail the build, it emits an empty page, silently.
   Native `<details>`, so it works with scripts off. Styled in `Prose.astro`; the
   caret is `caret.ts`, which is also the carousel's.
+- **Put a raccoon on a page:** add `raccoon: ../../assets/raccoon-<name>.webp` to
+  that page's frontmatter (`src/content/pages/*.md`) and it appears in the
+  right-hand margin — tap to spin, drag to throw. `Raccoon.astro` holds the pose
+  and the behaviour; the caller wraps it in a positioned element and tunes it
+  with `--raccoon-w`, `--raccoon-tilt`, and `--raccoon-turn` (the somersault's
+  direction: `360deg` clockwise, `-360deg` counter-clockwise). The home page's is `.raccoon-hero` in
+  `index.astro`; every content page's is `.raccoon-margin` in `[slug].astro`.
+  Purely decorative (`alt=""`, `aria-hidden`, not tabbable) — nothing depends
+  on it, and it's not in `.pages.yml` because it isn't an editor's decision.
 - **Add a gallery item:** drop the photo in `src/assets/gallery/`, create
   `src/content/gallery/<name>.md` with `title`, `caption`, `alt`, `image`,
   `order` (unique; the fallback order when `features.rotateGallery` is off) and

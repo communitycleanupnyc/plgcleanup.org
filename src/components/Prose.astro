@@ -23,6 +23,9 @@ const { backHref = "/", backLabel = "← Back home" } = Astro.props;
 
 <style>
   .prose {
+    /* Positioned so a page can pin decoration into the margin beside the
+       column — [slug].astro's optional raccoon is the one caller. */
+    position: relative;
     /* The content-page column (tokens.css). The override is local to this
        element and `margin-inline: auto` resolves against it, so the column
        re-centres at its narrower width on its own. */

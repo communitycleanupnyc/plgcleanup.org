@@ -1,7 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
-import { Image } from "astro:assets";
-import raccoon from "../assets/raccoon.webp";
+import raccoonMaple from "../assets/raccoon-maple.webp";
+import Raccoon from "../components/Raccoon.astro";
 import Carousel from "../components/Carousel.astro";
 import Hero from "../components/Hero.astro";
 import Section from "../components/Section.astro";
@@ -57,20 +57,7 @@ const ctaLabel = renderCtaLabel(state);
 >
   <Hero title="Clean Prospect Lefferts Gardens!">
     <Fragment slot="decoration">
-      <Image
-        src={raccoon}
-        alt=""
-        class="raccoon"
-        aria-hidden="true"
-        draggable="false"
-        widths={[148, 296]}
-        sizes="148px"
-        format="webp"
-        layout="none"
-        loading="eager"
-        fetchpriority="high"
-        decoding="async"
-      />
+      <div class="raccoon-hero"><Raccoon image={raccoonMaple} /></div>
     </Fragment>
     <p>
       {VOLUNTEER_COUNT} of your neighbors are helping keep trash off Brooklyn streets.
@@ -146,9 +133,6 @@ const ctaLabel = renderCtaLabel(state);
 
 <script>
   import "../lib/countdown.client.ts";
-  // Tap the raccoon and it somersaults; drag it and it slingshots home.
-  // The physics live in the module; the .raccoon rule below is its other half.
-  import "../lib/raccoon.client.ts";
 </script>
 
 <style>
@@ -156,80 +140,23 @@ const ctaLabel = renderCtaLabel(state);
      components (Hero, Section, SectionHeading, FeatureGrid); what remains here
      is the decoration this page alone owns. */
 
-  /* Positioned against Hero's headline block, which is position: relative.
-     The resting position is written as the individual `translate` / `rotate`
-     properties rather than one `transform`, so the two easter eggs in
-     ../lib/raccoon.client.ts can each move one part of it and leave the rest
-     alone: the spin animates `rotate`, the drag writes the three --drag-*
-     properties below. Composition order is unchanged, so it renders the same. */
-  .raccoon {
-    /* Set by the drag; 0 is home. The script removes them when it lands. */
-    --drag-x: 0px;
-    --drag-y: 0px;
-    --drag-rot: 0deg;
-
+  /* Where the raccoon (Raccoon.astro) sits: in the gap under the headline,
+     against the right edge. Positioned against Hero's headline block, which is
+     position: relative. The wrapper owns the placement and nothing else — the
+     raccoon's own pose, size, and behaviour live in the component, which this
+     page's scoped styles cannot reach into. It must NOT take a z-index: that
+     would make it a stacking context and trap the raccoon under the headline
+     (z-index 1) while you drag it. */
+  .raccoon-hero {
     position: absolute;
-    z-index: 0;
     right: var(--edge);
     top: 110%;
-    translate: var(--drag-x) calc(-25% + var(--drag-y));
-    rotate: calc(-20deg + var(--drag-rot));
-    width: clamp(100px, 26vw, 148px);
-    height: auto;
-    user-select: none;
-    opacity: 0.88;
-    /* `grab` advertises the drag; the tap is the discovery on the way in.
-       `touch-action: none` is what makes dragging work with a finger at all —
-       without it the browser claims the gesture for scrolling. It costs a
-       thumb-scroll that starts exactly on the raccoon, which is a 148px patch
-       of decoration in the gap under the headline; pointercancel still sends
-       it home if the browser does take the gesture. */
-    cursor: grab;
-    touch-action: none;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-user-drag: none;
-  }
-
-  /* In hand: above the headline (z-index 1) and the page, below the site
-     header (50). No transition — it tracks the pointer 1:1, and any easing
-     here would read as lag. */
-  .raccoon.is-dragging {
-    z-index: 10;
-    cursor: grabbing;
-    opacity: 1;
-  }
-
-  /* One full turn from the resting tilt (-20deg -> 340deg), carrying whatever
-     lean the drag left behind. The easing is the standard "back out" curve: it
-     overshoots a few degrees past the landing and settles, which reads as a
-     spring without a physics loop. ~0.6s is the sweet spot — long enough to see
-     the raccoon, short enough to tap again. (The slingshot is a real spring;
-     it has a whole gesture to justify the integrator, a tap doesn't.) */
-  .raccoon.is-spinning {
-    animation: raccoon-spin 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  @keyframes raccoon-spin {
-    from {
-      rotate: calc(-20deg + var(--drag-rot));
-    }
-    to {
-      rotate: calc(340deg + var(--drag-rot));
-    }
-  }
-
-  /* Belt and braces: the script already refuses to spin here, but if the class
-     ever lands some other way it must not animate. (The drag is exempt — it is
-     direct manipulation, not animation, and it stops the moment you let go.) */
-  @media (prefers-reduced-motion: reduce) {
-    .raccoon.is-spinning {
-      animation: none;
-    }
+    translate: 0 -25%;
   }
 
   @media (max-width: 380px) {
-    .raccoon {
-      width: 100px;
+    .raccoon-hero {
+      --raccoon-w: 100px;
     }
   }
 </style>

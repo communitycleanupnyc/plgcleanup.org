@@ -14,16 +14,26 @@ const filled = (field: string) => z.string().trim().min(1, `${field} must not be
 // PLG" so the site name + separator live in one place.
 const pages = defineCollection({
   loader: glob({ pattern: "*.md", base: "./src/content/pages" }),
-  schema: z.object({
-    title: filled("title"),
-    description: filled("description"),
-    navMode: z.enum(["ticker", "static"]).default("static"),
-    // Headings on this page that fold into a dropdown: the heading becomes the
-    // thing you click and its section unfolds beneath. Matched by text, so
-    // `- Team` collapses "## Team". src/plugins/collapsible-sections.ts does
-    // the work and fails the build if a name here matches no heading.
-    collapse: z.array(filled("collapse")).default([]),
-  }),
+  schema: ({ image }) =>
+    z.object({
+      title: filled("title"),
+      description: filled("description"),
+      navMode: z.enum(["ticker", "static"]).default("static"),
+      // Headings on this page that fold into a dropdown: the heading becomes the
+      // thing you click and its section unfolds beneath. Matched by text, so
+      // `- Team` collapses "## Team". src/plugins/collapsible-sections.ts does
+      // the work and fails the build if a name here matches no heading.
+      collapse: z.array(filled("collapse")).default([]),
+      // Optional easter egg: a raccoon (src/assets/raccoon-*.webp) in the page's
+      // right-hand margin, which you can tap to spin and throw around the
+      // screen — see Raccoon.astro. Written as a path relative to this file,
+      // e.g. `../../assets/raccoon-sterling.webp`; a path that points at no
+      // image fails the build. Purely decorative, so any page can drop it.
+      // It isn't in .pages.yml on purpose — it's a developer's choice, not an
+      // editor's — and merge mode there (see settings.content) keeps it in the
+      // file when an editor saves the page.
+      raccoon: image().optional(),
+    }),
 });
 
 // The image gallery shown in the carousel (Carousel.astro). One Markdown file

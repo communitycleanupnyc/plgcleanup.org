@@ -3,6 +3,7 @@ title: About
 description: How Community Cleanup PLG grew from a team of neighbors in 2023 into a weekly volunteer trash cleanup crew in Prospect Lefferts Gardens, Brooklyn.
 collapse:
   - Meet the team
+raccoon: ../../assets/raccoon-sterling.webp
 ---
 
 # We noticed trash

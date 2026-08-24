@@ -1,6 +1,6 @@
-// The raccoon easter egg on the home page. Two layers of play, one element:
+// The raccoon easter egg. Two layers of play, one element:
 //
-//   tap it   → it turns a somersault (a CSS animation; see index.astro)
+//   tap it   → it turns a somersault (a CSS animation; see Raccoon.astro)
 //   drag it  → it follows your finger, then slingshots home on a real spring
 //
 // Nothing here is load-bearing. The raccoon is `alt="" aria-hidden="true"`
@@ -10,7 +10,7 @@
 // fails to load, the page is exactly the page minus a bit of fun.
 //
 // The contract with the CSS is three custom properties, read by `translate`
-// and `rotate` in the `.raccoon` rule:
+// and `rotate` in the `.raccoon` rule (Raccoon.astro):
 //
 //   --drag-x    px offset from its resting spot
 //   --drag-y    px offset from its resting spot
@@ -18,11 +18,12 @@
 //
 // Offsets rather than absolute coordinates, so the raccoon keeps whatever
 // position the stylesheet gives it at every breakpoint. Home is always 0,0,0°.
-const raccoon = document.querySelector<HTMLElement>(".raccoon");
-if (raccoon) play(raccoon);
+//
+// Every raccoon on the page gets its own copy of the state below — a page may
+// hold more than one, and each has to be draggable on its own.
+document.querySelectorAll<HTMLElement>(".raccoon").forEach(play);
 
-// Wrapped in a function purely so `el` is a plain HTMLElement throughout:
-// TypeScript won't carry the null check into the hoisted handlers below.
+// One closure per raccoon: `el` and all the state below belong to it alone.
 function play(el: HTMLElement) {
   // ── Feel ────────────────────────────────────────────────────────────────
   // Spring: mass–stiffness–damping, the same model Framer/iOS springs use.

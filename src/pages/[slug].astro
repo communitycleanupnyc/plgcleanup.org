@@ -2,6 +2,7 @@
 import { getCollection, render } from "astro:content";
 import Base from "../layouts/Base.astro";
 import Prose from "../components/Prose.astro";
+import Raccoon from "../components/Raccoon.astro";
 import { headingKey } from "../plugins/collapsible-sections";
 
 // One static route per Markdown file in src/content/pages/. The filename is the
@@ -59,6 +60,53 @@ for (const name of page.data.collapse) {
 
 <Base title={page.data.title} description={page.data.description} navMode={page.data.navMode}>
   <Prose>
+    {
+      /* The optional easter egg, from this page's `raccoon:` frontmatter. It is
+        the first thing in the column so the page heading flows around it on a
+        phone (see the float below); on a desktop it steps out into the margin. */
+      page.data.raccoon && (
+        <div class="raccoon-margin">
+          <Raccoon image={page.data.raccoon} />
+        </div>
+      )
+    }
     <Content />
   </Prose>
 </Base>
+
+<style>
+  /* Placement only — the raccoon's pose, size, and behaviour belong to
+     Raccoon.astro, which this page's scoped styles cannot reach into. What
+     crosses the boundary is the two custom properties it reads. Never give
+     this wrapper a z-index: a stacking context here would trap the raccoon
+     under the page while you drag it. */
+
+  /* Phone: the column is the full site width, so there is no margin to use.
+     Float it instead and the heading wraps around it, which puts it exactly
+     where the hero raccoon is — top right, beside the first line. */
+  .raccoon-margin {
+    --raccoon-w: clamp(88px, 22vw, 116px);
+    --raccoon-tilt: 12deg;
+    /* Counter-clockwise, against the hero raccoon's clockwise somersault: the
+       two are a pair, and they should not read as the same trick twice. */
+    --raccoon-turn: -360deg;
+    float: right;
+    margin: 0.25rem 0 0.5rem 1.25rem;
+  }
+
+  /* Desktop: --content-w narrows the column to 60vw at exactly this width
+     (tokens.css), which leaves 20vw of margin either side — room enough to
+     pin the raccoon beside the heading, out of the text's way entirely. */
+  @media (min-width: 900px) {
+    .raccoon-margin {
+      --raccoon-w: clamp(104px, 9vw, 140px);
+      float: none;
+      position: absolute;
+      /* Against .prose, whose padding-top is --space-section: level with the
+         top of the page heading. */
+      top: var(--space-section);
+      left: 100%;
+      margin: 0 0 0 clamp(1rem, 2.5vw, 2.5rem);
+    }
+  }
+</style>
