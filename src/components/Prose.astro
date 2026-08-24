@@ -61,12 +61,27 @@ const { backHref = "/", backLabel = "← Back home" } = Astro.props;
   .prose :global(ul),
   .prose :global(ol) {
     font-size: var(--fs-body);
-    margin: 0 0 1.25rem 1.25rem;
+    margin: 0 0 1.25rem;
     line-height: 1.6;
+    /* Bullets and numbers start on the column's left edge, in line with the
+       paragraphs and headings around them. The default `outside` marker hangs
+       to the left of the text by a width only the browser knows — and a wider
+       one for `4.` than for a bullet — so no list margin lines both up. An
+       `inside` marker is just the first inline box of the item, which the
+       padding/negative-indent pair on `li` below can place exactly. */
+    list-style-position: inside;
+    /* Undo that indent for a nested list, which is a child of an `li` and so
+       inherits it; its own items re-apply it against the parent's padding. */
+    text-indent: 0;
   }
 
+  /* The hanging indent: the item's text sits one `--li-indent` in, and the
+     first line — the one carrying the marker — is pulled back out to the edge. */
   .prose :global(li) {
+    --li-indent: 1.5em;
     margin-bottom: 0.375rem;
+    padding-left: var(--li-indent);
+    text-indent: calc(-1 * var(--li-indent));
   }
 
   /* ── Collapsible section ────────────────────────────────────────────────
