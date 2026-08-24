@@ -9,7 +9,7 @@ collapse:
 
 Then we noticed how we felt about it. We also realized we wanted to meet our neighbors. By feeding two birds with one scone, we were able to both help clean up our neighborhood and build a strong community.
 
-Community Cleanup PLG has supported over 900+ volunteer hours and 5,500+ pounds of trash picked up since 2023. Our volunteers help pick a different route every weekend where we clean up. Once in a while, we hold _trashy hours_ and meet at a local business that we [partner](/partners) with. Dozens from our neighborhood show up. Thanks to our events, people have made new friends, felt more settled and at home in their neighborhood, and contributed to something greater - all from something as simple as picking up trash. 
+Community Cleanup PLG has supported over 900+ volunteer hours and 5,500+ pounds of trash picked up since 2023. Thanks to our events, people have made new friends, felt more at home in their neighborhood, and contributed to something greater - all from something as simple as picking up trash. 
 
 ## Values
 
@@ -23,8 +23,7 @@ Community Cleanup PLG has supported over 900+ volunteer hours and 5,500+ pounds 
 Our board members who help organize our cleanups, partnerships, and work with the Department of Sanitation are:
 
 - Danielle - Social Media Manager
-- Jess - Scheduling Coordinator 
-- Jess - Social Events Coordinator 
+- Jess - Scheduling & Social Events Coordinator 
 - Nic - Neighborhood Collaboration Coordinator 
 - Spencer - Mutual Aid Coordinator 
 - Riley - Member-at-Large
