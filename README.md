@@ -238,14 +238,14 @@ src/
     tokens.css             ← design tokens (colors, type, spacing, motion) — reskin here
     fonts.css              ← the @font-face blocks, with the font-swap recipe on top
     base.css               ← reset, base typography, links, focus ring, shared buttons
-    chrome.css             ← ticker, nav, footer, mobile menu
+    chrome.css             ← nav, footer, ticker, mobile menu
   layouts/
     Base.astro             ← thin shell: <head>, style imports, header/slot/footer
   components/
-    SiteHeader.astro       ← ticker + top nav (+ their client script)
+    SiteHeader.astro       ← top nav (+ its client script)
     MobileMenu.astro       ← hamburger button + slide-over menu (+ its script)
-    SiteFooter.astro       ← footer
-    Ticker.astro           ← the stats ticker band (markup + script); delete-able as one file
+    SiteFooter.astro       ← footer, with the ticker band beneath it
+    Ticker.astro           ← the full-width stats band at the page foot; delete-able as one file
     NavLink.astro          ← one nav/footer link, incl. safe external-link handling
     Logo.astro             ← the logo mark — the only file that draws it
     Section.astro          ← the content column + its spacing options
@@ -424,7 +424,7 @@ Lighthouse. The 98↔99 wobble is lab-run variance, not a fixable defect.
 
 Two Lighthouse diagnostics are **deliberately won't-fix** — verified, and left as-is:
 
-- **Forced reflow** — every flagged layout read is intentional. `fillTicker` (`SiteHeader.astro`)
+- **Forced reflow** — every flagged layout read is intentional. `fillTicker` (`Ticker.astro`)
   reads geometry once up front, clones off-DOM in a fragment, and writes in a single append. The
   `void el.offsetHeight` reads are the canonical "flush styles to restart a CSS transition" idiom —
   removing them breaks the animations. No cleaner fix exists.

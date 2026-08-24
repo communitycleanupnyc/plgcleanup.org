@@ -1,8 +1,8 @@
-/* Site chrome: the scrolling ticker, top nav, footer, and mobile menu.
-   Kept together because the scroll-behavior script coordinates these states. */
+/* Site chrome: the top nav, the ticker band at the foot of the page, the
+   footer, and the mobile menu. Kept together because the scroll-behavior
+   script coordinates these states. */
 
-/* ── Ticker + site chrome + nav ── */
-/* ── Ticker ─────────────────────────────────────── */
+/* ── Site chrome + nav ─────────────────────────── */
 
 /* ── Site chrome: static by default, scrolls with page ── */
 .site-chrome {
@@ -48,194 +48,31 @@
 .site-chrome.static-nav.is-hidden {
   transform: translateY(-100%);
 }
-.site-chrome.static-nav .ticker-bar {
-  display: none;
-}
 .site-chrome.static-nav ~ #chrome-spacer {
   height: var(--nav-h);
 }
 
-/* Compact (at page top): ticker fills the left half, nav links flush right.
-   Uses width+margin-inline:auto (same mechanism as is-fixed ticker/nav and
-   content below) so all three share one centering path — no 100vw/scrollbar
+/* Compact (at page top): nav links flush right.
+   Uses width+margin-inline:auto (same mechanism as the is-fixed nav and the
+   content below) so both share one centering path — no 100vw/scrollbar
    mismatch that padding-inline would introduce. Background fills body behind it. */
 .site-chrome.compact {
-  display: flex;
-  align-items: stretch;
   height: var(--nav-h);
   background: var(--bg);
   width: var(--site-w);
   margin-inline: auto;
 }
-.site-chrome.compact .ticker-bar {
-  flex: 0 0 50%;
-  min-width: 0;
-  background: none;
-}
-.site-chrome.compact .ticker {
-  width: 100%;
-  margin: 0;
-  padding-left: 0;
-  border-bottom: none;
-  height: 100%;
-}
+/* The nav is the compact row's only content and spans it, so the links land on
+   the same vertical line — and in the same nav-h row — as the ones in the full
+   nav; nothing moves when the revealed chrome takes over on scroll-up. */
 .site-chrome.compact .nav {
-  flex: 0 0 50%;
-  height: var(--nav-h);
+  width: 100%;
   padding: 0;
   justify-content: flex-end;
   background: none;
 }
 .site-chrome.compact .nav-home {
   display: none;
-}
-
-/* Full-bleed ticker wrapper (non-compact) */
-.ticker-bar {
-  width: 100%;
-  background: transparent;
-}
-
-.ticker {
-  width: var(--site-w);
-  margin-inline: auto;
-  height: var(--ticker-h);
-  display: flex;
-  align-items: center;
-}
-
-.ticker__viewport {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 1.926rem;
-}
-
-.ticker__track {
-  display: flex;
-  width: max-content;
-  will-change: transform;
-  font-size: 0.85rem;
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  color: var(--text);
-  font-variant-numeric: tabular-nums slashed-zero;
-  white-space: nowrap;
-  animation: ticker-rtl var(--ticker-duration) linear infinite;
-  animation-play-state: paused;
-}
-
-.ticker__segment {
-  flex-shrink: 0;
-  padding-right: clamp(2rem, 8vw, 6rem);
-}
-
-/* Continuous band: bg lives on the viewport (always fills full width) */
-.ticker__viewport {
-  background: var(--surface);
-  transition: background 0ms ease;
-  cursor: pointer;
-}
-.ticker__viewport:hover {
-  background: var(--accent);
-}
-.ticker__viewport:hover .ticker__link {
-  color: var(--bg);
-}
-.ticker__link {
-  display: inline-flex;
-  align-items: center;
-  text-decoration: none;
-  color: var(--text);
-  padding: 0.447rem 0.75em;
-}
-
-.ticker.is-playing .ticker__track {
-  animation-play-state: running;
-}
-
-@keyframes ticker-rtl {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(calc(-1 * var(--seg-w, 0px)));
-  }
-}
-
-/* Control sits on the right, outside the scrolling area.
-   height = 1.926rem (= nav-link box) so it matches the ticker band in all states.
-   width = icon(1.926rem) + 2×gap(0.385rem) = 2.696rem so the gap to
-   the ticker band matches the original 30%-reduced target. */
-.ticker__toggle {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 2.696rem;
-  height: 1.926rem;
-  margin-left: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted);
-  transition: color 100ms ease;
-}
-.ticker__toggle:hover,
-.ticker__toggle:focus-visible {
-  color: var(--accent);
-}
-/* The focus ring itself now comes from the global :focus-visible rule in
-   base.css — this only squares off the corner the UA would otherwise round. */
-.ticker__toggle:focus-visible {
-  border-radius: 0;
-}
-
-/* On touch devices, accent is sticky after first interaction */
-@media (hover: none) and (pointer: coarse) {
-  .ticker__toggle.is-activated {
-    color: var(--accent);
-  }
-  .ticker__toggle.is-activated .ticker__icon--play path + path {
-    fill: var(--accent);
-  }
-  .ticker__toggle.is-activated .ticker__icon--pause path + path {
-    stroke: var(--accent);
-  }
-}
-
-/* Icon swap: show play-circle when paused, pause-circle when playing */
-.ticker__icon {
-  width: 1.926rem;
-  height: 1.926rem;
-}
-.ticker__icon--play path + path {
-  fill: var(--text);
-  transition: fill var(--dur-fast) var(--ease-out);
-}
-.ticker__icon--pause path + path {
-  stroke: var(--text);
-  stroke-width: 2.75;
-  transition: stroke var(--dur-fast) var(--ease-out);
-}
-.ticker__toggle:hover .ticker__icon--play path + path,
-.ticker__toggle:focus-visible .ticker__icon--play path + path {
-  fill: var(--accent);
-}
-.ticker__toggle:hover .ticker__icon--pause path + path,
-.ticker__toggle:focus-visible .ticker__icon--pause path + path {
-  stroke: var(--accent);
-}
-.ticker__icon--pause {
-  display: none;
-}
-.ticker.is-playing .ticker__icon--play {
-  display: none;
-}
-.ticker.is-playing .ticker__icon--pause {
-  display: block;
 }
 
 /* ── Nav ────────────────────────────────────────── */
@@ -417,6 +254,155 @@
   }
 }
 
+/* ── Ticker ─────────────────────────────────────── */
+/* The stats band at the very bottom of the page, inside the footer. It spans
+   the full window rather than the content column — the only element that does. */
+.ticker-bar {
+  width: 100%;
+  background: transparent;
+}
+
+.ticker {
+  width: 100%;
+  height: var(--ticker-h);
+  display: flex;
+  align-items: center;
+}
+
+.ticker__viewport {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 1.926rem;
+}
+
+.ticker__track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums slashed-zero;
+  white-space: nowrap;
+  animation: ticker-rtl var(--ticker-duration) linear infinite;
+  animation-play-state: paused;
+}
+
+.ticker__segment {
+  flex-shrink: 0;
+  padding-right: clamp(2rem, 8vw, 6rem);
+}
+
+/* Continuous band: bg lives on the viewport (always fills full width) */
+.ticker__viewport {
+  background: var(--surface);
+  transition: background 0ms ease;
+  cursor: pointer;
+}
+.ticker__viewport:hover {
+  background: var(--accent);
+}
+.ticker__viewport:hover .ticker__link {
+  color: var(--bg);
+}
+.ticker__link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text);
+  padding: 0.447rem 0.75em;
+}
+
+.ticker.is-playing .ticker__track {
+  animation-play-state: running;
+}
+
+@keyframes ticker-rtl {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-1 * var(--seg-w, 0px)));
+  }
+}
+
+/* Control sits on the right, outside the scrolling area.
+   height = 1.926rem (= nav-link box) so it matches the ticker band in all states.
+   width = icon(1.926rem) + 2×gap(0.385rem) = 2.696rem so the gap to
+   the ticker band matches the original 30%-reduced target. */
+.ticker__toggle {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.696rem;
+  height: 1.926rem;
+  margin-left: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 100ms ease;
+}
+.ticker__toggle:hover,
+.ticker__toggle:focus-visible {
+  color: var(--accent);
+}
+/* The focus ring itself now comes from the global :focus-visible rule in
+   base.css — this only squares off the corner the UA would otherwise round. */
+.ticker__toggle:focus-visible {
+  border-radius: 0;
+}
+
+/* On touch devices, accent is sticky after first interaction */
+@media (hover: none) and (pointer: coarse) {
+  .ticker__toggle.is-activated {
+    color: var(--accent);
+  }
+  .ticker__toggle.is-activated .ticker__icon--play path + path {
+    fill: var(--accent);
+  }
+  .ticker__toggle.is-activated .ticker__icon--pause path + path {
+    stroke: var(--accent);
+  }
+}
+
+/* Icon swap: show play-circle when paused, pause-circle when playing */
+.ticker__icon {
+  width: 1.926rem;
+  height: 1.926rem;
+}
+.ticker__icon--play path + path {
+  fill: var(--text);
+  transition: fill var(--dur-fast) var(--ease-out);
+}
+.ticker__icon--pause path + path {
+  stroke: var(--text);
+  stroke-width: 2.75;
+  transition: stroke var(--dur-fast) var(--ease-out);
+}
+.ticker__toggle:hover .ticker__icon--play path + path,
+.ticker__toggle:focus-visible .ticker__icon--play path + path {
+  fill: var(--accent);
+}
+.ticker__toggle:hover .ticker__icon--pause path + path,
+.ticker__toggle:focus-visible .ticker__icon--pause path + path {
+  stroke: var(--accent);
+}
+.ticker__icon--pause {
+  display: none;
+}
+.ticker.is-playing .ticker__icon--play {
+  display: none;
+}
+.ticker.is-playing .ticker__icon--pause {
+  display: block;
+}
+
 /* ── Mobile nav ── */
 /* ── Mobile nav ─────────────────────────────────── */
 
@@ -443,26 +429,6 @@
 /* JS sets this class to keep button in sync with chrome show/hide */
 .nav-menu-btn.is-nav-hidden {
   transform: translateY(-100%);
-}
-/* State 2: G = (nav-h − 1.926rem) / 2 = 0.797rem (same gap in compact).
-   Ticker row = G + T = (nav-h + 1.926rem) / 2 ≈ 2.723rem.
-   Viewport at flex-end → sits at the bottom of the ticker row, so there
-   is exactly G of black above the band. Nav links center in their nav-h
-   row (G above/below). Result: three equal G gaps throughout the chrome. */
-.site-chrome.is-fixed .ticker {
-  height: calc((var(--nav-h) + 1.926rem) / 2);
-}
-.site-chrome.is-fixed .ticker__viewport {
-  align-self: flex-end;
-}
-.site-chrome.is-fixed .ticker__toggle {
-  align-self: flex-end;
-}
-.site-chrome.is-fixed ~ .nav-menu-btn {
-  top: calc((var(--nav-h) + 1.926rem) / 2);
-}
-.site-chrome.is-fixed ~ .nav-menu-btn.is-nav-hidden {
-  transform: translateY(-200%);
 }
 /* Keeps the global focus ring (base.css) — see the note on .nav-home. */
 .nav-menu-btn:focus-visible {
@@ -693,15 +659,6 @@
     position: fixed;
     right: calc((100vw - var(--site-w)) / 2);
     margin-top: 0;
-  }
-
-  /* Ticker expands to fill; nav is a fixed-width spacer for the button. */
-  .site-chrome.compact .ticker-bar {
-    flex: 1;
-    min-width: 0;
-  }
-  .site-chrome.compact .nav {
-    flex: 0 0 2.75rem;
   }
 }
 

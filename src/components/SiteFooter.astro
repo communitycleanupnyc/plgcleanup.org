@@ -3,6 +3,7 @@
 // SITE.footer — edit src/site.config.ts, not this file.
 import { SITE } from "../site.config";
 import NavLink from "./NavLink.astro";
+import Ticker from "./Ticker.astro";
 
 // Build-time year. The daily rebuild (site-checks.yml `redeploy`) is what keeps
 // this from going stale on 1 January without anyone pushing a commit.
@@ -29,4 +30,5 @@ const year = new Date().getFullYear();
       {SITE.footer.madeWith && <p class="footer-made">{SITE.footer.madeWith}</p>}
     </div>
   </div>
+  {SITE.features.ticker && <Ticker />}
 </footer>

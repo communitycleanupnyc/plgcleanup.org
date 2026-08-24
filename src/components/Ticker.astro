@@ -1,10 +1,10 @@
 ---
-// The scrolling stats band across the top of the site header, with its
+// The scrolling stats band across the full width of the page foot, with its
 // play/pause control.
 //
-// Rendered by SiteHeader only when SITE.features.ticker is on. To retire the
+// Rendered by SiteFooter only when SITE.features.ticker is on. To retire the
 // feature for good: set that flag to false, confirm the build is green, then
-// delete this file, its import in SiteHeader.astro, the .ticker* rules in
+// delete this file, its import in SiteFooter.astro, the .ticker* rules in
 // src/styles/chrome.css, and src/data/stats.{json,ts}.
 //
 // The copy lives here because it is inseparable from its data source.
@@ -67,8 +67,7 @@ const TICKER_HREF = "/join";
 
 <script>
   // Fills the scrolling track and drives the play/pause control. Lives here
-  // rather than in SiteHeader so the whole feature is one file; the header's
-  // scroll behavior is independent and runs whether or not this is rendered.
+  // rather than in SiteFooter so the whole feature is one file.
   const ticker = document.getElementById("ticker")!;
   const tickerToggle = document.getElementById("ticker-toggle")!;
   const tickerTrack = ticker.querySelector(".ticker__track") as HTMLElement;
@@ -103,11 +102,8 @@ const TICKER_HREF = "/join";
   document.fonts.ready.then(fillTicker);
   new ResizeObserver(fillTicker).observe(tickerViewport);
 
-  // Autoplay on load — only when the ticker is actually shown (the header is in
-  // its compact/ticker mode) and the visitor has no motion preference. Read off
-  // the header's class rather than passed in, so this script stays standalone.
-  const isStaticNav = !!document.getElementById("site-chrome")?.classList.contains("static-nav");
-  if (!isStaticNav && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  // Autoplay on load — unless the visitor prefers reduced motion.
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     ticker.classList.add("is-playing");
     tickerToggle.setAttribute("aria-pressed", "true");
     tickerToggle.setAttribute("aria-label", "Pause stats ticker");

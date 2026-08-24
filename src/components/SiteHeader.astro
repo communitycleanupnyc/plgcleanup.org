@@ -5,7 +5,6 @@ interface Props {
 import { SITE } from "../site.config";
 import Logo from "./Logo.astro";
 import NavLink from "./NavLink.astro";
-import Ticker from "./Ticker.astro";
 const { navMode = "ticker" } = Astro.props;
 ---
 
@@ -14,8 +13,6 @@ const { navMode = "ticker" } = Astro.props;
      .site-chrome / #site-chrome, and MobileMenu stays a sibling, so the general-
      sibling rules (.site-chrome.is-fixed ~ …) are unaffected by the element swap. -->
 <header class={`site-chrome ${navMode === "ticker" ? "compact" : "static-nav"}`} id="site-chrome">
-  {SITE.features.ticker && <Ticker />}
-
   <!-- Nav: logo left + links right (hidden in compact mode) -->
   <nav class="nav" id="main-nav" aria-label="Site navigation">
     <a href="/" class="nav-home" aria-label={`${SITE.name} — home`}>
@@ -39,8 +36,8 @@ const { navMode = "ticker" } = Astro.props;
 <div id="chrome-spacer" aria-hidden="true"></div>
 
 <script>
-  // Site chrome behavior: fill the scrolling ticker and show/hide the nav on
-  // scroll. Coordinates the (sibling) menu button by id, which MobileMenu renders.
+  // Site chrome behavior: show/hide the nav on scroll. Coordinates the
+  // (sibling) menu button by id, which MobileMenu renders.
   const chrome = document.getElementById("site-chrome")!;
   const isStaticNav = chrome.classList.contains("static-nav");
   const menuBtn = document.getElementById("nav-menu-btn");

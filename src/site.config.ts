@@ -131,8 +131,8 @@ export const SITE = {
   // and data if you never want it back.
   features: {
     /**
-     * The scrolling stats ticker across the top of the header.
-     * Off → src/components/SiteHeader.astro renders no ticker bar, and
+     * The scrolling stats ticker across the bottom of the page.
+     * Off → src/components/SiteFooter.astro renders no ticker bar, and
      * src/data/stats.json + stats.ts become unused.
      */
     ticker: true,
