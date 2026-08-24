@@ -121,8 +121,20 @@ export const SITE = {
     type: "NGO",
     /** Path to the logo image used in structured data (absolutized at build). */
     logo: "/images/logo.webp",
+    /**
+     * Where this organization is, in the shape schema.org wants. There is no
+     * street address on purpose — the group meets on a different corner each
+     * time (src/data/schedule.json), so locality/region/country is the whole
+     * truth. Set to null if the site isn't geographically scoped; the key is
+     * then dropped rather than emitted empty.
+     */
+    address: {
+      locality: "Brooklyn",
+      region: "NY",
+      country: "US",
+    } as { locality: string; region: string; country: string } | null,
     /** Optional — drop the line if the site isn't geographically scoped. */
-    areaServed: "Prospect Lefferts Gardens, Brooklyn, NY",
+    areaServed: "Prospect Lefferts Gardens, Brooklyn, New York",
     /** Profile URLs that identify this same entity elsewhere. */
     sameAs: [
       "https://www.instagram.com/communitycleanupplg/",

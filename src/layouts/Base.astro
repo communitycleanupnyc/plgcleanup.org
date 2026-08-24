@@ -46,8 +46,12 @@ const canonicalURL = new URL(cleanPath, Astro.site);
 
 // Sitewide organization identity for search/AI engines. Emitted once per page as
 // JSON-LD; the homepage URL + logo are absolute so they resolve off any host.
-// Every value is from SITE.schema (src/site.config.ts). `areaServed` is dropped
-// when blank, so a site that isn't geographically scoped emits no empty key.
+// Every value is from SITE.schema (src/site.config.ts). `address` and
+// `areaServed` are both dropped when unset, so a site that isn't geographically
+// scoped emits no empty keys. They say different things and both earn their
+// place: `address` is where the organization *is* (the locality Google matches
+// a "near me" query against), `areaServed` is the neighbourhood it works in.
+const { address } = SITE.schema;
 const orgSchema = {
   "@context": "https://schema.org",
   "@type": SITE.schema.type,
@@ -55,6 +59,16 @@ const orgSchema = {
   url: new URL("/", Astro.site).href,
   logo: new URL(SITE.schema.logo, Astro.site).href,
   description: SITE.description,
+  ...(address
+    ? {
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: address.locality,
+          addressRegion: address.region,
+          addressCountry: address.country,
+        },
+      }
+    : {}),
   ...(SITE.schema.areaServed ? { areaServed: SITE.schema.areaServed } : {}),
   sameAs: SITE.schema.sameAs,
 };
