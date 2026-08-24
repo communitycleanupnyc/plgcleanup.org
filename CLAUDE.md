@@ -110,6 +110,13 @@ Things that will silently break if you don't know them:
 - **Never delete an audit check to make CI pass.** `scripts/seo-audit.mjs` and
   `scripts/contrast-check.mjs` are the launch gate. If one fails, the site is
   wrong, not the script.
+- **The footer counter shows the REAL number server-side, and JavaScript winds
+  it back.** `SplitFlap.astro` renders `002039.43`-style flaps at the true value;
+  the script resets them to the start value on load and runs the count when they
+  scroll into view. Don't "fix" this by rendering the start value — without
+  scripts, and under `prefers-reduced-motion`, the page would then state a
+  number that isn't true. For the same reason the stop/replay control is added
+  by the script rather than rendered: a server-rendered button would be dead.
 - **`Carousel.astro` holds no copy of its own.** Every string it speaks comes
   from `labels` (defaults in `carousel.types.ts`), and every item field comes
   from props. Keep it that way — it is the component most likely to be reused.
@@ -162,6 +169,10 @@ Two things to know when writing a component here:
 - **Remove a gallery item:** delete the `.md`; the unused photo is pruned from
   the build automatically. At least one must remain.
 - **Rename the site / change nav / swap social links:** `src/site.config.ts`.
+- **Change the footer sign-off:** `SITE.footer.statLine`. It is preceded by the
+  pounds-collected total on a split-flap counter, so it reads as the back half
+  of a sentence ("pounds of trash picked up in…"). `""` removes the whole line,
+  counter included.
 - **Turn a feature off:** `SITE.features` — the ticker, the gallery rotation
   (`rotateGallery`, which drives the carousel order, the lead photo, and the
   social share image together). Flip it, confirm the build is green, then delete

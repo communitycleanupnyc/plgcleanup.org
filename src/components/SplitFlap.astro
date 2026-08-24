@@ -1,0 +1,502 @@
+---
+// A split-flap counter — the airport/Solari board, in the footer. The number
+// turns over flap by flap, racing up from `from` and settling on `value`.
+//
+// Like Carousel.astro, this file holds NO copy of its own: the sentence that
+// follows the number and the control's labels all arrive as props, so the
+// component lifts into another site unchanged. SiteFooter is the only caller.
+//
+// Three states, in order of how much the browser gives us:
+//
+//   • No JavaScript   → the flaps are server-rendered showing the REAL value.
+//                       A reader without scripts is never shown a made-up
+//                       number, and there is no dead control to tab into.
+//   • Reduced motion  → same as above. Nothing moves, so nothing needs a
+//                       stop button, and the script leaves the markup alone.
+//   • Otherwise       → on load the flaps reset to `from`, the flap row (and
+//                       only the flap row — not the sentence beside it)
+//                       becomes a role="button" control, and an
+//                       IntersectionObserver starts the run the first time it
+//                       scrolls into view. Clicking the board stops it on the
+//                       real number; clicking it again replays. That control
+//                       is what keeps a 30-second auto-starting animation
+//                       inside WCAG 2.2.2 (Pause, Stop, Hide) without adding
+//                       a second widget.
+//
+// The pacing is not a linear count: the flaps turn about once a second to
+// begin with, accelerate through five powers of ten, then decelerate through
+// the same five over the last `settle` ms — which is what makes the digits
+// lock left-to-right and the decimals click into place last. See "Pacing" in
+// the script below for the arithmetic.
+
+interface Props {
+  /** The number to land on, e.g. 3133.11. */
+  value: number;
+  /** The number the run starts from. */
+  from?: number;
+  /** Extra leading zeros in front of the integer part — the airport-board look. */
+  pad?: number;
+  /** Digits after the decimal point. */
+  decimals?: number;
+  /** How long the whole run takes, in ms. */
+  duration?: number;
+  /** How much of the tail of `duration` is the closing deceleration, in ms. */
+  settle?: number;
+  /** How long one flap takes to turn over, in ms. Also caps how fast a single
+      flap can change, which is what makes a racing board look mechanical. */
+  flip?: number;
+  /** The sentence that follows the number. Rendered verbatim. */
+  label?: string;
+  /** The final value as it should be *read aloud*, e.g. "3,133.11". */
+  spoken?: string;
+  /** Accessible names for the control. The flap row is the control, so these
+      stand alone as its name — write them as actions, not as sentences. */
+  labels?: { stop?: string; replay?: string };
+}
+
+const {
+  value,
+  from = 0,
+  pad = 2,
+  decimals = 2,
+  duration = 30000,
+  settle = 5000,
+  // 160ms: the ticker's ~75-character segment scrolls past in --ticker-duration
+  // (12s), i.e. one character every ~160ms. A flap turns over at that cadence,
+  // which is also about the speed of a real board.
+  flip = 160,
+  label = "",
+  spoken = String(value),
+  labels = {},
+} = Astro.props;
+
+const L = { stop: "Stop the counter", replay: "Replay the counter", ...labels };
+
+/** Width of the integer part, including the decorative leading zeros. */
+const width = String(Math.floor(value)).length + pad;
+
+/** "3133.11" → "003133.11" (leading zeros, no thousands separators). */
+function format(n: number): string {
+  const [int, frac = ""] = n.toFixed(decimals).split(".");
+  return int.padStart(width, "0") + (decimals ? "." + frac : "");
+}
+
+// Server-rendered at the REAL value — see the no-JavaScript note above.
+const chars = format(value).split("");
+---
+
+<span
+  class="splitflap"
+  data-splitflap
+  data-from={from}
+  data-to={value}
+  data-width={width}
+  data-decimals={decimals}
+  data-duration={duration}
+  data-settle={settle}
+  data-flip={flip}
+  data-stop={L.stop}
+  data-replay={L.replay}
+  style={`--flap-flip:${flip}ms`}
+>
+  <span class="splitflap__flaps" aria-hidden="true">
+    {
+      chars.map((ch) =>
+        ch === "." ? (
+          <span class="flap flap--sep">
+            <span class="flap__glyph">{ch}</span>
+          </span>
+        ) : (
+          /* Four panels, which is how the real thing works: the two static
+             halves are the slot, and the two leaves are the card that falls
+             through it. The script addresses them by index — don't reorder. */
+          <span class="flap" data-flap>
+            <span class="flap__panel flap__panel--top">
+              <span class="flap__glyph">{ch}</span>
+            </span>
+            <span class="flap__panel flap__panel--bottom">
+              <span class="flap__glyph">{ch}</span>
+            </span>
+            <span class="flap__panel flap__panel--top flap__leaf flap__leaf--front">
+              <span class="flap__glyph">{ch}</span>
+            </span>
+            <span class="flap__panel flap__panel--bottom flap__leaf flap__leaf--back">
+              <span class="flap__glyph">{ch}</span>
+            </span>
+          </span>
+        ),
+      )
+    }
+  </span><span class="sr-only">{spoken}</span>{" "}<span class="splitflap__label">{label}</span>
+</span>
+
+<style>
+  /* Type comes from the page: same family and same size as the text it sits in.
+     Inter's slashed zero is the whole reason the digits read as a departures
+     board. The digits take their own weight (see .flap__glyph); the colours
+     invert (see the panel rule). Those two are the whole visual idea. */
+  .splitflap {
+    --flap-w: 0.78em;
+    --flap-h: 1.45em;
+    --flap-gap: 0.041em;
+    font-family: var(--font-body);
+    font-variant-numeric: tabular-nums slashed-zero;
+  }
+
+  /* Only present once the script has upgraded the board into a control, which
+     is why the hit area is exactly the flaps and not the sentence beside them.
+     The global :focus-visible ring in base.css then outlines just the board. */
+  .splitflap__flaps[role="button"] {
+    cursor: pointer;
+    /* A control is not a paragraph: don't let a double-click to replay leave
+       the digits selected, and don't wait on a double-tap-to-zoom guess. */
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  .splitflap__flaps {
+    display: inline-flex;
+    gap: var(--flap-gap);
+    /* The flap row is taller than a line of text; drop it so the digits sit on
+       the same baseline as the sentence after them. */
+    vertical-align: -0.35em;
+  }
+
+  .flap {
+    position: relative;
+    display: block;
+    width: var(--flap-w);
+    height: var(--flap-h);
+    /* The page colour shows through the hinge gap between the two halves. */
+    background: var(--bg);
+    perspective: 6em;
+  }
+
+  /* The hinge. Sits above the leaves so a falling card is cut in half by it. */
+  .flap::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: calc(50% - 0.25px);
+    height: 0.5px;
+    background: var(--bg);
+    z-index: 3;
+  }
+
+  /* The inversion: flap face is the page's text colour, digit is the page's
+     background colour. Dark-board-with-light-flaps, and it makes the number
+     the one thing in the footer that pops. */
+  .flap__panel,
+  .flap--sep {
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  .flap__panel {
+    position: absolute;
+    inset-inline: 0;
+    height: 50%;
+    overflow: hidden;
+  }
+  .flap__panel--top {
+    top: 0;
+  }
+  .flap__panel--bottom {
+    bottom: 0;
+  }
+
+  /* A full-height glyph clipped by its half-height panel: the top panel shows
+     the top of the digit, the bottom panel the bottom of the same digit. */
+  .flap__glyph {
+    position: absolute;
+    inset-inline: 0;
+    height: var(--flap-h);
+    line-height: var(--flap-h);
+    text-align: center;
+    /* Bold, not inherited: the footer runs at weight 200, which is a hairline
+       at this size and washes out reversed onto a light flap. 700 is the top
+       of Inter's variable range (see fonts.css), so this is a real weight and
+       not a synthesised one. */
+    font-weight: 400;
+  }
+  /* The decimal point's flap never turns, so it is a bare glyph rather than
+     four panels — but it takes --flap-w/--flap-h from .flap like the digits.
+     A narrower separator reads as a gap in the board, not a card on it. */
+  .flap__panel--top .flap__glyph,
+  .flap--sep .flap__glyph {
+    top: 0;
+  }
+  .flap__panel--bottom .flap__glyph {
+    bottom: 0;
+  }
+
+  /* ── The falling card ──────────────────────────────────────────────────
+     Half a flip each: the front leaf (the old digit's top half) falls from
+     upright to edge-on, and as it disappears the back leaf (the new digit's
+     bottom half) swings down from edge-on to upright. Both hold their end
+     state (`forwards`), so the resting board needs no cleanup pass — the next
+     flip resets them. */
+  .flap__leaf {
+    z-index: 2;
+    backface-visibility: hidden;
+    animation-duration: calc(var(--flap-flip) / 2);
+    animation-fill-mode: forwards;
+  }
+  .flap__leaf--front {
+    transform-origin: bottom center;
+    transform: rotateX(0deg);
+  }
+  .flap__leaf--back {
+    transform-origin: top center;
+    transform: rotateX(90deg);
+  }
+
+  .flap.is-flipping .flap__leaf--front {
+    animation-name: flap-fall;
+    animation-timing-function: ease-in;
+  }
+  .flap.is-flipping .flap__leaf--back {
+    animation-name: flap-land;
+    animation-timing-function: ease-out;
+    animation-delay: calc(var(--flap-flip) / 2);
+  }
+
+  @keyframes flap-fall {
+    from {
+      transform: rotateX(0deg);
+    }
+    to {
+      transform: rotateX(-90deg);
+    }
+  }
+  @keyframes flap-land {
+    from {
+      transform: rotateX(90deg);
+    }
+    to {
+      transform: rotateX(0deg);
+    }
+  }
+
+  /* Reduced motion never reaches the script, so nothing here ever animates —
+     but a leaf left mid-fall by a media-query change would be a stuck card. */
+  @media (prefers-reduced-motion: reduce) {
+    .flap.is-flipping .flap__leaf--front,
+    .flap.is-flipping .flap__leaf--back {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  // Drives every split-flap on the page. Written for N instances even though
+  // the footer renders one — a component that assumes it is a singleton is the
+  // one thing that stops it being reused.
+  interface Flap {
+    el: HTMLElement;
+    top: HTMLElement;
+    bottom: HTMLElement;
+    front: HTMLElement;
+    back: HTMLElement;
+    /** The digit currently on the board. */
+    digit: string;
+    /** When this flap last started to turn, so it cannot turn faster than one
+        flip. During the fast stretch the low digits change hundreds of times a
+        second; the board can only show a few, which is exactly what a real
+        board does. */
+    at: number;
+  }
+
+  // Motion here is decorative, and 30 seconds of it is precisely what
+  // prefers-reduced-motion exists to suppress. Leave the server-rendered
+  // number — which is already the true one — untouched.
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.querySelectorAll<HTMLElement>("[data-splitflap]").forEach(setup);
+  }
+
+  function setup(root: HTMLElement) {
+    const from = Number(root.dataset.from);
+    const to = Number(root.dataset.to);
+    const width = Number(root.dataset.width);
+    const decimals = Number(root.dataset.decimals);
+    const duration = Number(root.dataset.duration);
+    const settle = Number(root.dataset.settle);
+    const flipMs = Number(root.dataset.flip);
+
+    const flaps: Flap[] = [...root.querySelectorAll<HTMLElement>("[data-flap]")].map((el) => {
+      const panel = (i: number) => el.children[i].firstElementChild as HTMLElement;
+      return {
+        el,
+        top: panel(0),
+        bottom: panel(1),
+        front: panel(2),
+        back: panel(3),
+        digit: panel(0).textContent ?? "0",
+        at: 0,
+      };
+    });
+    if (!flaps.length) return;
+
+    /** The value as bare digits, in flap order — the decimal point has its own
+        flap and is not in `flaps`, so it is dropped here too. */
+    const digitsOf = (n: number) => {
+      const [int, frac = ""] = n.toFixed(decimals).split(".");
+      return int.padStart(width, "0") + frac;
+    };
+
+    // ── Pacing ───────────────────────────────────────────────────────────
+    // Think in *rate*, not position, because what a viewer actually reads off
+    // the board is how fast the flaps are turning.
+    //
+    // The rate climbs exponentially through DECADES powers of ten over the
+    // run-up, then falls back through the same DECADES over the `settle` tail.
+    // That descent is the whole point: each decade the rate drops, one more
+    // flap slows below the speed it can physically turn and locks — thousands,
+    // then hundreds, tens, units, tenths, and the hundredths last of all. It
+    // is the cascade a real board makes as it stops.
+    //
+    // A single sigmoid cannot do this. Flattening its tail enough for the
+    // decimals to settle also freezes the opening half of the run solid; the
+    // curve is symmetric and this animation is not. Two matched exponentials
+    // are, and they meet with the same value AND the same slope, so the join
+    // at the start of the tail is invisible.
+    //
+    // `rate` is solved for last, from the distance still to cover, which is
+    // what makes the board land on exactly `to` at exactly `duration`.
+    const DECADES = 5;
+    const climb = duration - settle;
+    const tauUp = climb / (DECADES * Math.LN10);
+    const tauDown = settle / (DECADES * Math.LN10);
+    const spanUp = tauUp * (1 - Math.exp(-climb / tauUp));
+    const spanDown = tauDown * (1 - Math.exp(-settle / tauDown));
+    const rate = (to - from) / (spanUp + spanDown);
+    const climbed = rate * spanUp;
+
+    /** Where the counter should read `ms` into the run. */
+    function valueAt(ms: number) {
+      if (ms >= duration) return to;
+      return ms < climb
+        ? from + rate * tauUp * (Math.exp((ms - climb) / tauUp) - Math.exp(-climb / tauUp))
+        : from + climbed + rate * tauDown * (1 - Math.exp(-(ms - climb) / tauDown));
+    }
+
+    // ── Board ────────────────────────────────────────────────────────────
+    /** Show `n` with no animation — used to arm the board and to stop it. */
+    function snap(n: number) {
+      const digits = digitsOf(n);
+      flaps.forEach((f, i) => {
+        const d = digits[i];
+        f.digit = d;
+        f.at = 0;
+        f.el.classList.remove("is-flipping");
+        f.top.textContent = f.bottom.textContent = f.front.textContent = f.back.textContent = d;
+      });
+    }
+
+    /** Turn whichever flaps have changed and are not mid-flip. Returns true
+        once every flap is showing the digit it should be. */
+    function render(n: number, now: number): boolean {
+      const digits = digitsOf(n);
+      let settled = true;
+      flaps.forEach((f, i) => {
+        const d = digits[i];
+        if (d === f.digit) return;
+        settled = false;
+        if (now - f.at < flipMs) return;
+        f.at = now;
+        // Paint the card before dropping it: the slot's top half already shows
+        // the new digit (revealed as the front leaf falls away), its bottom
+        // half still shows the old one (covered as the back leaf lands).
+        f.top.textContent = d;
+        f.bottom.textContent = f.digit;
+        f.front.textContent = f.digit;
+        f.back.textContent = d;
+        f.digit = d;
+        // Restart the CSS animation. `void offsetWidth` between the remove and
+        // the add is the canonical flush — see CLAUDE.md; without it the
+        // browser coalesces the two class changes and nothing moves.
+        f.el.classList.remove("is-flipping");
+        void f.el.offsetWidth;
+        f.el.classList.add("is-flipping");
+      });
+      return settled;
+    }
+
+    // ── Run ──────────────────────────────────────────────────────────────
+    // The board itself is the control — not the sentence after it, which is
+    // ordinary prose and has no business being clickable.
+    const board = root.querySelector<HTMLElement>(".splitflap__flaps")!;
+    let raf = 0;
+    let began = 0;
+    let running = false;
+
+    function label(hint: string) {
+      board.setAttribute("aria-label", hint);
+    }
+
+    function tick(now: number) {
+      const elapsed = now - began;
+      const settled = render(valueAt(elapsed), now);
+      // Keep going a beat past the end if a flap was still cooling down when
+      // its last digit changed, so the board can never stop on a wrong number.
+      if (elapsed < duration || !settled) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+      running = false;
+      label(root.dataset.replay!);
+    }
+
+    function start() {
+      if (running) return;
+      running = true;
+      snap(from);
+      began = performance.now();
+      raf = requestAnimationFrame(tick);
+      label(root.dataset.stop!);
+    }
+
+    /** The WCAG 2.2.2 escape hatch: stop the motion on the true number. */
+    function stop() {
+      cancelAnimationFrame(raf);
+      running = false;
+      snap(to);
+      label(root.dataset.replay!);
+    }
+
+    // Promote the board to a control. It is only one now because a button
+    // rendered server-side would be dead for a reader without JavaScript.
+    //
+    // The `aria-hidden` comes off at the same moment: a focusable element may
+    // never be hidden from assistive tech. Nothing leaks out by dropping it,
+    // because `role="button"` makes its whole subtree presentational — the
+    // digits are not announced, only the name set below. The real number is
+    // still the .sr-only span that follows, which is read either way.
+    board.removeAttribute("aria-hidden");
+    board.setAttribute("role", "button");
+    board.tabIndex = 0;
+    // A control must have a name from the moment it exists. "Stop" is the
+    // honest one: the observer below starts the run as soon as the board is
+    // on screen, which is also the soonest anyone can reach it.
+    label(root.dataset.stop!);
+    board.addEventListener("click", () => (running ? stop() : start()));
+    board.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault(); // Space would scroll the page.
+      board.click();
+    });
+
+    // Arm the board and wait. It lives at the foot of the page: starting on
+    // load would mean the run finished long before anyone scrolled to it.
+    snap(from);
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        start();
+      },
+      { threshold: 0.5 },
+    );
+    io.observe(root);
+  }
+</script>

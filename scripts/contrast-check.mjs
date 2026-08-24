@@ -38,6 +38,7 @@ const PAIRS = [
   { fg: "--bg", bg: "--btn-light", min: 4.5, what: "Primary button label" },
   { fg: "--bg", bg: "--accent", min: 4.5, what: "Label on an accent fill (hover/focus states)" },
   { fg: "--bg", bg: "--select", min: 4.5, what: "Text inside <mark>" },
+  { fg: "--bg", bg: "--text", min: 4.5, what: "Split-flap counter digits (inverted flap face)" },
   { fg: "--accent", bg: "--bg", min: 3, what: "Accent used as an icon/indicator colour" },
   { fg: "--focus-ring-color", bg: "--bg", min: 3, what: "Keyboard focus ring (WCAG 2.4.13)" },
   { fg: "--focus-ring-color", bg: "--surface", min: 3, what: "Focus ring over a raised surface" },

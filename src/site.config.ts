@@ -99,8 +99,13 @@ export const SITE = {
     legal: [{ label: "Volunteering Terms", href: "/terms" }] as SiteLink[],
     /** Rendered as "© {copyright} {current year}". */
     copyright: "Community Cleanup PLG",
-    /** Optional sign-off line. Set to "" to omit. */
-    madeWith: "Made with 💚 in Brooklyn, New York",
+    /**
+     * The sign-off line under the copyright. It is preceded by the running
+     * pounds-collected total on a split-flap counter (SplitFlap.astro), so
+     * write it to read *after* a number — it starts mid-sentence on purpose.
+     * Set to "" to omit the whole line, counter included.
+     */
+    statLine: "pounds of trash picked up in Brooklyn, New York",
   },
 
   // ── Structured data (JSON-LD) ──────────────────────────────────────────────
@@ -127,11 +132,13 @@ export const SITE = {
   // and data if you never want it back.
   features: {
     /**
-     * The scrolling stats ticker across the bottom of the page.
-     * Off → src/components/SiteFooter.astro renders no ticker bar, and
-     * src/data/stats.json + stats.ts become unused.
+     * The scrolling stats ticker across the bottom of the page. Off since the
+     * split-flap counter took over the same figure in the footer's sign-off
+     * line — Ticker.astro is kept, wired up and one flag away, in case the
+     * band is ever wanted back. Turning both off leaves src/data/stats.json +
+     * stats.ts unused.
      */
-    ticker: true,
+    ticker: false,
     /**
      * Rotate the gallery. One switch, three effects, because they are the same
      * decision: the photo that leads the homepage carousel is also the photo in

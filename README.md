@@ -238,14 +238,15 @@ src/
     tokens.css             ← design tokens (colors, type, spacing, motion) — reskin here
     fonts.css              ← the @font-face blocks, with the font-swap recipe on top
     base.css               ← reset, base typography, links, focus ring, shared buttons
-    chrome.css             ← nav, footer, ticker, mobile menu
+    chrome.css             ← nav, footer, ticker, mobile menu (the counter styles itself)
   layouts/
     Base.astro             ← thin shell: <head>, style imports, header/slot/footer
   components/
     SiteHeader.astro       ← top nav (+ its client script)
     MobileMenu.astro       ← hamburger button + slide-over menu (+ its script)
-    SiteFooter.astro       ← footer, with the ticker band beneath it
-    Ticker.astro           ← the full-width stats band at the page foot; delete-able as one file
+    SiteFooter.astro       ← footer, incl. the split-flap sign-off line
+    SplitFlap.astro        ← the airport-board stats counter; delete-able as one file
+    Ticker.astro           ← the old full-width stats band; off, kept as an optional path
     NavLink.astro          ← one nav/footer link, incl. safe external-link handling
     Logo.astro             ← the logo mark — the only file that draws it
     Section.astro          ← the content column + its spacing options
@@ -392,8 +393,12 @@ the code:
   `Carousel.astro` — it has the same specificity as the rules it overrides, so
   source order is the only thing that makes it win.
 
-(The stats ticker is exempt from reduced-motion on purpose too: it starts paused
-and has its own play/pause button, which beats suppressing it.)
+(The split-flap counter in the footer goes the other way: reduced motion skips
+the script entirely and leaves the real number on the board, because a
+thirty-second count-up is exactly the kind of decoration the setting is for.
+Everyone else gets a stop/replay control — the band itself is the button — which
+is what keeps an auto-starting animation inside WCAG 2.2.2. The retired ticker
+was exempt for the opposite reason: it started paused, under explicit control.)
 
 ### Checking accessibility by hand
 

@@ -3,7 +3,9 @@
 // SITE.footer — edit src/site.config.ts, not this file.
 import { SITE } from "../site.config";
 import NavLink from "./NavLink.astro";
+import SplitFlap from "./SplitFlap.astro";
 import Ticker from "./Ticker.astro";
+import { POUNDS_COLLECTED, POUNDS_COLLECTED_DISPLAY } from "../data/stats";
 
 // Build-time year. The daily rebuild (site-checks.yml `redeploy`) is what keeps
 // this from going stale on 1 January without anyone pushing a commit.
@@ -27,7 +29,18 @@ const year = new Date().getFullYear();
     <div class="footer-right">
       {SITE.footer.legal.map((link) => <NavLink link={link} />)}
       <p class="footer-copyright">&copy; {SITE.footer.copyright} {year}</p>
-      {SITE.footer.madeWith && <p class="footer-made">{SITE.footer.madeWith}</p>}
+      {
+        SITE.footer.statLine && (
+          <p class="footer-made">
+            <SplitFlap
+              value={POUNDS_COLLECTED}
+              spoken={POUNDS_COLLECTED_DISPLAY}
+              from={1000}
+              label={SITE.footer.statLine}
+            />
+          </p>
+        )
+      }
     </div>
   </div>
   {SITE.features.ticker && <Ticker />}
