@@ -246,6 +246,8 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                       <p class="card__quote">
                         “{item.caption}
                         {enablePopup && Body && <span class="card__quote-more"> […]</span>}”
+                        {/*<!-- {enablePopup && Body && <span class="card__quote-more"></span>} -->*/}
+                        {/*<!-- {enablePopup && Body} -->*/}
                       </p>
                     </div>
                     {enablePopup && Body && (

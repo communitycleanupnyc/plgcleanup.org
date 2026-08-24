@@ -210,6 +210,7 @@ h1 {
   letter-spacing: -0.04em;
   font-weight: 400;
   color: var(--text);
+  /*color: var(--bg);*/
   background: var(--surface);
   text-decoration: none;
   border-radius: var(--hover-radius);
