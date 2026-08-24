@@ -69,7 +69,7 @@ export const SITE = {
         { label: "Join", href: "/join" },
         { label: "Schedule", href: "/schedule" },
         { label: "Service hours", href: "/community-service-hours" },
-        { label: "Lost & found", href: "/lost-and-found" },
+        { label: "Lost Treasure", href: "/lost-treasure" },
         { label: "Partners", href: "/partners" },
         { label: "NYC trash clubs", href: "/new-york-trash-clubs" },
         { label: "FAQ", href: "/faq" },
@@ -92,7 +92,7 @@ export const SITE = {
     { label: "Instagram", href: "https://www.instagram.com/communitycleanupplg/", external: true },
     {
       label: "Support us",
-      href: "https://www.amazon.com/registries/gl/guest-view/1Y3YRXM9ILG5I",
+      href: "/support",
       external: true,
     },
   ] as SiteLink[],

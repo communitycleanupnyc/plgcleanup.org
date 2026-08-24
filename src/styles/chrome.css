@@ -187,7 +187,7 @@
 
 .footer-grid {
   width: var(--site-w);
-  margin-left: var(--site-ml);
+  margin-inline: auto;
   padding-bottom: var(--edge);
   display: grid;
   grid-template-columns: auto auto 1fr;

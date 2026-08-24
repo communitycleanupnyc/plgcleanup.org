@@ -23,11 +23,12 @@ const { backHref = "/", backLabel = "← Back home" } = Astro.props;
 
 <style>
   .prose {
-    /* The content-page column (tokens.css). --site-ml is written in terms of
-       --site-w, so the left offset follows this override on its own. */
+    /* The content-page column (tokens.css). The override is local to this
+       element and `margin-inline: auto` resolves against it, so the column
+       re-centres at its narrower width on its own. */
     --site-w: var(--content-w);
     width: var(--site-w);
-    margin-left: var(--site-ml);
+    margin-inline: auto;
     padding-top: var(--space-section);
     padding-bottom: var(--space-block);
   }

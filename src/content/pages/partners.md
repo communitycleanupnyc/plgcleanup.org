@@ -18,3 +18,8 @@ Want to partner with us? [Email us](mailto:communitycleanupplg@gmail.com).
 - Awesome
 - Antilles Cafe
 - **[Bobbed Bandit](https://www.instagram.com/thebobbedbandit/)** is a favorite of ours for hosting larger events such as trashy hours, post-trashathon hangouts and celebrating community birthdays 🥳
+- **[Fiona's Bar](https://www.instagram.com/fionasbarbrooklyn/)** and our team have collaborated on several events small and large, and we regularly host post-clean hangouts there.
+
+# ⚕️ NYC Department of Sanitation
+
+We work closely with the Department of Sanitation to arrange drop-off locations and pick-ups after all of our volunteering events.

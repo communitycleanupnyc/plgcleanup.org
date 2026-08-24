@@ -22,7 +22,19 @@ Once in a while, we hold _trashy hours_ and meet at a local business that we [pa
 
 ## Team
 
-Some of our team members who help organize our cleanups, partnerships, and work with the Department of Sanitation are listed below. Curious about joining the team? Become a regular at our cleanups and ask when the next board meeting is! :)
+Our board members who help organize our cleanups, partnerships, and work with the Department of Sanitation are:
 
+- Spencer
+- Megan
+- Kristin 
+- Jess
+- Isaiah
+- Danielle
+- Sarah
+- Albert
+- Riley
+- Sarah
+- Nic
+- Jaan
 
-Still have inquiries that aren't covered by our [frequently asked questions](/faq)? Send us an [email](mailto:communitycleanupplg@gmail.com) or contact us on [Instagram](https://www.instagram.com/communitycleanupplg) or [Discord](https://discord.com/invite/H9her7r8N2)
+We are always looking for more folks to join our team, and we need your help! Curious? Come to one of our cleanups and ask when the next board meeting is! :)

@@ -111,14 +111,17 @@ main:focus {
   outline: none;
 }
 
-/* Main content column */
 /* ── Main ───────────────────────────────────────── */
 
+/* No max-width here on purpose. Every block inside main sizes itself to
+   `--site-w` and centres with `margin-inline: auto`, and auto margins resolve
+   against THIS element. Capping main capped that containing block, so any
+   column wider than the cap (94vw on any screen over ~960px) had its auto
+   margins collapse to zero and fell back to the left edge. Width is a property
+   of the column, not of main. */
 main {
   flex: 1;
-  max-width: var(--main-max-w);
   width: 100%;
-  margin-inline: auto;
   /* padding-top removed — site-chrome is in-flow sticky */
 }
 
@@ -140,7 +143,7 @@ h1 {
 
 .cta-actions {
   width: var(--site-w);
-  margin-left: var(--site-ml);
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;

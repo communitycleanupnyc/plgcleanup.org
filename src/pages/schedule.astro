@@ -111,11 +111,11 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
 <style>
   /* /schedule — the date list and the copy around it. */
   .schedule-page {
-    /* The narrower column every page but the home page runs in; --site-ml in
-       tokens.css is written in terms of --site-w, so the offset follows. */
+    /* The narrower column every page but the home page runs in
+       (--content-w in tokens.css); the auto margins below re-centre it. */
     --site-w: var(--content-w);
     width: var(--site-w);
-    margin-left: var(--site-ml);
+    margin-inline: auto;
     padding-top: var(--space-section);
     padding-bottom: var(--space-block);
   }

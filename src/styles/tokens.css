@@ -71,20 +71,24 @@
   --ticker-duration: 12s;
 
   /* ── Layout ────────────────────────────────────────────────────────────── */
-  /* Content column: width + derived left-offset for the 95→90vw breakout */
+  /* The site-wide content column. A block opts in with
+     `width: var(--site-w); margin-inline: auto;`. */
   --site-w: 94vw;
-  --site-ml: calc(50% - var(--site-w) / 2);
-  /* The column every page BUT the home page runs in: 65% of the window, so a
+  /* The column every page BUT the home page runs in: 60% of the window, so a
      page of words sits centred instead of hugging the left edge of a 94vw band.
-     A page opts in by setting `--site-w: var(--content-w)` on its container —
-     --site-ml above is written in terms of --site-w, so the offset follows it
-     with nothing else to change. Written as a literal, not var(--site-w): a
-     token that refers to the one overriding it is a cycle, and CSS drops both.
+     A page opts in by setting `--site-w: var(--content-w)` on its container;
+     the container centres itself with `margin-inline: auto`, so there is
+     nothing else to change. Written as a literal, not var(--site-w): a token
+     that refers to the one overriding it is a cycle, and CSS drops both.
+     There used to be a companion --site-ml token holding the derived left
+     offset. It could not work: a custom property that reads another one is
+     substituted where it is DECLARED (:root, where --site-w is 94vw), so a
+     page overriding --site-w inherited an offset computed for the wide band
+     and the narrow column sat flush left. Auto margins resolve per element,
+     which is the whole reason they are used instead.
      Phones keep the full width (see the media query at the foot of this file);
-     65% of a 390px screen is a sliver. */
+     60% of a 390px screen is a sliver. */
   --content-w: 94vw;
-  /* Reading-width cap on <main>. Widen it for an image-led site. */
-  --main-max-w: 900px;
   --ticker-h: 3.3rem;
   --nav-h: 3.52rem;
   /* Corner radius on nav links, footer links, and CTA buttons. 0 is a
@@ -96,6 +100,6 @@
    full site width, which is all a phone has room for. */
 @media (min-width: 900px) {
   :root {
-    --content-w: 65vw;
+    --content-w: 60vw;
   }
 }
