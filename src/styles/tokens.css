@@ -10,7 +10,7 @@
      which recomputes the contrast ratios asserted in the comments below. */
 :root {
   /* ── Colour ────────────────────────────────────────────────────────────── */
-  --bg: #004aad /* #000 */;
+  --bg: #00357a /* #000 */;
   --text: #e2e2e2 /* #e2e2e2 */;
   /* SURFACE tokens — backgrounds only. --surface was called --muted, a name that
      invited use as a text colour: at 1.44:1 on --bg it made the "← Back home"
