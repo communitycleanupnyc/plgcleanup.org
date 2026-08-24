@@ -1,8 +1,9 @@
 ---
 title: Community Partners
-description: The local businesses and neighborhood organizations that help keep Prospect Lefferts Gardens clean alongside Community Cleanup PLG.
+description: The local businesses and neighborhood organizations that help keep
+  Prospect Lefferts Gardens clean alongside Community Cleanup PLG.
+navMode: static
 ---
-
 # Community partners
 
 Community Cleanup PLG works with local businesses and
@@ -19,6 +20,7 @@ Want to partner with us? [Email us](mailto:communitycleanupplg@gmail.com).
 - Antilles Cafe
 - **[Bobbed Bandit](https://www.instagram.com/thebobbedbandit/)** is a favorite of ours for hosting larger events such as trashy hours, post-trashathon hangouts and celebrating community birthdays 🥳
 - **[Fiona's Bar](https://www.instagram.com/fionasbarbrooklyn/)** and our team have collaborated on several events small and large, and we regularly host post-clean hangouts there.
+- We have also held many events at **[Pacha Cafe](https://www.instagram.com/pachacafebk/)**, and their incredible team is always very welcoming and supportive!
 
 # ⚕️ NYC Department of Sanitation
 
