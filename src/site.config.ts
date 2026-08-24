@@ -90,11 +90,7 @@ export const SITE = {
     { label: "Email us!", href: "mailto:communitycleanupplg@gmail.com" },
     { label: "Discord", href: "https://discord.com/invite/H9her7r8N2", external: true },
     { label: "Instagram", href: "https://www.instagram.com/communitycleanupplg/", external: true },
-    {
-      label: "Support us",
-      href: "/support",
-      external: true,
-    },
+    { label: "Support us", href: "/support" },
   ] as SiteLink[],
 
   // ── Footer tail ────────────────────────────────────────────────────────────
