@@ -10,8 +10,8 @@
      which recomputes the contrast ratios asserted in the comments below. */
 :root {
   /* ── Colour ────────────────────────────────────────────────────────────── */
-  --bg: #000;
-  --text: #e2e2e2;
+  --bg: #004aad /* #000 */;
+  --text: #ffff /* #e2e2e2 */;
   /* SURFACE tokens — backgrounds only. --surface was called --muted, a name that
      invited use as a text colour: at 1.44:1 on --bg it made the "← Back home"
      link on every prose page, and the ticker's play/pause control, effectively
