@@ -2,6 +2,7 @@
 import { getCollection, render } from "astro:content";
 import Base from "../layouts/Base.astro";
 import Prose from "../components/Prose.astro";
+import { headingKey } from "../plugins/collapsible-sections";
 
 // One static route per Markdown file in src/content/pages/. The filename is the
 // URL slug (faq.md → /faq). index.astro, join.astro, and schedule.astro are their
@@ -36,7 +37,24 @@ const { page } = Astro.props;
 if (!page.body?.trim()) {
   throw new Error(`[pages] "${page.id}.md" has an empty body. Add the page content.`);
 }
-const { Content } = await render(page);
+const { Content, headings } = await render(page);
+
+// `collapse:` names a heading to fold into a dropdown (see
+// ../plugins/collapsible-sections.ts). A name that matches nothing would
+// otherwise be invisible — the page builds clean and simply never collapses,
+// which is what a renamed heading looks like. Checked against the headings
+// Astro extracted from this very page, so the two can't drift.
+const present = new Set(headings.map((h) => headingKey(h.text)));
+for (const name of page.data.collapse) {
+  if (!present.has(headingKey(name))) {
+    throw new Error(
+      `[pages] "${page.id}.md" asks to collapse the section "${name}", but has no heading with that text. ` +
+        `Its headings are: ${headings.map((h) => `"${h.text}"`).join(", ") || "(none)"}. ` +
+        `Capitalisation and spacing don't matter, but the words must match — renaming a heading means ` +
+        `renaming it in the "collapse" list too.`,
+    );
+  }
+}
 ---
 
 <Base title={page.data.title} description={page.data.description} navMode={page.data.navMode}>

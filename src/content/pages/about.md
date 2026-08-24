@@ -1,17 +1,15 @@
 ---
 title: About
 description: How Community Cleanup PLG grew from a team of neighbors in 2023 into a weekly volunteer trash cleanup crew in Prospect Lefferts Gardens, Brooklyn.
+collapse:
+  - Meet the team
 ---
 
 # We noticed trash
 
-Then we noticed how we felt about it. We also realized we wanted to meet our neighbors. 
+Then we noticed how we felt about it. We also realized we wanted to meet our neighbors. By feeding two birds with one scone, we were able to both help clean up our neighborhood and build a strong community.
 
-By feeding two birds with one scone, we were able to both help clean up our neighborhood and build a strong community with over 900+ volunteer hours and 5,500+ pounds of trash picked up since 2023. 
-
-Our volunteers help pick a different route every weekend where we pick up trash. 
-
-Once in a while, we hold _trashy hours_ and meet at a local business that we [partner](/partners) with. Dozens from our neighborhood show up. 
+Community Cleanup PLG has supported over 900+ volunteer hours and 5,500+ pounds of trash picked up since 2023. Our volunteers help pick a different route every weekend where we clean up. Once in a while, we hold _trashy hours_ and meet at a local business that we [partner](/partners) with. Dozens from our neighborhood show up. Thanks to our events, people have made new friends, felt more settled and at home in their neighborhood, and contributed to something greater - all from something as simple as picking up trash. 
 
 ## Values
 
@@ -20,21 +18,22 @@ Once in a while, we hold _trashy hours_ and meet at a local business that we [pa
 - We are an inclusive space: we share names and pronouns, and accommodate access needs.
 
 
-## Team
+## Meet the team
 
 Our board members who help organize our cleanups, partnerships, and work with the Department of Sanitation are:
 
-- Spencer
-- Megan
-- Kristin 
-- Jess
-- Isaiah
-- Danielle
-- Sarah
-- Albert
-- Riley
-- Sarah
-- Nic
-- Jaan
+- Danielle - Social Media Manager
+- Jess - Scheduling Coordinator 
+- Jess - Social Events Coordinator 
+- Nic - Neighborhood Collaboration Coordinator 
+- Spencer - Mutual Aid Coordinator 
+- Riley - Member-at-Large
+- Albert - Merchandise and Supplies Coordinator 
+- Isaiah - Civic Engagement Coordinator 
+- Sarah U - DSNY liaison 
+- Megan - Flatbush cart coordinator
+- Isaiah - Discord Moderator 
+- Spencer - Trash-a-Thon Coordinator 
+- Jaan - Digital Projects Technician
 
 We are always looking for more folks to join our team, and we need your help! Curious? Come to one of our cleanups and ask when the next board meeting is! :)

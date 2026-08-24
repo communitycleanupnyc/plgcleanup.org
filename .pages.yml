@@ -72,6 +72,22 @@ content:
         options:
           values: [ticker, static]
       - { name: body, label: Page content, type: rich-text, required: true }
+      # Sections that start folded up. Type the heading exactly as it appears in
+      # the page content above — "Team" folds the "## Team" section, heading and
+      # all, into a dropdown a reader clicks to open. Leave the list empty and
+      # the whole page reads straight through, which is the right answer for
+      # most pages. A name that matches no heading fails the build (with a
+      # message naming it) rather than silently doing nothing.
+      - name: collapse
+        label: Sections that fold up (optional)
+        type: string
+        list: true
+        required: false
+        description: >-
+          Optional. A heading from the page content that should start collapsed,
+          e.g. "Team" — readers see the heading with an arrow and click to
+          unfold the rest. Capitalisation and spacing don't matter, but the
+          words must match a heading on the page.
 
   - name: gallery
     label: Gallery

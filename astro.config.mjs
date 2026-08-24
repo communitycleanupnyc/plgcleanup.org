@@ -2,6 +2,9 @@ import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 // Vendored, not an npm dependency — see the header of that file for why.
 import deleteUnusedImages from "./src/integrations/delete-unused-images/index.js";
+// Ours: lets a content page collapse a named section into a <details> dropdown
+// from its frontmatter, so the Markdown stays plain Markdown.
+import collapsibleSections from "./src/plugins/collapsible-sections.ts";
 
 export default defineConfig({
   // Canonical production origin — used to build absolute URLs (e.g. the social
@@ -40,6 +43,12 @@ export default defineConfig({
       ],
     }),
   ],
+  markdown: {
+    // Runs over the rendered HTML of every Markdown file — content pages and
+    // gallery entries alike. It is a no-op for anything without a `collapse:`
+    // list in its frontmatter, which is everything but /about today.
+    rehypePlugins: [collapsibleSections],
+  },
   server: {
     host: true,
   },

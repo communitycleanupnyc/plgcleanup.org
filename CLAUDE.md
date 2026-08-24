@@ -162,6 +162,19 @@ Two things to know when writing a component here:
 - **Add a page:** create `src/content/pages/<slug>.md` with `title` and
   `description` frontmatter plus a Markdown body, then add the link to
   `SITE.nav` in `src/site.config.ts`.
+- **Fold a section into a dropdown:** add the heading's own text to `collapse:`
+  in that page's frontmatter (`collapse:` / `  - Team`). The heading becomes the
+  control you click and its whole section unfolds beneath it, on the same spring
+  the same 400ms curve the Figma FAQ folds on.
+  `src/plugins/collapsible-sections.ts` rewrites the Markdown at build time —
+  the page stays plain Markdown, because the body is edited in a rich-text field
+  that is entitled to eat raw HTML. **Rename a collapsed heading and you must
+  rename it in `collapse:` too**; `[slug].astro` fails the build (naming the
+  headings the page does have) if they disagree. That check lives in the route
+  and NOT in the plugin on purpose — a plugin that throws inside Astro's
+  Markdown pipeline doesn't fail the build, it emits an empty page, silently.
+  Native `<details>`, so it works with scripts off. Styled in `Prose.astro`; the
+  caret is `caret.ts`, which is also the carousel's.
 - **Add a gallery item:** drop the photo in `src/assets/gallery/`, create
   `src/content/gallery/<name>.md` with `title`, `caption`, `alt`, `image`,
   `order` (unique; the fallback order when `features.rotateGallery` is off) and

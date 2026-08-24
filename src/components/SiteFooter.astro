@@ -28,7 +28,7 @@ const year = new Date().getFullYear();
     </div>
     <div class="footer-right">
       {SITE.footer.legal.map((link) => <NavLink link={link} />)}
-      <p class="footer-copyright">&copy; {SITE.footer.copyright} {year}</p>
+      <p class="footer-copyright">&copy; {year} {SITE.footer.copyright}</p>
       {
         SITE.footer.statLine && (
           <p class="footer-made">

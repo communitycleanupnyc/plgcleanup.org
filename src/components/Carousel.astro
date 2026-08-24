@@ -4,6 +4,7 @@ import type { ImageMetadata } from "astro";
 import type { CarouselProps } from "./carousel.types";
 import { DEFAULT_CAROUSEL_LABELS } from "./carousel.types";
 import SectionHeading from "./SectionHeading.astro";
+import { CARET } from "./caret";
 import { lqip } from "../lib/lqip";
 
 const {
@@ -257,20 +258,25 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                         aria-controls={panelId(index)}
                         aria-label={withTitle(L.open, item.title)}
                       >
+                        {/* The site's caret, drawn from the one place its
+                            geometry lives (./caret.ts) — a collapsible section
+                            on a content page draws the same one. It points up
+                            here because this panel rises; see the rotation on
+                            .card__toggle-icon below. */}
                         <svg
                           class="card__toggle-icon"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 16 16"
+                          width={CARET.size}
+                          height={CARET.size}
+                          viewBox={CARET.viewBox}
                           fill="none"
                           aria-hidden="true"
                         >
                           <path
-                            d="M4 10l4-4 4 4"
+                            d={CARET.path}
                             stroke="currentColor"
-                            stroke-width="1.5"
-                            stroke-linecap="square"
-                            stroke-linejoin="miter"
+                            stroke-width={CARET.strokeWidth}
+                            stroke-linecap={CARET.strokeLinecap}
+                            stroke-linejoin={CARET.strokeLinejoin}
                           />
                         </svg>
                       </button>

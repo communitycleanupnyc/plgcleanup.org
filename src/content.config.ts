@@ -18,6 +18,11 @@ const pages = defineCollection({
     title: filled("title"),
     description: filled("description"),
     navMode: z.enum(["ticker", "static"]).default("static"),
+    // Headings on this page that fold into a dropdown: the heading becomes the
+    // thing you click and its section unfolds beneath. Matched by text, so
+    // `- Team` collapses "## Team". src/plugins/collapsible-sections.ts does
+    // the work and fails the build if a name here matches no heading.
+    collapse: z.array(filled("collapse")).default([]),
   }),
 });
 

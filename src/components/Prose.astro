@@ -51,14 +51,142 @@ const { backHref = "/", backLabel = "← Back home" } = Astro.props;
     margin-bottom: 1.25rem;
   }
 
+  /* Lists match the paragraphs around them. Without this they fall back to the
+     browser's default 1rem — <body> sets no size — so raising --fs-body moved
+     the prose and left every bullet behind. `li` inherits it, and so does a
+     nested list: --fs-body is an absolute rem, so nothing compounds. */
   .prose :global(ul),
   .prose :global(ol) {
+    font-size: var(--fs-body);
     margin: 0 0 1.25rem 1.25rem;
     line-height: 1.6;
   }
 
   .prose :global(li) {
     margin-bottom: 0.375rem;
+  }
+
+  /* ── Collapsible section ────────────────────────────────────────────────
+     Built at build time by src/plugins/collapsible-sections.ts, out of a
+     heading a page names in its `collapse:` frontmatter: the heading becomes a
+     <summary> you click and the rest of its section unfolds beneath. The
+     markup arrives through the slot, so it is styled with :global() like the
+     rest of the Markdown here.
+
+     Native <details> does the work — keyboard, screen readers, and open/close
+     with JavaScript off all come free, and there is no script to maintain. */
+  .prose :global(.disclosure) {
+    /* One duration and one curve for everything that moves during the fold, so
+       the height, the fade, the padding and the caret can't drift apart. Both
+       numbers are lifted from the reference this was asked to match
+       (config.figma.com/san-francisco/faq): 400ms on the default `ease`, which
+       --ease-out already is. Deliberately NOT the site's spring — that curve is
+       front-loaded, which is right for a panel sliding across the screen and
+       wrong here, where it makes a section look like it snaps open and then
+       creeps the last of the way. */
+    --fold: 400ms var(--ease-out);
+    /* The rule reads as "there is a control on this line", the way a row of an
+       FAQ list does, and marks where the fold begins. */
+    border-top: 1px solid var(--line);
+    margin: 2rem 0 1.25rem;
+  }
+
+  .prose :global(.disclosure__summary) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0 0.75rem;
+    cursor: pointer;
+    /* Both are needed to drop the UA's own disclosure triangle: the standard
+       property, and the WebKit pseudo-element for Safari before 18. */
+    list-style: none;
+    color: var(--text);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  .prose :global(.disclosure__summary::-webkit-details-marker) {
+    display: none;
+  }
+  /* The heading keeps its type but gives up its spacing — the <details> above
+     owns the gap now, so the row can't inherit a margin that pushes the caret
+     out of line with the text. */
+  .prose :global(.disclosure__summary :is(h1, h2, h3, h4, h5, h6)) {
+    margin: 0;
+  }
+  /* Hover only where hovering is real: on touch, :hover sticks after the tap
+     and would leave the heading green while the section is open. Same reasoning
+     as the carousel caption. */
+  @media (hover: hover) {
+    .prose :global(.disclosure__summary:hover) {
+      color: var(--accent);
+    }
+  }
+  .prose :global(.disclosure__summary:active) {
+    color: var(--accent);
+  }
+
+  /* Parked pointing DOWN — the section drops open, so the caret should point
+     the way the content is about to travel — and rotating to its drawn
+     orientation (up) once it has. The carousel's caret makes the mirrored
+     journey for its panel, which rises; both are the same glyph (caret.ts). */
+  .prose :global(.disclosure__caret) {
+    flex: none;
+    rotate: 180deg;
+    transition: rotate var(--fold);
+  }
+  .prose :global(.disclosure[open] .disclosure__caret) {
+    rotate: 0deg;
+  }
+
+  /* ── The fold ──
+     ::details-content is the box a browser wraps everything after the <summary>
+     in, and it is the only handle on that content, so this is where the
+     animation has to live.
+
+     The height comes from a grid row going 0fr → 1fr, NOT from animating
+     block-size to `auto`. `auto` is a keyword, and interpolating to it needs
+     `interpolate-size: allow-keywords`, which not every current browser has —
+     where it is missing the section simply snapped open, which is what this
+     replaced. A fractional row needs no keyword interpolation, so it animates
+     wherever ::details-content itself is understood. It is also exactly what
+     the Figma FAQ does, down to the fade and the padding arriving with it.
+
+     Two of the four transitions are doing something less obvious:
+     · opacity — the text fades up as the row grows. This is most of why the
+       reference feels soft rather than mechanical; without it the copy is at
+       full strength in a box that is still 10px tall.
+     · content-visibility — the property the browser flips to hide a closed
+       section. Transitioned `allow-discrete`, it holds the content painted for
+       the length of the close instead of it vanishing on the first frame. */
+  .prose :global(.disclosure::details-content) {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-rows var(--fold),
+      opacity var(--fold),
+      padding-block-end var(--fold),
+      content-visibility var(--fold) allow-discrete;
+  }
+  .prose :global(.disclosure[open]::details-content) {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    /* Grows with the fold rather than being there from the start, so a
+       half-open section has proportionate breathing room under it. */
+    padding-block-end: 0.75rem;
+  }
+  /* The single grid item. `min-height: 0` is what lets the row shrink below the
+     content's natural height — without it the row is never smaller than the
+     text and nothing moves — and `overflow: hidden` is what crops the text
+     while it does. The pair is load-bearing; neither works alone. */
+  .prose :global(.disclosure__body) {
+    min-height: 0;
+    overflow: hidden;
+  }
+  /* The gap under the section is the animated padding above, so the last
+     paragraph gives up the margin every other paragraph here carries. */
+  .prose :global(.disclosure__body > :last-child) {
+    margin-bottom: 0;
   }
 
   .prose-back {
@@ -76,4 +204,17 @@ const { backHref = "/", backLabel = "← Back home" } = Astro.props;
     text-decoration-color: var(--text);
   }
   /* Focus ring comes from the global :focus-visible rule in base.css. */
+
+  /* ── Reduced motion ──────────────────────────────────────────────────────
+     MUST STAY LAST IN THIS FILE: these selectors have the same specificity as
+     the rules they override, so source order alone decides them.
+
+     Suppresses the fold's height animation and the caret's rotation — both are
+     movement. The section still opens and closes; it just arrives. */
+  @media (prefers-reduced-motion: reduce) {
+    .prose :global(.disclosure::details-content),
+    .prose :global(.disclosure__caret) {
+      transition: none;
+    }
+  }
 </style>

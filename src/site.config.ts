@@ -90,6 +90,11 @@ export const SITE = {
     { label: "Email us!", href: "mailto:communitycleanupplg@gmail.com" },
     { label: "Discord", href: "https://discord.com/invite/H9her7r8N2", external: true },
     { label: "Instagram", href: "https://www.instagram.com/communitycleanupplg/", external: true },
+    {
+      label: "GitHub",
+      href: "https://github.com/communitycleanupnyc/plgcleanup.org/",
+      external: true,
+    },
     { label: "Support us", href: "/support" },
   ] as SiteLink[],
 
@@ -97,15 +102,15 @@ export const SITE = {
   footer: {
     /** Legal/terms links, shown above the copyright. */
     legal: [{ label: "Volunteering Terms", href: "/terms" }] as SiteLink[],
-    /** Rendered as "© {copyright} {current year}". */
-    copyright: "Community Cleanup PLG",
+    /** Rendered as "© {current year} {copyright}". */
+    copyright: "Community Cleanup PLG · Brooklyn, New York",
     /**
      * The sign-off line under the copyright. It is preceded by the running
      * pounds-collected total on a split-flap counter (SplitFlap.astro), so
      * write it to read *after* a number — it starts mid-sentence on purpose.
      * Set to "" to omit the whole line, counter included.
      */
-    statLine: "pounds of trash picked up in Brooklyn, New York",
+    statLine: "pounds of trash picked up.",
   },
 
   // ── Structured data (JSON-LD) ──────────────────────────────────────────────
