@@ -11,6 +11,15 @@
 
 html {
   background: var(--bg);
+  /* Tells the browser this page is dark in EVERY OS setting, which is the truth:
+     there is one palette in tokens.css and no prefers-color-scheme override.
+     Without it a light-mode visitor gets light scrollbars, a light form-control
+     and text-selection UI, and a white flash before the first paint — the
+     browser's own chrome contradicting the page. Declared rather than left to
+     `prefers-color-scheme` because the site does not follow the OS; the icons
+     do (public/favicon.svg), because they are drawn on the browser's surface
+     rather than ours. */
+  color-scheme: dark;
 }
 
 ::selection {

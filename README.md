@@ -189,7 +189,7 @@ npm run check     # type-check (astro check)
 npm run a11y      # colour-contrast gate — reads src/styles/tokens.css, no build needed
 npm run format    # auto-format with Prettier
 npm run audit     # the launch gate — see below (the pre-push hook runs this too)
-npm run gen:logo  # regenerate favicon/touch-icon/logo.webp from public/images/logo.svg
+npm run gen:logo  # regenerate favicon/touch-icon/logo.webp — after a logo OR palette change
 ```
 
 `npm run audit` runs `scripts/seo-audit.mjs` over the built `dist/`. Together
@@ -333,8 +333,16 @@ organization. To make it a different site:
    drop `.woff2` files in `public/fonts/`, rewrite the two `@font-face` blocks,
    then point `--font-body` / `--font-display` and `SITE.fonts` at them.
 4. **`src/components/Logo.astro`** — replace the `<svg>`. It's the only file
-   that draws the mark. Favicons are `public/favicon.svg`, `favicon.png`, and
-   `apple-touch-icon.png` (`npm run gen:logo` regenerates the raster ones).
+   that draws the mark. The favicons (`public/favicon.svg`, `favicon.png`,
+   `apple-touch-icon.png`) are all **generated** — `npm run gen:logo` redraws
+   them from `public/images/logo.svg`, tinted from `--accent` and `--bg` in
+   `tokens.css`. So run it after a palette change too, not just after redrawing
+   the logo; `npm run audit` fails if the favicon and the palette disagree.
+   The icons ship in two greens because the browser's tab strip is white in a
+   light OS theme and near-black in a dark one — `favicon.svg` carries a
+   `prefers-color-scheme` rule, and the PNG fallback takes the shade that
+   clears 3:1 against both. The page itself has only one theme (`color-scheme:
+dark` in `base.css` says so, which is why the scrollbars match).
 5. **`src/content/`** — `pages/*.md` for prose pages, `gallery/*.md` plus photos
    in `src/assets/gallery/` for the carousel.
 6. **`.pages.yml`** — if the editors use Pages CMS, mirror any field changes
