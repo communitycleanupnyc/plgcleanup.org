@@ -32,7 +32,6 @@ Our board members who help organize our cleanups, partnerships, and work with th
 - Isaiah - Civic Engagement Coordinator 
 - Sarah U - DSNY liaison 
 - Megan - Flatbush cart coordinator
-- Isaiah - Discord Moderator 
 - Spencer - Trash-a-Thon Coordinator 
 - Jaan - Digital Projects Technician
 
