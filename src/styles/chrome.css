@@ -618,9 +618,12 @@
   color: var(--bg);
   outline: none;
 }
+/* Same outlined treatment as the home page's (base.css); only the type size
+   differs here. The menu's primary above it is the filled accent, so the two
+   read as one button in two weights. */
 .mobile-menu-ctas .cta-secondary {
-  background: var(--surface);
-  color: var(--text);
+  background: transparent;
+  color: var(--accent);
   font-size: var(--fs-lg);
   transition:
     background-color var(--dur-fast) var(--ease-out),

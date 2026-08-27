@@ -34,12 +34,17 @@ import { readFileSync } from "node:fs";
 const PAIRS = [
   { fg: "--text", bg: "--bg", min: 4.5, what: "Body text on the page background" },
   { fg: "--text-muted", bg: "--bg", min: 4.5, what: "Dim text: prose back-link, ticker control" },
-  { fg: "--text", bg: "--surface", min: 4.5, what: "Text on a raised surface (.cta-secondary)" },
+  { fg: "--text", bg: "--surface", min: 4.5, what: "Text on a raised surface (the footer ticker)" },
   { fg: "--bg", bg: "--btn-light", min: 4.5, what: "Primary button label" },
   { fg: "--bg", bg: "--accent", min: 4.5, what: "Label on an accent fill (hover/focus states)" },
   { fg: "--bg", bg: "--select", min: 4.5, what: "Text inside <mark>" },
   { fg: "--bg", bg: "--text", min: 4.5, what: "Split-flap counter digits (inverted flap face)" },
-  { fg: "--accent", bg: "--bg", min: 3, what: "Accent used as an icon/indicator colour" },
+  {
+    fg: "--accent",
+    bg: "--bg",
+    min: 4.5,
+    what: "Accent as foreground: .cta-secondary's label and outline, icons, indicators",
+  },
   { fg: "--focus-ring-color", bg: "--bg", min: 3, what: "Keyboard focus ring (WCAG 2.4.13)" },
   { fg: "--focus-ring-color", bg: "--surface", min: 3, what: "Focus ring over a raised surface" },
 ];

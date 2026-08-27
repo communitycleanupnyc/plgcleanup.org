@@ -209,18 +209,27 @@ h1 {
   background: var(--accent);
   outline: none;
 }
+/* The quieter half of the pair. This was a grey --surface fill, which was the
+   only patch of neutral grey on the page and read as a disabled button sitting
+   directly under the hero. It is now the accent, outlined: same size, same
+   weight, half the visual volume, and it fills in on hover — so mint stays the
+   site's single interaction colour instead of the page gaining a second brand
+   colour. --accent on --bg is 7.99:1 (gated in scripts/contrast-check.mjs),
+   clear of the 4.5:1 AA minimum for the label and the 3:1 for the outline.
+   The 2px border is subtracted from the padding so this button stays exactly
+   the same height as .cta-primary stacked above it. */
 .cta-secondary {
   display: block;
   text-align: center;
   text-transform: uppercase;
-  padding: 1.1rem 1.5rem;
+  padding: calc(1.1rem - 2px) calc(1.5rem - 2px);
   font-family: var(--font-body);
   font-size: var(--fs-cta);
   letter-spacing: -0.04em;
   font-weight: 400;
-  color: var(--text);
-  /*color: var(--bg);*/
-  background: var(--surface);
+  color: var(--accent);
+  background: transparent;
+  border: 2px solid var(--accent);
   text-decoration: none;
   border-radius: var(--hover-radius);
   transition:
