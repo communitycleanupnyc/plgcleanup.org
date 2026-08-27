@@ -13,6 +13,7 @@ Want to partner with us? [Email us](mailto:communitycleanupplg@gmail.com).
 
 ## Our partners
 
+- We work with The **[Sanitation Foundation](https://sanitationfoundation.galaxydigital.com/agency/detail/?agency_id=171449)** who host our Community Steward page for more volunteers to find us through.
 - **[Prospect Lefferts Gardens Neighborhood Association](https://www.plgna.org/)**
 - **Maple Street Community Garden** — hosts our tool cart, and people volunteering at both trash club and the garden is common.
 - **[Hamlet](https://www.instagram.com/hamletcoffeecompany/)** is one of our favorite cafes in the neighborhood where we stop before, during, or after our cleanups :)
