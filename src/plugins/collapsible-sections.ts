@@ -33,38 +33,11 @@
 // a hand-rolled toggle would give us for free, in a repo with no full-time
 // maintainer.
 import { CARET } from "../components/caret";
+import { headingKey, isHeading, label, rank, type File, type Node, type Root } from "./hast";
 
-// Minimal shapes for the HTML syntax tree (hast) this plugin edits. Declared
-// here rather than imported from @types/hast: that would be a dependency, and
-// this is the whole of what we touch.
-interface Node {
-  type: string;
-  tagName?: string;
-  properties?: Record<string, unknown>;
-  children?: Node[];
-  value?: string;
-}
-interface Root extends Node {
-  children: Node[];
-}
-interface File {
-  data?: { astro?: { frontmatter?: Record<string, unknown> } };
-}
-
-const HEADINGS = new Set(["h1", "h2", "h3", "h4", "h5", "h6"]);
-const rank = (node: Node) => Number(node.tagName?.[1]);
-const isHeading = (node: Node) => node.type === "element" && HEADINGS.has(node.tagName ?? "");
-
-/** Heading text, flattened. */
-function label(node: Node): string {
-  if (node.type === "text") return node.value ?? "";
-  return (node.children ?? []).map(label).join("");
-}
-
-/** The matching rule, shared with the check in src/pages/[slug].astro so the
-    two can't disagree about what counts as the same heading: case- and
-    whitespace-insensitive, so "our team" in the frontmatter finds "## Our Team". */
-export const headingKey = (text: string) => text.trim().replace(/\s+/g, " ").toLowerCase();
+// Re-exported because src/pages/[slug].astro checks the `collapse:` names
+// against this page's real headings with the same rule (see ./hast.ts).
+export { headingKey };
 
 function caret(): Node {
   return {

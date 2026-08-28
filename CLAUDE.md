@@ -125,6 +125,19 @@ Things that will silently break if you don't know them:
   tried; it also blocks hit-testing, so a slide that is inert when the pointer
   enters it fires no `pointerenter` and never runs its hover crossfade. The
   highlight visibly stops following the mouse. Don't swap it back.
+- **Every subheading of a Markdown page carries a `#` link to itself**
+  (`src/plugins/heading-anchors.ts`), so a section can be shared by URL. Two
+  things there look wrong and aren't: the plugin order in `astro.config.mjs`
+  (`rehypeHeadingIds` runs first because Astro's own copy runs too late for the
+  anchors to see an id, then `headingAnchors`, then `collapsibleSections`), and
+  the link holding no text — the `#` is drawn by CSS in `Prose.astro`, because a
+  text node there lands in the heading text Astro collects, which is what the
+  `collapse:` check reads ("Meet the team#" fails the build). The ids are
+  Astro's github-slugger ids; don't slug headings a second time here.
+- **`src/plugins/hast.ts`** holds the syntax-tree vocabulary both Markdown
+  plugins share (`isHeading`, `label`, `rank`, `headingKey`) so they can't
+  disagree about what a heading is. It is not a dependency — those types are the
+  whole of what we touch of hast.
 - **`.pages.yml` nesting is fussy.** `settings.content` must be an object and
   commit messages must sit under `commit.templates`. A wrong shape parses fine and
   does nothing.
@@ -176,6 +189,9 @@ Two things to know when writing a component here:
   Markdown pipeline doesn't fail the build, it emits an empty page, silently.
   Native `<details>`, so it works with scripts off. Styled in `Prose.astro`; the
   caret is `caret.ts`, which is also the carousel's.
+- **Link to a section of a page:** nothing to do — hover a subheading and click
+  the `#` beside it, or read the id out of the heading's `id` attribute
+  (`/faq#do-i-need-to-register`). Renaming the heading changes the address.
 - **Put a raccoon on a page:** add `raccoon: ../../assets/raccoon-<name>.webp` to
   that page's frontmatter (`src/content/pages/*.md`) and it appears in the
   right-hand margin — tap to spin, drag to throw. `Raccoon.astro` holds the pose

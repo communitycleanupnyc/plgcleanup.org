@@ -5,6 +5,15 @@ import deleteUnusedImages from "./src/integrations/delete-unused-images/index.js
 // Ours: lets a content page collapse a named section into a <details> dropdown
 // from its frontmatter, so the Markdown stays plain Markdown.
 import collapsibleSections from "./src/plugins/collapsible-sections.ts";
+// Ours: appends the "#" link to every subheading, so a section can be shared
+// by URL.
+import headingAnchors from "./src/plugins/heading-anchors.ts";
+// Astro's own heading-id plugin, run early — see the note on rehypePlugins
+// below. Not declared in package.json on purpose: it is astro's own dependency,
+// pinned by astro to one exact version, and this import is the recipe Astro's
+// docs give for plugins that need the ids. Declaring it here as well would risk
+// a second, differently-versioned copy the day astro moves.
+import { rehypeHeadingIds } from "@astrojs/markdown-remark";
 
 export default defineConfig({
   // Canonical production origin — used to build absolute URLs (e.g. the social
@@ -44,10 +53,18 @@ export default defineConfig({
     }),
   ],
   markdown: {
-    // Runs over the rendered HTML of every Markdown file — content pages and
-    // gallery entries alike. It is a no-op for anything without a `collapse:`
-    // list in its frontmatter, which is everything but /about today.
-    rehypePlugins: [collapsibleSections],
+    // Both run over the rendered HTML of every Markdown file — content pages
+    // and gallery entries alike. collapsibleSections is a no-op for anything
+    // without a `collapse:` list in its frontmatter.
+    //
+    // ORDER, and all three positions are load-bearing:
+    //   rehypeHeadingIds — Astro runs its own copy of this AFTER the plugins
+    //     listed here, which is too late for headingAnchors to see an id. It is
+    //     safe to run twice: the second pass leaves an id that already exists
+    //     alone, so the ids stay Astro's and stay stable.
+    //   headingAnchors — before collapsibleSections, so a heading that moves
+    //     into a <summary> takes its link with it.
+    rehypePlugins: [rehypeHeadingIds, headingAnchors, collapsibleSections],
   },
   server: {
     host: true,

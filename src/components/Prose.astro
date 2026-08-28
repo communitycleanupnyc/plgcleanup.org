@@ -207,6 +207,42 @@ const { backHref = "/", backLabel = "← Back home" } = Astro.props;
     margin-bottom: 0;
   }
 
+  /* ── Heading links ───────────────────────────────────────────────────────
+     src/plugins/heading-anchors.ts appends one "#" link to every subheading on
+     the page, pointing at that heading's own id, so a section can be linked to
+     directly. Its accessible name comes from the plugin; here it is only ever
+     decoration beside the words.
+
+     Revealed on hover of the heading and whenever the link itself takes
+     keyboard focus. On a touch screen there is no hover to reveal it with, so
+     it simply stays visible — the same reasoning as the carousel caption. */
+  .prose :global(.heading-anchor) {
+    color: var(--text-muted);
+    font-weight: 400;
+    text-decoration: none;
+  }
+  /* The glyph is drawn here rather than sitting in the markup: a "#" text node
+     inside the heading would be swept into the heading's own text when Astro
+     collects the page's headings — see src/plugins/heading-anchors.ts. It does
+     not reach the accessible name either way: the link's aria-label is what
+     names it, and a label wins over any content, generated or not. */
+  .prose :global(.heading-anchor)::after {
+    content: "#";
+    margin-left: 0.35em;
+  }
+  @media (hover: hover) {
+    .prose :global(.heading-anchor) {
+      /* Fades rather than being taken out of flow, so revealing it can't move
+         the heading's own text sideways. */
+      opacity: 0;
+      transition: opacity var(--dur-fast) var(--ease-out);
+    }
+    .prose :global(:is(h2, h3, h4, h5, h6):hover .heading-anchor),
+    .prose :global(.heading-anchor:focus-visible) {
+      opacity: 1;
+    }
+  }
+
   .prose-back {
     display: inline-block;
     margin-top: 1rem;
@@ -231,7 +267,8 @@ const { backHref = "/", backLabel = "← Back home" } = Astro.props;
      movement. The section still opens and closes; it just arrives. */
   @media (prefers-reduced-motion: reduce) {
     .prose :global(.disclosure::details-content),
-    .prose :global(.disclosure__caret) {
+    .prose :global(.disclosure__caret),
+    .prose :global(.heading-anchor) {
       transition: none;
     }
   }
