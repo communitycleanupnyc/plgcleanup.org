@@ -15,7 +15,14 @@ Did we miss any, or curious about starting a trash club in your neighborhood? [E
 ## Clubs around the city
 
 - **[Community Cleanup PLG](/)** – Prospect Lefferts Gardens, Brooklyn.
+- **[Greenpoint Trash Club](https://greenpointtrashclub.org/)** – Greenpoint, Brooklyn. 
 - **[Clean Up Crown Heights](https://cleanupcrownheights.weebly.com/)** – Crown Heights, Brooklyn.
+- **[Astoria Trash Club](https://astoriatrashclub.org/)** – Astoria, Queens.
+- **[Sunnyside Trash Club](https://www.instagram.com/sunnysidetrashclub/)** – Sunnyside, Queens.
+- **[Pick Up Pigeons](https://www.instagram.com/pickuppigeons/)** – Around Brooklyn & Queens.
+- **[Club Canned](https://www.instagram.com/clubcanned/)** – Around Brooklyn.
+- **[East Williamsburg Trash Club](https://www.instagram.com/eastwburgtrashclub/)** – East Williamsburg, Brooklyn.
+- **[NYC Trash Club](https://trashclub.nyc/)** – occasional cleanups, more centered on events in Brooklyn around trash infrastructure.
 
 ## Fort Tilden / Breezy Point Beach Cleanup
 Times: Mornings, every Friday, Saturday, and Sunday.
@@ -43,4 +50,6 @@ A: "We're not a non-profit organization, so we can't supply the cleanup gear, un
 
 Trash clubs keep making the news. A few stories worth reading about why efforts like ours are growing:
 
-- [NYC’s newest hobby is cleaning up trash and documenting the filth](https://www.washingtonpost.com/nation/2026/03/27/new-york-trash-cleanup-groups/) — Washington Post
+- [In New York, trash clubs are becoming a social movement](https://www.washingtonpost.com/nation/2026/03/27/new-york-trash-cleanup-groups/) — Washington Post
+- [Greenpoint Trash Club – the only club without a cover](https://brooklyneagle.com/311169/greenpoint-trash-club-the-only-club-without-a-cover/) – Brooklyn Eagle
+- [Garbage Nights Out: How Trash Clubs Are Cleaning and Connecting NYC](https://lavocedinewyork.com/en/new-york/2025/11/25/garbage-nights-out-how-trash-clubs-are-cleaning-and-connecting-nyc/) – La Voce di New York
