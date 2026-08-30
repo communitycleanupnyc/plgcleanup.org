@@ -6,13 +6,16 @@ navMode: static
 ---
 # Community partners
 
-Community Cleanup PLG works with local businesses and organizations. These are partners who donate supplies, host us, spread the word, or show up to clean.
+Community Cleanup PLG works with a city department in addition to local businesses, associations, and groups. These are partners who donate supplies, host us, spread the word, or show up to clean.
 
 Want to partner with us? [Email us](mailto:communitycleanupplg@gmail.com).
 
-## Our partners
+# ⚕️ NYC Department of Sanitation
 
-- We work with The **[Sanitation Foundation](https://sanitationfoundation.galaxydigital.com/agency/detail/?agency_id=171449)** who host our Community Steward page for more volunteers to find us. We have also received their Tool Grant in 2025 and 2026 for more supplies!
+We work closely with the Department of Sanitation to arrange drop-off locations and pick-ups after all of our volunteering events.
+The **Sanitation Foundation** is the non-profit arm of the Department of Sanitation, and we are recognized through their [Community Stewards program](https://www.sanitationfoundation.org/communitystewards). They also host our [Community Steward page](https://sanitationfoundation.galaxydigital.com/agency/detail/?agency_id=171449) for more volunteers to find us. We have also received their Tool Grant in 2025 and 2026 for more supplies!
+
+# 🏡 Neighborhood partners
 - **[Maple Street Community Garden](https://maplestreetcommunitygarden.org/)** houses our cleanup supplies and hosts our board meetings. If you want to sit in on a board meeting, all are welcome! [Come to one of our cleanups](/schedule) to learn more. 
 - **[Q Gardens](https://qgardenscf.com/)** is the community garden in Flatbush that houses or cleanup supplies for cleans in the lower parts of the neighborhood deeper into Flatbush. 
 - **[Prospect Lefferts Gardens Neighborhood Association](https://www.plgna.org/)**
@@ -27,7 +30,3 @@ Want to partner with us? [Email us](mailto:communitycleanupplg@gmail.com).
 - **[Fiona's Bar](https://www.instagram.com/fionasbarbrooklyn/)** and our team have collaborated on several events small and large, and we regularly host post-clean hangouts there.
 - **[Hee Space Thrift Shop](https://www.instagram.com/heespacethrift/)** works with our team for post-cleanup hangouts.
 - We have also held many events at **[Pacha Cafe](https://www.instagram.com/pachacafebk/)**, and their incredible team is always very welcoming and supportive!
-
-# ⚕️ NYC Department of Sanitation
-
-We work closely with the Department of Sanitation to arrange drop-off locations and pick-ups after all of our volunteering events.
