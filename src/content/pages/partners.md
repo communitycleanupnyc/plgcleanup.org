@@ -13,6 +13,7 @@ Want to partner with us? [Email us](mailto:communitycleanupplg@gmail.com).
 # ⚕️ NYC Department of Sanitation
 
 We work closely with the Department of Sanitation to arrange drop-off locations and pick-ups after all of our volunteering events.
+
 The **Sanitation Foundation** is the non-profit arm of the Department of Sanitation, and we are recognized through their [Community Stewards program](https://www.sanitationfoundation.org/communitystewards). They also host our [Community Steward page](https://sanitationfoundation.galaxydigital.com/agency/detail/?agency_id=171449) for more volunteers to find us. We have also received their Tool Grant in 2025 and 2026 for more supplies!
 
 # 🏡 Neighborhood partners
