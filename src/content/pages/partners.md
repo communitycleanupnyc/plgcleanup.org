@@ -30,4 +30,5 @@ The **Sanitation Foundation** is the non-profit arm of the Department of Sanitat
 - **[Bobbed Bandit](https://www.instagram.com/thebobbedbandit/)** is a favorite of ours for hosting larger events such as trashy hours, post-trashathon hangouts and celebrating community birthdays 🥳
 - **[Fiona's Bar](https://www.instagram.com/fionasbarbrooklyn/)** and our team have collaborated on several events small and large, and we regularly host post-clean hangouts there.
 - **[Hee Space Thrift Shop](https://www.instagram.com/heespacethrift/)** works with our team for post-cleanup hangouts.
+- **[Crown Heights Running Club](https://www.instagram.com/crownheightsrunningclub)** joins our cleanups sometimes! 
 - We have also held many events at **[Pacha Cafe](https://www.instagram.com/pachacafebk/)**, and their incredible team is always very welcoming and supportive!
