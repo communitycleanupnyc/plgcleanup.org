@@ -12,6 +12,8 @@ Then we noticed how we felt about it. We also realized we wanted to meet our nei
 
 Community Cleanup PLG has supported over 900+ volunteer hours and 5,500+ pounds of trash picked up since 2023. Thanks to our events, people have made new friends, felt more at home in their neighborhood, and contributed to something greater - all from something as simple as picking up trash. 
 
+We are supported by [donations](/support), [partners](/partners), fellow [trash clubs](/new-york-trash-clubs), and programs like the Sanitation Foundation's [Community Stewards program](https://www.sanitationfoundation.org/communitystewards) through which we have received grants in 2025 and 2026 😊.
+
 ## Values
 
 - We clean from a place of mutual care and respect for the environment. We don’t police neighbors’ choices or trash habits.
