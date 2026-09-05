@@ -87,7 +87,8 @@ working site. Here's how to unstick it.
 5. **Still stuck?** Paste the red error text to the Claude agent and ask it to fix
    the file. That's what it's for.
 
-Two emergency levers in the Cloudflare dashboard (Workers & Pages → `plgcleanup`):
+Two emergency levers in the Cloudflare dashboard — sign in to the **Community Cleanup PLG**
+account (not a personal one), then Workers & Pages → `plgcleanup-org`:
 
 - **Rollback** — on any past deployment, puts that exact version back live now.
 - **Retry deployment → clear build cache** — for failures that mention modules,
@@ -454,7 +455,8 @@ adding a build step and a silent design-range footgun. Not worth it; revisit onl
 
 ## Deployment & CI
 
-- **Cloudflare Pages**: build command `npm run build`, output dir `dist/`. Every push to `main`
+- **Cloudflare Pages**: the `plgcleanup-org` project in the shared **Community Cleanup PLG**
+  Cloudflare account. Build command `npm run build`, output dir `dist/`. Every push to `main`
   deploys. **Build cache is enabled** (project → Settings → Build → Build cache), which persists
   `node_modules` between deploys. This skips reinstalling Sharp and — because Astro caches every
   processed image in `node_modules/.astro` — only _changed_ photos are re-encoded. Adding one
@@ -482,8 +484,9 @@ adding a build step and a silent design-range footgun. Not worth it; revisit onl
   redeploy** rebuilds the site so the baked-in copy ("Join us this Sunday", the
   countdown line, the Event schema) keeps up with the calendar — and so /join
   moves on to the next cleanup in the schedule by itself.
-- **How the site went live on plgcleanup.org** (2026-08-23) is recorded in
-  **[LAUNCH.md](LAUNCH.md)**, along with the few steps still owed to a human.
+- **How the site went live on plgcleanup.org** (2026-08-23), and how it moved to the shared
+  Cloudflare account (2026-09-05), are recorded in **[LAUNCH.md](LAUNCH.md)**, along with the
+  few steps still owed to a human.
 - **Git hooks** (`.githooks/`, zero-dependency, activated by `npm install` via the `prepare`
   script): **pre-commit** auto-formats staged files with Prettier so commits are always clean;
   **pre-push** runs the full CI locally (format + types + build + the SEO audit) so `main`
@@ -674,8 +677,9 @@ reminder somewhere real (June and December work) and spend twenty minutes:
    GitHub also disables scheduled workflows in public repos after 60 days of no
    activity: repo → **Actions** → "site checks" → **Enable workflow** if it's off.
 4. **Confirm the accounts are still in reach.** The domain registration (is
-   auto-renew on, and on a card that hasn't expired?), the Cloudflare account,
-   and the Google Search Console property. At least two people should be able to
+   auto-renew on, and on a card that hasn't expired?), the **Community Cleanup
+   PLG** Cloudflare account that holds the domain and the `plgcleanup-org`
+   project, and the Google Search Console property. At least two people should be able to
    get into each. A lapsed domain ends the site in a way no code can prevent.
 5. **Skim the TODO list below** and delete anything already done.
 
@@ -709,7 +713,10 @@ scattered comments, and delete a line when it's done.
       date is under three weeks away.
 - [ ] What is left in **[LAUNCH.md](LAUNCH.md)**: A.5 (issue watchers), and B.4
       to B.6 (the pages.dev bulk redirect, HSTS, Search Console). The domain
-      cutover itself is done.
+      cutover and the 2026-09-05 account move are done — but the old
+      `plgcleanup` project in the jaan.io account is still there, kept as a
+      rollback; delete it once the new one has held for a week or two
+      (LAUNCH.md C).
 
 - [ ] **Write real `alt` text for the gallery photos.** Every item now has a
       required `alt:` field, seeded as "Portrait of {name}" during the rename.

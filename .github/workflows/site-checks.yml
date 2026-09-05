@@ -32,8 +32,10 @@
 # cron and you must change its guard to match, or the job silently stops running.
 #
 # Setup:
-#  - Add a Pages Deploy Hook (Cloudflare dashboard → your project → Settings →
-#    Builds & deployments → Deploy hooks) as repo secret CF_PAGES_DEPLOY_HOOK.
+#  - Add a Pages Deploy Hook (Cloudflare dashboard → the Community Cleanup PLG
+#    account → the plgcleanup-org project → Settings → Builds → Deploy hooks)
+#    as repo secret CF_PAGES_DEPLOY_HOOK. The hook is per-project: recreate it
+#    and repoint the secret if the project is ever moved or rebuilt.
 #  - At domain cutover, change SITE below. Full runbook: LAUNCH.md.
 
 name: site checks

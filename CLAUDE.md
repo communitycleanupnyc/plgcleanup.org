@@ -245,8 +245,9 @@ The build failing is the safety net working — the previous site stays live.
 1. Open the repo's **Actions** tab, click the red run, read the last red lines.
    The error names the file and the field.
 2. Fix that file, or revert the commit from the GitHub UI.
-3. Cloudflare dashboard → Pages → the deployment → **Rollback** is the emergency
-   lever if a bad deploy did go out.
+3. Cloudflare dashboard (**Community Cleanup PLG** account → Workers & Pages →
+   `plgcleanup-org`) → the deployment → **Rollback** is the emergency lever if a
+   bad deploy did go out.
 
 CI opens a GitHub issue on push failures, so an editor who never looks at Actions
 still finds out. See "If your edit doesn't appear" in the README.
@@ -262,8 +263,9 @@ in `npm run preview`, because nothing in CI exercises client JavaScript.
 
 ## Pointers
 
-- `LAUNCH.md` — how the site went live on plgcleanup.org (done 2026-08-23), and
-  the handful of steps still owed to a human.
+- `LAUNCH.md` — how the site went live on plgcleanup.org (done 2026-08-23) and
+  how it moved to the shared Cloudflare account (done 2026-09-05, Section C),
+  plus the handful of steps still owed to a human.
 - `README.md` — editor-facing docs, the stack, dependency pins, the twice-a-year
   maintenance checklist, and the running TODO list.
 - `.github/workflows/site-checks.yml` — what the scheduled checks do and why.

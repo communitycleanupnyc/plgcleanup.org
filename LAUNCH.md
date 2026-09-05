@@ -1,17 +1,19 @@
 # Launch runbook
 
 Everything that had to happen to take this site live on **plgcleanup.org**, in
-order. **The cutover happened on 2026-08-23** — the apex serves the site, the
-repo points at it, and every check below is armed except the one noted in A.4.
-Two things still need a person: `www` answers 522 (B.1), and the old pages.dev
-host still serves a second copy of the site (B.4). The rest of this file is a
-record of how the site was set up.
+order. **The cutover happened on 2026-08-23**, and on **2026-09-05 the site
+moved to the Community Cleanup PLG Cloudflare account** (Section C) — the apex
+serves the site, the repo points at it, and every check below is armed except the
+one noted in A.4. One thing still needs a person: the pages.dev host still serves
+a second copy of the site (B.4). The rest of this file is a record of how the
+site was set up.
 
 Steps marked **[you]** happen in a browser (Cloudflare, Google, GitHub settings);
 everything else is a file in this repo, named with its exact location.
 
-Section C is reference only — how to rebuild the Cloudflare project if it is ever
-lost.
+Section C is the account move — read it first, because it is what says which
+Cloudflare account the site lives in. Section D is reference only: how to rebuild
+the Cloudflare project if it is ever lost.
 
 ---
 
@@ -21,8 +23,8 @@ The repo used to ship with its automated checks disabled so that a past event
 date and unfinished gallery copy couldn't fail every build during setup. They
 are back on now, bar the one exception in step 4.
 
-1. ✅ **Done 2026-08-23.** **[you] Create the Cloudflare deploy hook.** Cloudflare dashboard → Workers &
-   Pages → the `plgcleanup` project → **Settings → Builds → Deploy hooks** →
+1. ✅ **Done 2026-08-23; recreated 2026-09-05 for the new account.** **[you] Create the Cloudflare deploy hook.** Cloudflare dashboard → Workers &
+   Pages → the `plgcleanup-org` project → **Settings → Builds → Deploy hooks** →
    create one (any name, branch `main`). Copy the URL it gives you, then in
    GitHub → repo → **Settings → Secrets and variables → Actions → New repository
    secret**, name it exactly `CF_PAGES_DEPLOY_HOOK` and paste the URL.
@@ -76,17 +78,20 @@ are back on now, bar the one exception in step 4.
 
 ## B. Domain cutover — same deploy
 
-1. ⚠ **Apex done 2026-08-23; `www` is still broken.** **[you] Attach both
-   hostnames.** Cloudflare Pages project → **Custom domains** → add
-   `plgcleanup.org` **and** `www.plgcleanup.org`. Then in the `plgcleanup.org`
-   zone → **Rules → Redirect Rules**, add a 301 from `www.` to the apex
-   preserving path and query.
+1. ✅ **Apex done 2026-08-23; `www` fixed 2026-09-05.** **[you] Attach the apex,
+   and redirect `www` at the edge.** Cloudflare Pages project → **Custom
+   domains** → add `plgcleanup.org`, and _only_ the apex. `www` is handled by a
+   **redirect rule** instead, per Cloudflare's
+   [www redirect how-to](https://developers.cloudflare.com/pages/how-to/www-redirect/):
+   a proxied DNS record for `www` so the edge sees the request at all, plus a 301
+   to the apex preserving path and query.
 
-   `plgcleanup.org` serves the site. `www.plgcleanup.org` resolves to the
-   Cloudflare edge but answers **522** — the edge has no origin to send it to,
-   which means the hostname is proxied in DNS but is not attached to the Pages
-   project, and no redirect rule is catching it first. That is the form people
-   type off a flyer, so it is worth fixing today. Check with:
+   ⚠ **Do not also add `www` as a Pages custom domain.** That was tried on
+   2026-09-05 and removed. The redirect rule fires at the edge before any origin
+   lookup, so the custom domain never finishes validating — and if it ever did,
+   Pages would serve a second full copy of the site at `www`, which is precisely
+   the duplicate-content problem B.4 exists to prevent. One mechanism, not two.
+   Check with:
 
    ```sh
    curl -sI https://www.plgcleanup.org/about   # want: 301 → https://plgcleanup.org/about
@@ -102,26 +107,30 @@ are back on now, bar the one exception in step 4.
    - `public/robots.txt` → the `Sitemap:` line
    - `README.md` → the "Live:" line near the top
 
-4. **[you] Redirect the old pages.dev host.** Cloudflare dashboard → **Account
-   Home → Bulk Redirects** → create a list with one rule:
+4. **[you] Redirect the pages.dev host.** In the **Community Cleanup PLG**
+   account → **Account Home → Bulk Redirects** → create a list with one rule:
 
-   | Setting               | Value                          |
-   | --------------------- | ------------------------------ |
-   | Source URL            | `https://plgcleanup.pages.dev` |
-   | Target URL            | `https://plgcleanup.org`       |
-   | Status                | 301                            |
-   | Subpath matching      | **On**                         |
-   | Preserve path suffix  | **On**                         |
-   | Preserve query string | **On**                         |
-   | Include subdomains    | **OFF** ← see below            |
+   | Setting               | Value                              |
+   | --------------------- | ---------------------------------- |
+   | Source URL            | `https://plgcleanup-org.pages.dev` |
+   | Target URL            | `https://plgcleanup.org`           |
+   | Status                | 301                                |
+   | Subpath matching      | **On**                             |
+   | Preserve path suffix  | **On**                             |
+   | Preserve query string | **On**                             |
+   | Include subdomains    | **OFF** ← see below                |
 
    Then enable the rule set.
 
    ⚠ **"Include subdomains" must be OFF**, even though Cloudflare's own how-to
-   turns it on. Preview deployments live at `<hash>.plgcleanup.pages.dev`; with
-   subdomains included, every preview 301s to production and you lose the only way
-   to eyeball a change before it's live. The bare production host is the only one
-   Google indexes anyway — previews are `X-Robots-Tag: noindex` by default.
+   turns it on. Preview deployments live at `<hash>.plgcleanup-org.pages.dev`;
+   with subdomains included, every preview 301s to production and you lose the
+   only way to eyeball a change before it's live. The bare production host is the
+   only one Google indexes anyway — previews are `X-Robots-Tag: noindex` by
+   default.
+
+   The _old_ host, `plgcleanup.pages.dev`, needs no redirect: it disappears when
+   the old project is deleted (Section C).
 
    > This replaces an earlier plan to ship a `_worker.js` redirect. Don't revive
    > it: a `_worker.js` in `public/` puts Pages into **advanced mode**, where
@@ -141,7 +150,7 @@ are back on now, bar the one exception in step 4.
    ```sh
    curl -sI https://plgcleanup.org/about       # 200 + the four headers from public/_headers
    curl -s  https://plgcleanup.org/about | grep canonical   # → https://plgcleanup.org/about
-   curl -sI 'https://plgcleanup.pages.dev/about?x=1'        # 301 → https://plgcleanup.org/about?x=1
+   curl -sI 'https://plgcleanup-org.pages.dev/about?x=1'    # 301 → https://plgcleanup.org/about?x=1
    ```
 
    And locally, `npm run build && npm run audit` — the audit infers its expected
@@ -149,24 +158,82 @@ are back on now, bar the one exception in step 4.
 
 ---
 
-## C. Appendix — recreating the Cloudflare Pages project
+## C. Account move — jaan.io → Community Cleanup PLG (2026-09-05)
 
-Only needed if the project is deleted or you're moving accounts.
+The domain was registered in one person's Cloudflare account. It now lives in a
+shared one, **Community Cleanup PLG** (account id
+`e392a4d128f6166769257e796e7a5605`), so more than one organizer can get in.
 
-| Setting           | Value                                                              |
-| ----------------- | ------------------------------------------------------------------ |
-| Project name      | `plgcleanup` — **the `*.pages.dev` hostname is derived from this** |
-| Production branch | `main`                                                             |
-| Build command     | `npm run build`                                                    |
-| Output directory  | `dist`                                                             |
-| Node version      | from `.nvmrc` (currently v24)                                      |
-| Build cache       | **On** (Settings → Build → Build cache)                            |
+The zone moved on its own. Moving the _site_ was a separate job, because
+**Cloudflare cannot transfer a Pages project between accounts** — it has to be
+recreated:
+
+|     |                                                                                           |
+| --- | ----------------------------------------------------------------------------------------- |
+| Old | account `jaan.io` → project `plgcleanup` → `plgcleanup.pages.dev`                         |
+| New | account **Community Cleanup PLG** → project `plgcleanup-org` → `plgcleanup-org.pages.dev` |
+
+Five things bit, in the order they bit. If this is ever done again, read them
+first:
+
+1. **The project name had to change.** `*.pages.dev` is a single global
+   namespace, so `plgcleanup` could not exist in two accounts at once. The name
+   is cosmetic — B.4 redirects it away — and keeping both projects alive at the
+   same time is what made the cutover seamless.
+2. **A repo can be connected to a Pages project in only one Cloudflare account
+   at a time.** Creating the new project failed with _"This repository is being
+   used for a Cloudflare Pages project on a different Cloudflare account"_ until
+   the old project's Git connection was removed: old project → **Settings →
+   Builds → Git Repository → Manage**. Disconnecting does not touch the live
+   deployment or the custom domain — it only stops that project rebuilding.
+3. **The dashboard will not create a Pages project any more.** "Connect to Git"
+   now lands in Workers Builds, which runs `astro add cloudflare` and dies with
+   `Error installing dependencies`. That adapter would be wrong here anyway:
+   this site is `output: "static"` and, in Cloudflare's words, _"if you want to
+   use Astro as a static site generator, you do not need the Astro Cloudflare
+   adapter."_ The project was created through the Pages API instead — the same
+   API the dashboard calls. Section D has the settings to pass.
+4. **Pages did not repoint DNS, and the site went down until it was.** The apex
+   record had been made by hand back when the zone and the project were in
+   different accounts, so Pages did not treat it as its own. Removing the domain
+   from the old project left the apex answering **403** — the record still
+   pointed at a host that no longer claimed the name. Fix: point the apex at
+   `plgcleanup-org.pages.dev`, proxied. **Change the DNS record in the same
+   minute as the custom domain, not after.**
+5. **The deploy hook is per-project**, so A.1 had to be redone and
+   `CF_PAGES_DEPLOY_HOOK` repointed at the new project.
+
+The old project stays in the `jaan.io` account — domainless, disconnected from
+Git, still holding its last build — as a rollback. Delete it once this has held
+for a week or two. That also retires `plgcleanup.pages.dev` for good, and frees
+the name `plgcleanup`.
+
+---
+
+## D. Appendix — recreating the Cloudflare Pages project
+
+Only needed if the project is deleted or you're moving accounts again — in
+which case read Section C first, it is the list of what goes wrong.
+
+| Setting            | Value                                                                  |
+| ------------------ | ---------------------------------------------------------------------- |
+| Cloudflare account | **Community Cleanup PLG** — `e392a4d128f6166769257e796e7a5605`         |
+| Project name       | `plgcleanup-org` — **the `*.pages.dev` hostname is derived from this** |
+| Production branch  | `main`                                                                 |
+| Build command      | `npm run build`                                                        |
+| Output directory   | `dist`                                                                 |
+| Node version       | from `.nvmrc` (currently v24)                                          |
+| Build cache        | **On** (Settings → Build → Build cache)                                |
 
 Build cache matters more than it sounds: it persists `node_modules`, including
 Astro's processed-image cache, so adding one gallery item re-encodes one photo
 instead of all sixteen — seconds instead of ~40.
 
-Then re-do: custom domains (B.1), the deploy hook + `CF_PAGES_DEPLOY_HOOK` secret
+Note that the dashboard no longer offers this flow (Section C.3) — create the
+project against the Pages API, `POST /accounts/<account>/pages/projects`, passing
+`build_config`, a `deployment_configs` block per environment carrying
+`NODE_VERSION`, and a `source` block naming the GitHub owner and repo. Then
+re-do: custom domains (B.1), the deploy hook + `CF_PAGES_DEPLOY_HOOK` secret
 (A.1), and the Bulk Redirect (B.4).
 
 **Branch protection** on `main` (GitHub → Settings → Rules): block force pushes
