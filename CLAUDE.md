@@ -90,6 +90,20 @@ Things that will silently break if you don't know them:
   `/schedule` lists the next four. The daily redeploy cron is what advances it, so
   nothing needs editing after a cleanup happens. Don't reintroduce a
   "current event" field that someone has to move.
+- **Event structured data has one builder: `src/lib/event-schema.ts`.** `/join`
+  emits a node for the next cleanup and `/schedule` emits one per cleanup it
+  lists, both from that file, so the same cleanup can never be described two
+  ways. The node's `url` is `/join` for the next cleanup and `/schedule` for the
+  later ones on purpose — `/join` only ever shows the next date, so a search
+  result for a cleanup three weeks out has to land on the list. `/join` drops its
+  node once the cleanup is over (`isPastEvent`); `/schedule` needs no such guard,
+  because `UPCOMING_CLEANUPS` is future-only. `scripts/seo-audit.mjs` fails the
+  build on a stale or incomplete Event node, on `/join` shipping none while a
+  future cleanup exists, and on `/schedule` shipping a number of nodes that
+  isn't the number of rows it lists. That last check counts the rows out of the
+  markup, so `li.schedule-item` and `.schedule-empty` are load-bearing class
+  names — rename either and you must rename it in the audit too (it fails
+  loudly if it can find neither, rather than passing on an empty count).
 - **Gallery `alt` text is authored per photo and required** by the schema in
   `src/content.config.ts`. It used to be derived from the name; it isn't any
   more, because alt describes the _picture_, which a title can't stand in for.

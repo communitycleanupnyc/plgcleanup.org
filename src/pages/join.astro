@@ -5,7 +5,7 @@ import { Image } from "astro:assets";
 import cart from "../assets/cart.webp";
 import { NEXT_CLEANUP } from "../data/schedule";
 import { computeCountdown, renderJoinCountdown } from "../data/countdown";
-import { SITE } from "../site.config";
+import { eventSchema } from "../lib/event-schema";
 
 // The next cleanup still to come — src/data/schedule.ts picks it out of the
 // schedule, so this page never names a date of its own.
@@ -16,7 +16,9 @@ const state = computeCountdown(new Date(), next.iso, next.endIso);
 const countdownLine = renderJoinCountdown(state);
 
 // Event structured data — the one schema type with a visible SERP surface
-// (Google event listings). Built from the same schedule.ts values shown on the page.
+// (Google event listings). Built by ../lib/event-schema.ts from the same
+// schedule.ts values shown on the page; /schedule emits the same node shape for
+// every cleanup it lists.
 //
 // Dropped once the cleanup is over, because an EventScheduled node for a date
 // that has already passed is worse in search results than no node at all. That
@@ -24,38 +26,7 @@ const countdownLine = renderJoinCountdown(state);
 // daily rebuild in .github/workflows/site-checks.yml moves this page on to the
 // next cleanup without anyone pushing a commit.
 const isPastEvent = state.tag === "past";
-const eventUrl = new URL("/join", Astro.site).href;
-const eventSchema = {
-  "@context": "https://schema.org",
-  "@type": "Event",
-  name: `${SITE.name} — ${next.corner}`,
-  description:
-    "A one-hour volunteer street cleanup in Prospect Lefferts Gardens, Brooklyn. No registration; all supplies provided. Just show up.",
-  // Local time + offset, not UTC — the form Google's Event docs ask for.
-  startDate: next.isoLocal,
-  endDate: next.endIsoLocal,
-  eventStatus: "https://schema.org/EventScheduled",
-  eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-  isAccessibleForFree: true,
-  url: eventUrl,
-  image: new URL(SITE.schema.logo, Astro.site).href,
-  location: {
-    "@type": "Place",
-    name: next.corner,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: next.corner,
-      addressLocality: "Brooklyn",
-      addressRegion: "NY",
-      addressCountry: "US",
-    },
-  },
-  organizer: {
-    "@type": SITE.schema.type,
-    name: SITE.name,
-    url: new URL("/", Astro.site).href,
-  },
-};
+const schema = eventSchema(next);
 ---
 
 <Base
@@ -139,12 +110,7 @@ const eventSchema = {
   </div>
   {
     !isPastEvent && (
-      <script
-        slot="head"
-        type="application/ld+json"
-        is:inline
-        set:html={JSON.stringify(eventSchema)}
-      />
+      <script slot="head" type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
     )
   }
 </Base>

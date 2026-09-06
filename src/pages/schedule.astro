@@ -9,11 +9,21 @@
 import Base from "../layouts/Base.astro";
 import Button from "../components/Button.astro";
 import { UPCOMING_CLEANUPS } from "../data/schedule";
+import { eventSchema } from "../lib/event-schema";
 
 // How many cleanups the page lists. The rest stay in the form — an editor can
 // add dates months ahead without making this page a wall of text.
 const HOW_MANY = 4;
 const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
+
+// One Event node per cleanup listed, which is what puts these dates in Google's
+// event surfaces ("things to do this weekend"). The shape is ../lib/event-schema.ts,
+// shared with /join, so the two pages can't describe the same cleanup differently.
+// Only the rows actually on the page get a node — describing a cleanup nobody can
+// read here would be schema the page doesn't back up — and they are all in the
+// future by construction (UPCOMING_CLEANUPS), so nothing has to be dropped for
+// being stale the way /join's single node does.
+const eventSchemas = cleanups.map(eventSchema);
 ---
 
 <Base
@@ -106,6 +116,16 @@ const cleanups = UPCOMING_CLEANUPS.slice(0, HOW_MANY);
       > with instead. Those get announced in the newsletter and on Instagram like any other cleanup.
     </p>
   </div>
+  {
+    eventSchemas.length > 0 && (
+      <script
+        slot="head"
+        type="application/ld+json"
+        is:inline
+        set:html={JSON.stringify(eventSchemas)}
+      />
+    )
+  }
 </Base>
 
 <style>

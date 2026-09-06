@@ -228,7 +228,7 @@ const inSitemap = new Set(sitemapUrls.map((u) => pathToFile(new URL(u).pathname)
 const titles = new Map(),
   descs = new Map();
 const missingAssets = new Set();
-const eventNodePages = new Set(); // pages that emitted an Event JSON-LD node
+const eventNodeCounts = new Map(); // page → how many Event JSON-LD nodes it emitted
 
 function assetExists(u, page) {
   // Only verify same-host or root-relative references; externals are lychee's job.
@@ -327,7 +327,7 @@ for (const page of htmlFiles) {
     for (const n of nodes) {
       for (const k of ["image", "logo"]) if (typeof n[k] === "string") assetExists(n[k], page);
       if (n["@type"] === "Event") {
-        eventNodePages.add(page);
+        eventNodeCounts.set(page, (eventNodeCounts.get(page) ?? 0) + 1);
         // Google requires these three; without them the node is inert in search.
         for (const k of ["name", "startDate", "location"])
           if (!n[k]) err(page, `Event JSON-LD is missing required "${k}".`);
@@ -530,10 +530,36 @@ if (fileSet.has("join.html")) {
       const d = new Date(decode(m[1]));
       if (!Number.isNaN(d.getTime()) && (!latestEnd || d > latestEnd)) latestEnd = d;
     }
-  if (latestEnd && latestEnd > new Date() && !eventNodePages.has("join.html"))
+  if (latestEnd && latestEnd > new Date() && !eventNodeCounts.has("join.html"))
     err(
       "join.html",
       `No Event JSON-LD, but the build describes an upcoming cleanup ending ${latestEnd.toISOString()}. Google event listings need the schema — check the eventSchema block in src/pages/join.astro.`,
+    );
+}
+
+// The same hole on /schedule, which emits one Event node per cleanup it lists
+// (src/pages/schedule.astro). Nothing there drops a node legitimately — it maps
+// over UPCOMING_CLEANUPS, which is future-only — so the count has to match the
+// rows on the page exactly. A row with no node is a cleanup Google can't see; a
+// node with no row is schema the page doesn't back up.
+//
+// Counting rows means reading two class names out of the markup, and a check
+// that silently passes once someone renames them is the failure this check
+// exists to prevent. Hence the first branch: no rows AND no empty state means
+// the markers moved, not that the schedule is empty.
+if (fileSet.has("schedule.html")) {
+  const html = read("schedule.html");
+  const rows = [...html.matchAll(/<li class="schedule-item"/g)].length;
+  const nodes = eventNodeCounts.get("schedule.html") ?? 0;
+  if (rows === 0 && !/class="schedule-empty"/.test(html))
+    err(
+      "schedule.html",
+      'Found neither cleanup rows (<li class="schedule-item">) nor the empty state (class="schedule-empty"). This check counts both to verify the Event JSON-LD; update the class names here and in src/pages/schedule.astro together.',
+    );
+  else if (nodes !== rows)
+    err(
+      "schedule.html",
+      `${rows} cleanup row(s) listed but ${nodes} Event JSON-LD node(s). One node per listed cleanup is what puts these dates in Google event listings — check the eventSchemas block in src/pages/schedule.astro.`,
     );
 }
 
