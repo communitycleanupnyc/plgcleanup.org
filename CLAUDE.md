@@ -90,10 +90,16 @@ Things that will silently break if you don't know them:
   `/schedule` lists the next four. The daily redeploy cron is what advances it, so
   nothing needs editing after a cleanup happens. Don't reintroduce a
   "current event" field that someone has to move.
-- **Event structured data has one builder: `src/lib/event-schema.ts`.** `/join`
-  emits a node for the next cleanup and `/schedule` emits one per cleanup it
-  lists, both from that file, so the same cleanup can never be described two
-  ways. The node's `url` is `/join` for the next cleanup and `/schedule` for the
+- **A cleanup has one description: `src/lib/event-schema.ts`.** It exports the
+  name, the blurb, and the page a cleanup links to (`eventName`,
+  `EVENT_DESCRIPTION`, `eventUrl`), and everything machine-readable is built from
+  those: `/join` emits a JSON-LD node for the next cleanup, `/schedule` emits one
+  per cleanup it lists, and `src/lib/calendar-feed.ts` writes the same values into
+  `/cleanups.ics`. So the same cleanup can never be described two ways.
+  `eventUrl` recognises the next cleanup by **object identity** against
+  `NEXT_CLEANUP` — hand it the objects `src/data/schedule.ts` exports, unchanged;
+  a mapped or cloned list silently sends every entry to `/schedule`.
+  The node's `url` is `/join` for the next cleanup and `/schedule` for the
   later ones on purpose — `/join` only ever shows the next date, so a search
   result for a cleanup three weeks out has to land on the list. `/join` drops its
   node once the cleanup is over (`isPastEvent`); `/schedule` needs no such guard,
@@ -104,6 +110,24 @@ Things that will silently break if you don't know them:
   markup, so `li.schedule-item` and `.schedule-empty` are load-bearing class
   names — rename either and you must rename it in the audit too (it fails
   loudly if it can find neither, rather than passing on an empty count).
+- **`/cleanups.ics` is a subscription, so its rules are different from a page's.**
+  `src/lib/calendar-feed.ts` writes every cleanup in `UPCOMING_CLEANUPS` (not the
+  four `/schedule` lists) and `src/pages/cleanups.ics.ts` emits it. Three things
+  there are load-bearing. **The `UID` is the cleanup's start instant** — unique
+  already, because the build refuses two cleanups starting at the same moment, and
+  keyed on the start rather than the corner so that fixing a corner _updates_ the
+  event in someone's calendar instead of deleting one and adding another. **The
+  `DTSTAMP` is build time**, which is what makes an edit win against the copy a
+  client already holds; the daily byte change is the point, not churn to optimise
+  away. **Times are UTC with no `VTIMEZONE`**, which is only safe because every
+  cleanup is an explicit row — add an `RRULE` and a recurring UTC time drifts an
+  hour across every DST boundary. The audit checks the built bytes (75-octet
+  folding, CRLF, no split code points) rather than trusting `fold()` and `esc()`,
+  because a malformed feed fails _inside_ a phone's calendar app where nobody sees
+  an error. A static build discards the endpoint's own `Content-Type`, so the rule
+  in `public/_headers` is the only one that reaches a browser — don't delete it as
+  redundant, and never add a `_worker.js` (advanced mode stops `_headers` being
+  read at all).
 - **Gallery `alt` text is authored per photo and required** by the schema in
   `src/content.config.ts`. It used to be derived from the name; it isn't any
   more, because alt describes the _picture_, which a title can't stand in for.
@@ -237,7 +261,14 @@ Two things to know when writing a component here:
   the list is a field; see the comment on the `schedule` entry in `.pages.yml`. Rows sort
   themselves by date and past ones are ignored, so adding next month's dates is
   the whole job. Bad values fail the build with a message naming the row. The
-  Pages CMS form for it is the `schedule` entry in `.pages.yml`.
+  Pages CMS form for it is the `schedule` entry in `.pages.yml`. Adding a date
+  also updates the calendar feed and therefore everyone subscribed to it —
+  nothing to send, nothing else to edit.
+- **Change what a subscribed calendar says:** `src/lib/calendar-feed.ts` for the
+  file, `src/lib/event-schema.ts` for the wording (which the search-result
+  listings share). Read the `/cleanups.ics` invariant above first — `UID`,
+  `DTSTAMP`, and the absent `VTIMEZONE` each have a reason. Editors never touch
+  either file; the feed follows `src/data/schedule.json` on its own.
 - **Update stats:** `src/data/stats.json` — plain numbers, no commas.
 - **Change how wide a page of words is:** `--content-w` in `src/styles/tokens.css`
   — 60% of the window on a desktop, the full site width on a phone. Every page

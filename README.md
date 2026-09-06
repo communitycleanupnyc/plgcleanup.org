@@ -52,15 +52,15 @@ Everything an organizer normally changes is plain text you can edit on GitHub (c
 click the ✏️ pencil, change the words, **Commit changes** — the site rebuilds itself). If an
 edit has a mistake, the build fails and nothing broken goes live.
 
-| To change…                                                                                     | Edit this                                                                                                                                                                                                                                                        |
-| ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The **cleanup schedule** (dates, times, corners)                                               | In [Pages CMS](#pages-cms-form-based-editing), open **Schedule** — or edit `src/data/schedule.json` directly. One row per cleanup; the site shows the next four and picks the first one for /join. Bad dates/times fail the build with a message naming the row. |
-| **Statistics** (pounds collected, volunteer count)                                             | In [Pages CMS](#pages-cms-form-based-editing), open **Statistics** — or edit `src/data/stats.json` directly. Plain numbers, no commas.                                                                                                                           |
-| Any **prose page** — About, FAQ, Terms, Partners, Service hours, Lost & found, NYC trash clubs | The matching file in `src/content/pages/` (e.g. `faq.md`). Write normal Markdown. **The filename is the web address** — `faq.md` is at `/faq` — so renaming a file moves the page.                                                                               |
-| **Gallery items** in the home-page carousel                                                    | One file per item in `src/content/gallery/` (e.g. `jaan.md`): the top block holds the title, pull quote, photo, and the photo's description; the text below is the full text shown when the card is opened.                                                      |
-| A gallery **photo**                                                                            | Add the image to `src/assets/gallery/` and point that item's `image:` at it. Write the `alt:` line too — it describes the picture for people who can't see it.                                                                                                   |
-| The site **name, navigation, or social links**                                                 | `src/site.config.ts` — one file holding everything that makes this site _this_ site. Every menu and the footer read from it.                                                                                                                                     |
-| **Site settings** (e.g. rotating the carousel and the link-preview photo)                      | `SITE.features` in `src/site.config.ts` — flip a `true`/`false` toggle; each is documented in the file.                                                                                                                                                          |
+| To change…                                                                                     | Edit this                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The **cleanup schedule** (dates, times, corners)                                               | In [Pages CMS](#pages-cms-form-based-editing), open **Schedule** — or edit `src/data/schedule.json` directly. One row per cleanup; the site shows the next four and picks the first one for /join. Bad dates/times fail the build with a message naming the row. Adding a date also updates the [calendar feed](#the-calendar-feed) — anyone subscribed sees it within about a day, with nothing to send. |
+| **Statistics** (pounds collected, volunteer count)                                             | In [Pages CMS](#pages-cms-form-based-editing), open **Statistics** — or edit `src/data/stats.json` directly. Plain numbers, no commas.                                                                                                                                                                                                                                                                    |
+| Any **prose page** — About, FAQ, Terms, Partners, Service hours, Lost & found, NYC trash clubs | The matching file in `src/content/pages/` (e.g. `faq.md`). Write normal Markdown. **The filename is the web address** — `faq.md` is at `/faq` — so renaming a file moves the page.                                                                                                                                                                                                                        |
+| **Gallery items** in the home-page carousel                                                    | One file per item in `src/content/gallery/` (e.g. `jaan.md`): the top block holds the title, pull quote, photo, and the photo's description; the text below is the full text shown when the card is opened.                                                                                                                                                                                               |
+| A gallery **photo**                                                                            | Add the image to `src/assets/gallery/` and point that item's `image:` at it. Write the `alt:` line too — it describes the picture for people who can't see it.                                                                                                                                                                                                                                            |
+| The site **name, navigation, or social links**                                                 | `src/site.config.ts` — one file holding everything that makes this site _this_ site. Every menu and the footer read from it.                                                                                                                                                                                                                                                                              |
+| **Site settings** (e.g. rotating the carousel and the link-preview photo)                      | `SITE.features` in `src/site.config.ts` — flip a `true`/`false` toggle; each is documented in the file.                                                                                                                                                                                                                                                                                                   |
 
 Prefer a form-based editor? See Pages CMS below — it edits these same files behind a friendly UI.
 
@@ -315,6 +315,29 @@ or component; only genuinely shared styles are global (`src/styles/`).
   so nobody is featured twice running and nobody waits months. The rest of the carousel is
   re-shuffled on every build. Turn the switch off in `src/site.config.ts` and the lowest-`order`
   photo leads forever. See `src/lib/gallery.ts` and `src/lib/og.ts`.
+
+### The calendar feed
+
+`/schedule` offers a **Subscribe to the calendar** link. Someone clicks it once and every future
+cleanup lands in their own calendar app — and stays right, because the app re-fetches the file and
+the daily redeploy keeps it current. **Adding a date in Pages CMS is the whole job**; there is
+nothing to send and nothing else to edit.
+
+The file is `/cleanups.ics`, written at build time by `src/lib/calendar-feed.ts` (the iCalendar
+format, hand-written — it's four rules and no dependency) from the same `schedule.json` rows
+everything else reads. Its wording comes from `src/lib/event-schema.ts`, shared with the Google
+search listings, so a cleanup can't read one way in a search result and another in a calendar.
+
+Two things worth knowing before you promise anyone anything:
+
+- **Google Calendar refreshes on its own schedule** — often 8–24 hours, sometimes days — and
+  ignores how often the file asks to be re-read. Apple Calendar and Outlook honour it. So a
+  same-day weather cancellation still belongs in the newsletter and on Instagram, not here.
+- **A cleanup drops out of subscribers' calendars once it's over.** The feed carries what's still
+  to come, so nobody keeps a record of the ones they attended.
+
+The link is `webcal://`, which is what makes it a subscription rather than a one-time import; the
+plain `https://` address is printed beside it because Google Calendar asks you to paste a URL.
 
 ---
 

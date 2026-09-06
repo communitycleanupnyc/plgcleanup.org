@@ -3,3 +3,14 @@
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
   Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# The calendar feed (/cleanups.ics, built by src/pages/cleanups.ics.ts).
+# Pages infers a type from the extension, but not reliably the charset — and the
+# feed is full of multi-byte characters (an em dash in every event name). The
+# nosniff above means whatever type is sent is the type the client is stuck with,
+# so say it here. This is also the ONLY lever: a static build writes the
+# endpoint's body to disk and throws its Response headers away.
+# One block, not a second Content-Type on /* — Cloudflare comma-joins duplicate
+# header values, which would produce a nonsense type.
+/cleanups.ics
+  Content-Type: text/calendar; charset=utf-8

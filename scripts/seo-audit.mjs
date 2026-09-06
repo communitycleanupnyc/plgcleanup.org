@@ -354,6 +354,19 @@ for (const page of htmlFiles) {
   // fragment part (pathToFile already strips #, so /about#team resolves fine).
   for (const m of body.matchAll(/href="([^"]+)"/g)) {
     const h = decode(m[1]);
+    // webcal: is http's calendar-subscription twin — the same host and the same
+    // path, under a scheme the operating system hands to a calendar app. It is
+    // NOT an external link (it names a file this build emitted), so it is not
+    // added to the allowlist below: that would only silence the check, and a
+    // broken subscribe link fails INSIDE somebody's calendar app, where no error
+    // is ever shown to anyone. Resolve it like any other internal link instead.
+    if (h.startsWith("webcal://")) {
+      const u = new URL(`https://${h.slice("webcal://".length)}`);
+      if (u.host !== siteHost) err(page, `webcal: link points at ${u.host}, not ${siteHost}: ${h}`);
+      else if (!pathToFile(u.pathname))
+        err(page, `Broken webcal link: ${h} — nothing at ${u.pathname} in dist.`);
+      continue;
+    }
     if (/^(https?:|mailto:|tel:)/.test(h)) {
       if (/\/\/(www\.)?(example\.(org|com|net)|localhost|127\.0\.0\.1)/i.test(h))
         err(page, `Placeholder external link shipped: ${h}`);
@@ -602,6 +615,151 @@ if (existsSync(SCHEDULE_FILE)) {
         );
     }
   }
+}
+
+// ----------------------------------------------------------- calendar feed ---
+// /cleanups.ics is the one thing this site ships that nobody ever looks at: it
+// lands inside a phone's calendar app, and when it breaks it breaks SILENTLY —
+// a client that cannot parse a feed shows nothing at all and tells nobody. So
+// everything about it is checked here, including the two mistakes its own
+// serializer could make (a line over 75 octets, a line ending that is not CRLF),
+// because there is no other way anyone would find out.
+//
+// Built by src/pages/cleanups.ics.ts from src/lib/calendar-feed.ts.
+const FEED_FILE = "cleanups.ics";
+if (!fileSet.has(FEED_FILE)) {
+  err(
+    "(site)",
+    `No ${FEED_FILE} in dist, so the "Subscribe to the calendar" link on /schedule leads nowhere. It is built by src/pages/cleanups.ics.ts — check that file still exists and still exports GET.`,
+  );
+} else {
+  const feed = read(FEED_FILE);
+
+  // The envelope.
+  if (!feed.startsWith("BEGIN:VCALENDAR\r\n") || !feed.endsWith("END:VCALENDAR\r\n"))
+    err(
+      FEED_FILE,
+      "Not a complete iCalendar object: it must open with BEGIN:VCALENDAR and close with END:VCALENDAR, each ending in CRLF. See calendarFeed() in src/lib/calendar-feed.ts.",
+    );
+  for (const required of ["VERSION:2.0", "PRODID:"])
+    if (!feed.includes(required))
+      err(
+        FEED_FILE,
+        `Missing the required ${required.replace(/:.*$/, "")} property (RFC 5545 §3.7).`,
+      );
+  const opens = (feed.match(/\r\nBEGIN:VEVENT\r\n/g) ?? []).length;
+  const closes = (feed.match(/\r\nEND:VEVENT\r\n/g) ?? []).length;
+  if (opens !== closes)
+    err(FEED_FILE, `${opens} BEGIN:VEVENT but ${closes} END:VEVENT — an unterminated event.`);
+
+  // The serializer's own two possible bugs, checked against the bytes rather
+  // than trusted from the code.
+  // A replacement character means a multi-byte character was cut in half by the
+  // line folder, which RFC 5545 §3.1 forbids and every client renders as junk.
+  if (feed.includes("\uFFFD"))
+    err(
+      FEED_FILE,
+      "Contains a replacement character (U+FFFD): a multi-byte character was split across a folded line. fold() in src/lib/calendar-feed.ts must count OCTETS and never split a code point.",
+    );
+  const feedLines = feed.split("\r\n");
+  if (feedLines.at(-1) !== "")
+    err(
+      FEED_FILE,
+      "The last line has no CRLF. Every content line ends with CRLF, the final END:VCALENDAR included.",
+    );
+  const contentLines = feedLines.slice(0, -1);
+  // Split on CRLF above, so a \r or \n left inside a piece is a line ending that
+  // is not CRLF — which strict parsers reject and lenient ones truncate at.
+  const bare = contentLines.findIndex((l) => /[\r\n]/.test(l));
+  if (bare !== -1)
+    err(
+      FEED_FILE,
+      `Line ${bare + 1} contains a bare CR or LF. Line endings in an .ics file are CRLF only; a newline inside a value is escaped as "\\n".`,
+    );
+  // 75 OCTETS, not characters — every SUMMARY carries a three-octet em dash, so
+  // a character count would happily pass a line that is too long.
+  const long = contentLines
+    .map((l, i) => ({ n: i + 1, bytes: Buffer.byteLength(l, "utf8") }))
+    .filter((l) => l.bytes > 75);
+  if (long.length)
+    err(
+      FEED_FILE,
+      `${long.length} line(s) longer than 75 octets (first: line ${long[0].n}, ${long[0].bytes} octets). fold() in src/lib/calendar-feed.ts is meant to wrap those onto a continuation line beginning with one space.`,
+    );
+
+  // One event per future cleanup. Read from src/ like the runway check above:
+  // the question is not "did the file parse" but "does it hold the dates
+  // somebody typed in".
+  //
+  // A range, not an equality, and deliberately so: the feed carries the cleanups
+  // that have not ENDED (an instant comparison, daylight saving and all), while
+  // this script can only cheaply compare DATES in New York. Those two agree on
+  // every row but one — a cleanup happening today, which may or may not have
+  // finished by now. So a row dated after today MUST be in the feed, a row dated
+  // today MAY be, and anything outside that range is a real fault.
+  if (existsSync(SCHEDULE_FILE)) {
+    let feedRows = null;
+    try {
+      feedRows = JSON.parse(readFileSync(SCHEDULE_FILE, "utf8"))?.cleanups;
+    } catch {
+      /* the runway check above already reported the unparseable JSON */
+    }
+    if (Array.isArray(feedRows)) {
+      const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(
+        new Date(),
+      );
+      const dates = feedRows.map((r) => String(r?.date ?? ""));
+      const definitely = dates.filter((d) => d > today).length;
+      const possibly = dates.filter((d) => d >= today).length;
+      if (opens < definitely || opens > possibly)
+        err(
+          FEED_FILE,
+          `${opens} VEVENT(s) for ${definitely}–${possibly} upcoming cleanup(s) in ${SCHEDULE_FILE}. Every cleanup still to come belongs in the feed — check that src/pages/cleanups.ics.ts still passes UPCOMING_CLEANUPS to calendarFeed().`,
+        );
+    }
+  }
+
+  // Not stale. A feed whose last event has already happened is a calendar that
+  // quietly empties itself in every subscriber's app. Same escape hatch as the
+  // other freshness checks, so a deliberate pre-launch build can still pass.
+  const ends = [...feed.matchAll(/\r\nDTEND:(\d{8}T\d{6}Z)\r\n/g)].map((m) =>
+    Date.parse(
+      m[1].replace(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/, "$1-$2-$3T$4:$5:$6Z"),
+    ),
+  );
+  // An unparseable stamp is NaN, which compares false against everything — it
+  // would sail past the freshness test below looking fresh. Name it instead.
+  if (ends.some(Number.isNaN))
+    err(FEED_FILE, "A DTEND is not a valid UTC timestamp (expected the form 20260829T150000Z).");
+  const latest = Math.max(0, ...ends.filter((t) => !Number.isNaN(t)));
+  if (opens > 0 && latest < Date.now()) {
+    const msg = `Every event in the feed has already ended (the last on ${new Date(latest).toISOString().slice(0, 10)}). Subscribers' calendars will go empty. Add the next dates in Pages CMS → "Schedule".`;
+    process.env.SEO_SKIP_FRESH ? warn(FEED_FILE, msg) : err(FEED_FILE, msg);
+  }
+
+  // Someone can still find it. A feed nobody links to is a feed nobody
+  // subscribes to, and /schedule carries the only subscribe link on the site.
+  if (
+    fileSet.has("schedule.html") &&
+    !/href="webcal:\/\/[^"]*cleanups\.ics"/.test(read("schedule.html"))
+  )
+    err(
+      "schedule.html",
+      `No webcal:// link to ${FEED_FILE}. That link is the only way anyone finds this feed — restore it in src/pages/schedule.astro using FEED_WEBCAL_URL from src/lib/calendar-feed.ts.`,
+    );
+
+  // Served as a calendar. A static build throws the endpoint's own Content-Type
+  // away, so public/_headers is the only lever left. WARN rather than ERROR:
+  // Cloudflare probably does infer text/calendar from the extension — but
+  // "probably" is not a thing to learn from a subscriber who cannot subscribe.
+  if (
+    fileSet.has("_headers") &&
+    !/^\/cleanups\.ics\b[\s\S]*?Content-Type:\s*text\/calendar/m.test(read("_headers"))
+  )
+    warn(
+      "public/_headers",
+      `No "Content-Type: text/calendar; charset=utf-8" rule for /${FEED_FILE}. The endpoint sets that header, but a static build drops it; _headers is what actually reaches the browser.`,
+    );
 }
 
 // ---------------------------------------------------------------- report ---

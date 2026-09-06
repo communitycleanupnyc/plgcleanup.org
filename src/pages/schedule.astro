@@ -10,6 +10,7 @@ import Base from "../layouts/Base.astro";
 import Button from "../components/Button.astro";
 import { UPCOMING_CLEANUPS } from "../data/schedule";
 import { eventSchema } from "../lib/event-schema";
+import { FEED_URL, FEED_WEBCAL_URL } from "../lib/calendar-feed";
 
 // How many cleanups the page lists. The rest stay in the form — an editor can
 // add dates months ahead without making this page a wall of text.
@@ -95,6 +96,20 @@ const eventSchemas = cleanups.map(eventSchema);
     <h2>Further out</h2>
     <p>Pick whichever of these you prefer to get updates from:</p>
     <ul>
+      {
+        /* The calendar feed. No target="_blank": a webcal:// link is handed to
+           the operating system, which opens the calendar app — a blank tab would
+           be left behind with nothing in it. The plain https address is spelled
+           out beside it because Google Calendar asks people to PASTE a URL
+           rather than follow a link, and because a browser with no calendar app
+           behind it does nothing at all with webcal://. Both come from
+           src/lib/calendar-feed.ts, which is also what builds the file. */
+      }
+      <li>
+        <a href={FEED_WEBCAL_URL}>Subscribe to the calendar</a> — every date below in your own calendar,
+        adding itself as we add dates. On a phone or a Mac, one tap does it; in Google Calendar, use Other
+        calendars → From URL with {FEED_URL}.
+      </li>
       <li>
         <a href="https://communitycleanupplg.substack.com/subscribe">Our newsletter</a> — the schedule
         by email, including any weather cancellations.
