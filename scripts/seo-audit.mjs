@@ -737,16 +737,29 @@ if (!fileSet.has(FEED_FILE)) {
     process.env.SEO_SKIP_FRESH ? warn(FEED_FILE, msg) : err(FEED_FILE, msg);
   }
 
-  // Someone can still find it. A feed nobody links to is a feed nobody
-  // subscribes to, and /schedule carries the only subscribe link on the site.
-  if (
-    fileSet.has("schedule.html") &&
-    !/href="webcal:\/\/[^"]*cleanups\.ics"/.test(read("schedule.html"))
-  )
-    err(
-      "schedule.html",
-      `No webcal:// link to ${FEED_FILE}. That link is the only way anyone finds this feed — restore it in src/pages/schedule.astro using FEED_WEBCAL_URL from src/lib/calendar-feed.ts.`,
-    );
+  // Someone can still find it, on whatever they are holding. /schedule carries
+  // the only subscribe links on the site, and it takes TWO of them: webcal://
+  // is a single tap in Apple Calendar and Outlook but is silently dead in
+  // Chrome, which registers no handler for the scheme, while Google's own
+  // subscribe screen is plain https and works in any browser. Losing either one
+  // strands a whole platform without erroring anywhere, so both are required.
+  if (fileSet.has("schedule.html")) {
+    const html = read("schedule.html");
+    if (!/href="webcal:\/\/[^"]*cleanups\.ics"/.test(html))
+      err(
+        "schedule.html",
+        `No webcal:// link to ${FEED_FILE}, so there is no one-tap subscribe for Apple Calendar or Outlook. Restore it in src/pages/schedule.astro using FEED_WEBCAL_URL from src/lib/calendar-feed.ts.`,
+      );
+    if (
+      !/href="https:\/\/www\.google\.com\/calendar\/render\?cid=[^"]*cleanups\.ics"/.test(
+        decode(html),
+      )
+    )
+      err(
+        "schedule.html",
+        `No Google Calendar subscribe link to ${FEED_FILE}. It is the only one that works in Chrome, where webcal:// does nothing at all. Restore it in src/pages/schedule.astro using FEED_GOOGLE_URL from src/lib/calendar-feed.ts.`,
+      );
+  }
 
   // Served as a calendar. A static build throws the endpoint's own Content-Type
   // away, so public/_headers is the only lever left. WARN rather than ERROR:

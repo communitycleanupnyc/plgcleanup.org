@@ -328,16 +328,22 @@ format, hand-written — it's four rules and no dependency) from the same `sched
 everything else reads. Its wording comes from `src/lib/event-schema.ts`, shared with the Google
 search listings, so a cleanup can't read one way in a search result and another in a calendar.
 
-Two things worth knowing before you promise anyone anything:
+**There are two links, and both are needed** — no single one reaches everybody:
+
+- **Google Calendar** gets Google's own subscribe screen, which is an ordinary `https://` link and
+  so works in any browser. It has to be done **from a computer**: Google Calendar's phone apps
+  can't subscribe to a calendar by URL at all. Added once on a desktop, it syncs to the phone.
+- **Apple Calendar and Outlook** get a `webcal://` link, which is one tap and works on the phone
+  itself. **Chrome registers no handler for `webcal://` on any platform**, so clicking one there
+  does nothing at all — no error, no tab. That is why it can't be the only link.
+
+Two more things worth knowing before you promise anyone anything:
 
 - **Google Calendar refreshes on its own schedule** — often 8–24 hours, sometimes days — and
   ignores how often the file asks to be re-read. Apple Calendar and Outlook honour it. So a
   same-day weather cancellation still belongs in the newsletter and on Instagram, not here.
 - **A cleanup drops out of subscribers' calendars once it's over.** The feed carries what's still
   to come, so nobody keeps a record of the ones they attended.
-
-The link is `webcal://`, which is what makes it a subscription rather than a one-time import; the
-plain `https://` address is printed beside it because Google Calendar asks you to paste a URL.
 
 ---
 

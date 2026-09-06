@@ -10,7 +10,7 @@ import Base from "../layouts/Base.astro";
 import Button from "../components/Button.astro";
 import { UPCOMING_CLEANUPS } from "../data/schedule";
 import { eventSchema } from "../lib/event-schema";
-import { FEED_URL, FEED_WEBCAL_URL } from "../lib/calendar-feed";
+import { FEED_GOOGLE_URL, FEED_WEBCAL_URL } from "../lib/calendar-feed";
 
 // How many cleanups the page lists. The rest stay in the form — an editor can
 // add dates months ahead without making this page a wall of text.
@@ -97,18 +97,24 @@ const eventSchemas = cleanups.map(eventSchema);
     <p>Pick whichever of these you prefer to get updates from:</p>
     <ul>
       {
-        /* The calendar feed. No target="_blank": a webcal:// link is handed to
-           the operating system, which opens the calendar app — a blank tab would
-           be left behind with nothing in it. The plain https address is spelled
-           out beside it because Google Calendar asks people to PASTE a URL
-           rather than follow a link, and because a browser with no calendar app
-           behind it does nothing at all with webcal://. Both come from
-           src/lib/calendar-feed.ts, which is also what builds the file. */
+        /* The calendar feed, offered twice because no single link reaches
+           everybody. Google's own subscribe screen (FEED_GOOGLE_URL) leads,
+           because it is ordinary https and so works in any browser; a webcal://
+           link is silently dead in Chrome, which registers no handler for the
+           scheme. The webcal:// one follows for Apple Calendar and Outlook,
+           where it is a single tap and where the Google link would send someone
+           to the wrong app. "From a computer" is not hedging: Google Calendar's
+           phone apps cannot subscribe by URL at all, and a reader who taps this
+           on a phone and gets nowhere is the whole problem being fixed here.
+           Both URLs are built in src/lib/calendar-feed.ts, which also writes the
+           file they point at. No target="_blank", like every other link here. */
       }
       <li>
-        <a href={FEED_WEBCAL_URL}>Subscribe to the calendar</a> — every date below in your own calendar,
-        adding itself as we add dates. On a phone or a Mac, one tap does it; in Google Calendar, use Other
-        calendars → From URL with {FEED_URL}.
+        <a href={FEED_GOOGLE_URL}>Add the cleanups to Google Calendar</a> — every date below in your own
+        calendar, adding itself as we add more. Do that one from a computer; Google can't subscribe by
+        link on a phone. On an iPhone, an iPad, or a Mac, <a href={FEED_WEBCAL_URL}
+          >subscribe in Apple Calendar</a
+        > instead — one tap, and it works on the phone itself.
       </li>
       <li>
         <a href="https://communitycleanupplg.substack.com/subscribe">Our newsletter</a> — the schedule

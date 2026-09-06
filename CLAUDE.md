@@ -128,6 +128,16 @@ Things that will silently break if you don't know them:
   in `public/_headers` is the only one that reaches a browser — don't delete it as
   redundant, and never add a `_worker.js` (advanced mode stops `_headers` being
   read at all).
+- **The feed needs BOTH subscribe links on `/schedule`, and the audit enforces it.**
+  `FEED_GOOGLE_URL` (Google's `render?cid=` screen) is plain https and therefore
+  the only one that works in **Chrome, which registers no `webcal://` handler on
+  any platform** — a `webcal://` link there does nothing at all, with no error and
+  no tab, which is exactly how this shipped broken the first time.
+  `FEED_WEBCAL_URL` is the one tap that works on an iPhone or a Mac, and the one
+  that reaches Apple Calendar rather than sending an Apple user to Google. Neither
+  is redundant. The copy must also keep saying **"from a computer"** for the Google
+  one: Google Calendar's mobile apps cannot subscribe by URL at all, so a reader
+  who taps it on a phone gets nowhere.
 - **Gallery `alt` text is authored per photo and required** by the schema in
   `src/content.config.ts`. It used to be derived from the name; it isn't any
   more, because alt describes the _picture_, which a title can't stand in for.

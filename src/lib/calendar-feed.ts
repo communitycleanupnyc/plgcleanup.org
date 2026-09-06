@@ -42,13 +42,41 @@ const ORIGIN = new URL(import.meta.env.SITE);
 export const FEED_URL = new URL(FEED_PATH, ORIGIN).href;
 
 /**
- * The one-click subscribe address: the same URL as FEED_URL with the scheme
+ * The Apple/Outlook subscribe address: the same URL as FEED_URL with the scheme
  * swapped. A browser hands `webcal://` to the operating system, which opens the
  * calendar app already asking "subscribe to this?" — where the https address
  * would merely download a file that imports once and never updates again.
  * Fetching it is plain HTTPS; only the handoff differs.
+ *
+ * It is NOT a universal one-click link, which is why FEED_GOOGLE_URL exists.
+ * Safari and Mail on iOS and macOS know the scheme, and so does Outlook; CHROME
+ * REGISTERS NO HANDLER FOR IT, on any platform, so a click there does nothing
+ * at all — no error, no tab, nothing. Never offer this as the only way in.
  */
 export const FEED_WEBCAL_URL = `webcal://${ORIGIN.host}${FEED_PATH}`;
+
+/**
+ * The Google Calendar subscribe address — Google's own "add this calendar"
+ * screen, pre-filled with the feed, which then polls it forever.
+ *
+ * This is the link that works in ANY browser, because it is ordinary https:
+ * Google resolves the webcal:// address in `cid` server-side rather than asking
+ * the operating system to. That is what makes it the one to lead with; a
+ * webcal:// link is silently dead in Chrome.
+ *
+ * Two things about it are Google's behaviour and not ours, and both belong in
+ * whatever copy points here:
+ *   • It needs a COMPUTER. Google Calendar's mobile apps cannot subscribe to a
+ *     calendar by URL at all. Added once on a desktop, it syncs to the phone.
+ *   • Google re-reads a subscribed feed on its own schedule, often 8–24 hours
+ *     and sometimes days, whatever REFRESH says above.
+ *
+ * Built with URLSearchParams, like googleCalendarUrl() in src/data/schedule.ts,
+ * so the encoding is the standard library's problem and not ours.
+ */
+export const FEED_GOOGLE_URL = `https://www.google.com/calendar/render?${new URLSearchParams({
+  cid: FEED_WEBCAL_URL,
+})}`;
 
 /**
  * How often a subscriber's calendar should re-check. Twelve hours, against a
