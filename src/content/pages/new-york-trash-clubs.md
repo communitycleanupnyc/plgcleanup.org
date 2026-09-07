@@ -15,7 +15,7 @@ Did we miss any, or curious about starting a trash club in your neighborhood? [E
 ## Clubs around the city
 
 - **[Community Cleanup PLG](/)** – Prospect Lefferts Gardens, Brooklyn.
-- **[Greenpoint Trash Club](https://greenpointtrashclub.org/)** – Greenpoint, Brooklyn. 
+- **[Greenpoint Trash Club](http://greenpointtrashclub.org/)** – Greenpoint, Brooklyn. 
 - **[Clean Up Crown Heights](https://cleanupcrownheights.weebly.com/)** – Crown Heights, Brooklyn.
 - **[Astoria Trash Club](https://astoriatrashclub.org/)** – Astoria, Queens.
 - **[Sunnyside Trash Club](https://www.instagram.com/sunnysidetrashclub/)** – Sunnyside, Queens.

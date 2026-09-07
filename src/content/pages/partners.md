@@ -19,7 +19,7 @@ The **Sanitation Foundation** is the non-profit arm of the Department of Sanitat
 # 🏡 Neighborhood partners
 - **[Maple Street Community Garden](https://maplestreetcommunitygarden.org/)** houses our cleanup supplies and hosts our board meetings. If you want to sit in on a board meeting, all are welcome! [Come to one of our cleanups](/schedule) to learn more. 
 - **[Q Gardens](https://qgardenscf.com/)** is the community garden in Flatbush that houses or cleanup supplies for cleans in the lower parts of the neighborhood deeper into Flatbush. 
-- **[Prospect Lefferts Gardens Neighborhood Association](https://www.plgna.org/)**
+- **[Prospect Lefferts Gardens Neighborhood Association](https://www.instagram.com/plgnanyc/?hl=en)**
 - **[Flatbush Avenue Merchants Association](https://www.instagram.com/flatbushparkside/)**
 - **Maple Street Community Garden** — hosts our tool cart, and people volunteering at both trash club and the garden is common.
 - **[Hamlet](https://www.instagram.com/hamletcoffeecompany/)** is one of our favorite cafes in the neighborhood where we stop before, during, or after our cleanups :)

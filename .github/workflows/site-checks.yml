@@ -128,16 +128,33 @@ jobs:
         # SHA pins updated.
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
+          # --root-dir + --fallback-extensions are what let lychee read this
+          # site's OWN links at all. Every internal href Astro emits is
+          # root-relative ('/join'), and against local files lychee cannot
+          # resolve a leading '/' unless it is told where the site root is — it
+          # errors on each one instead, which is how this job managed to report
+          # ~410 failures while the site was entirely healthy. --root-dir points
+          # it at dist; --fallback-extensions html is needed on top of that
+          # because astro.config.mjs sets build.format "file", so '/join' is
+          # dist/join.html, not dist/join/index.html. Drop either flag and the
+          # job goes back to failing on every page.
+          #
           # Bot-walled hosts excluded: they 4xx for crawlers but work for humans.
+          # substack.com is on that list for our OWN newsletter link: it serves
+          # 403 to GitHub's runners and 200 to a browser (and to lychee's own
+          # user agent from a home connection) — it is the runner's IP being
+          # walled, not a broken link.
           # webcal: excluded because it is not a scheme lychee fetches — it is the
           # calendar subscribe link on /schedule, and scripts/seo-audit.mjs
           # resolves it against dist instead (see the webcal branch in its link
           # check), which is a stronger test than anything lychee could do here.
           args: >-
             --no-progress --max-retries 2
+            --root-dir ${{ github.workspace }}/dist
+            --fallback-extensions html
             --accept 200..299,301,302,308,429
             --exclude instagram.com --exclude amazon.com --exclude discord.com
-            --exclude washingtonpost.com
+            --exclude washingtonpost.com --exclude substack.com
             --exclude '^webcal:'
             'dist/**/*.html'
           fail: true
