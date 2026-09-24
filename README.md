@@ -513,6 +513,10 @@ adding a build step and a silent design-range footgun. Not worth it; revisit onl
   redeploy** rebuilds the site so the baked-in copy ("Join us this Sunday", the
   countdown line, the Event schema) keeps up with the calendar — and so /join
   moves on to the next cleanup in the schedule by itself.
+- **Schedule runway** (`.github/workflows/schedule-runway.yml`): every morning it
+  checks how far ahead `src/data/schedule.json` goes, and opens an issue (so an
+  email goes to everyone watching issues) when two weeks of cleanups are left,
+  and another when one week is left. Adding dates closes them on the next run.
 - **How the site went live on plgcleanup.org** (2026-08-23), and how it moved to the shared
   Cloudflare account (2026-09-05), are recorded in **[LAUNCH.md](LAUNCH.md)**, along with the
   few steps still owed to a human.
