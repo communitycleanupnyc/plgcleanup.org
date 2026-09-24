@@ -1,0 +1,94 @@
+# .github/workflows/schedule-runway.yml
+#
+# Early warning that src/data/schedule.json is running out. Every morning it
+# measures the runway — days from today (New York) to the last cleanup in the
+# file — and opens a GitHub issue at two points:
+#
+#   - 14 days or fewer: "Schedule runs out in 2 weeks"
+#   -  7 days or fewer: "Schedule runs out in 1 week"
+#
+# Each is a NEW issue, so each one emails everyone watching this repo's issues
+# (Watch → Custom → Issues; see "Turn on failure notifications" in the README).
+# The last cleanup's date is in the title, which is what keeps it to one email
+# per notice: tomorrow's run finds the issue already exists (open or closed) and
+# does nothing. Once someone adds dates the last date moves, so the next time the
+# schedule runs low the titles are new and the notices fire again — and any open
+# notice about the old last date is closed with a comment saying so.
+#
+# This is the gentle half. The hard tripwire is still the Monday audit in
+# site-checks.yml, which fails and files its own issue once every date has
+# passed; this workflow says nothing then, so there is only one alarm.
+#
+# To test: Actions → "schedule runway" → Run workflow, and enter a pretend
+# "today" (e.g. two weeks before the last cleanup). Test runs put "[test]" in
+# front of the title, so they never stand in for — or get closed by — the real
+# notices. Close the test issue afterwards.
+
+name: schedule runway
+
+on:
+  schedule:
+    - cron: "0 13 * * *" # Daily 13:00 UTC (9am EDT / 8am EST)
+  workflow_dispatch:
+    inputs:
+      today:
+        description: "Pretend today is this date (yyyy-mm-dd), to test. Leave blank for a real check."
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  runway:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Open an issue if the schedule is running out
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRETEND_TODAY: ${{ inputs.today }}
+          SCHEDULE_URL: ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/src/data/schedule.json
+        run: |
+          set -euo pipefail
+          file=src/data/schedule.json
+
+          # Same measure as the runway check in scripts/seo-audit.mjs: whole days
+          # between today in New York and the last cleanup date that isn't past.
+          today=${PRETEND_TODAY:-$(TZ=America/New_York date +%F)}
+          date -ud "$today" >/dev/null # a mistyped test date fails here, loudly
+          prefix=""
+          [ -n "$PRETEND_TODAY" ] && prefix="[test] "
+          last=$(jq -r --arg t "$today" '[.cleanups[].date | select(. >= $t)] | max // empty' "$file")
+
+          # Close notices about an old last date: someone has since added cleanups.
+          gh issue list --state open --limit 100 --json number,title \
+            --jq ".[] | select(.title | startswith(\"${prefix}Schedule runs out\")) | select(.title | endswith(\"(last cleanup ${last:-none})\") | not) | .number" |
+            while read -r n; do
+              gh issue close "$n" --comment "More cleanups have been added since this was opened (the last one is now ${last:-none}), so this notice is out of date. Closing it."
+            done
+
+          if [ -z "$last" ]; then
+            echo "No upcoming cleanups. The Monday audit in site-checks.yml files that issue."
+            exit 0
+          fi
+
+          days=$(( ( $(date -ud "$last" +%s) - $(date -ud "$today" +%s) ) / 86400 ))
+          echo "Today is $today. The last cleanup is $last, $days days away."
+          if   [ "$days" -le 7 ];  then weeks="1 week"
+          elif [ "$days" -le 14 ]; then weeks="2 weeks"
+          else exit 0
+          fi
+
+          title="${prefix}Schedule runs out in ${weeks} (last cleanup ${last})"
+          if gh issue list --state all --limit 500 --json title --jq ".[].title" | grep -qxF "$title"; then
+            echo "Already notified: $title"
+            exit 0
+          fi
+
+          gh issue create --title "$title" --body "The last cleanup on the website's schedule is **${last}**, ${days} days from now. After that, the site has no next cleanup to advertise.
+
+          **Add the next few dates** in Pages CMS → \"Schedule\", or edit [\`src/data/schedule.json\`](${SCHEDULE_URL}) directly on GitHub. One row per cleanup; the site picks the next one on its own.
+
+          This issue closes itself once later dates are added. It was opened automatically by \`.github/workflows/schedule-runway.yml\`."
