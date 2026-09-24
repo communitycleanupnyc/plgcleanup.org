@@ -29,6 +29,30 @@
       "startTime": "11am",
       "endTime": "12pm",
       "corner": "Rogers Ave & Maple St"
+    },
+    {
+      "date": "2026-10-11",
+      "startTime": "2pm",
+      "endTime": "3pm",
+      "corner": "Rogers Ave & Clarkson Ave"
+    },
+    {
+      "date": "2026-10-17",
+      "startTime": "10:00am",
+      "endTime": "11:00am",
+      "corner": "New York Ave & Empire Blvd"
+    },
+    {
+      "date": "2026-10-25",
+      "startTime": "2pm",
+      "endTime": "3pm",
+      "corner": "Nostrand Ave & Hawthorne St"
+    },
+    {
+      "date": "2026-10-31",
+      "startTime": "10:00am",
+      "endTime": "11:00am",
+      "corner": "Flatbush Ave & Rutland Rd"
     }
   ]
 }
