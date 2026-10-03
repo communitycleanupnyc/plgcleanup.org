@@ -544,7 +544,7 @@ adding a build step and a silent design-range footgun. Not worth it; revisit onl
   never goes red. Bypass
   either with `--no-verify`. Note: hooks only run on local `git` commits — edits via the GitHub web
   editor or Pages CMS skip them, so CI remains the real gate for content edits.
-- **Dependencies** (`.github/dependabot.yml`): weekly grouped update PRs. Merge them once CI is
+- **Dependencies** (`.github/dependabot.yml`): one grouped npm PR and one GitHub Actions PR a month, at most. Merge them once CI is
   green. **Major-version updates are held back on purpose** for `astro`,
   `embla-carousel`, `sharp`, and `typescript`: CI builds the site but never
   _clicks_ it, so a major that silently breaks the menu, the carousel, or the

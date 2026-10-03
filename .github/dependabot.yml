@@ -1,18 +1,22 @@
-# Keeps dependencies current with minimal oversight: Dependabot opens grouped,
-# reviewable PRs on a weekly cadence. Merge them after CI (see ci.yml) passes.
+# Keeps dependencies current with minimal oversight: once a month Dependabot
+# opens at most one PR for npm and one for GitHub Actions, each bundling every
+# pending update. Merge them after CI (see ci.yml) passes. Vulnerability alerts
+# still arrive as they're published (the repo's Security tab); the schedule only
+# affects these PRs.
 version: 2
 updates:
   - package-ecosystem: npm
     directory: "/"
     schedule:
-      interval: weekly
+      interval: monthly
     open-pull-requests-limit: 5
     groups:
-      # One PR for all non-major updates keeps the review burden low.
-      minor-and-patch:
-        update-types:
-          - minor
-          - patch
+      # One PR for everything, majors included, so a month is one notification.
+      # The majors that could break the site are ignored below, so the only ones
+      # that land here are dev tools; if one turns the PR red, it holds up the
+      # rest until it's fixed.
+      all-npm:
+        patterns: ["*"]
     ignore:
       # TypeScript 7 (the native compiler) doesn't yet expose the API that
       # `astro check` needs. Stay on the 5.x line until Astro supports it.
@@ -53,6 +57,9 @@ updates:
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: weekly
+      interval: monthly
+    groups:
+      all-actions:
+        patterns: ["*"]
     commit-message:
       prefix: "ci"
