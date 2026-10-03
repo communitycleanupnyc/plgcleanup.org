@@ -20,7 +20,7 @@
 //    • neither — the club is listed under the map but not drawn on it.
 //
 //  The map opens framed around every club on it. A club far from the rest
-//  (the Fort Tilden beach) can say "startView": false to stay on the map but
+//  (the Fort Tilden beach, Staten Island) can say "startView": false to stay on the map but
 //  out of that first view, so it doesn't shrink everyone else.
 //
 //  Each club on the map gets a colour from Observable 10, a palette from

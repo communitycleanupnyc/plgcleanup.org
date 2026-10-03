@@ -108,6 +108,13 @@
       "where": "Fort Tilden & Breezy Point, Queens (details below)",
       "neighborhood": "fort-tilden-queens, breezy-point-queens",
       "startView": false
+    },
+    {
+      "name": "DSNY Running Club",
+      "url": "https://www.instagram.com/dsny_running_club/",
+      "where": "Staten Island",
+      "point": [-74.1502, 40.5795],
+      "startView": false
     }
   ]
 }
