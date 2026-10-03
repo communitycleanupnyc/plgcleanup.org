@@ -59,9 +59,7 @@ const ctaLabel = renderCtaLabel(state);
     <Fragment slot="decoration">
       <div class="raccoon-hero"><Raccoon image={raccoonMaple} /></div>
     </Fragment>
-    <p>
-      {VOLUNTEER_COUNT} of your neighbors are helping keep trash off Brooklyn streets.
-    </p>
+    <p>{VOLUNTEER_COUNT} of your neighbors are helping keep trash off Brooklyn streets.</p>
     <p>Want to see why people love volunteering with us?</p>
   </Hero>
 
@@ -71,7 +69,8 @@ const ctaLabel = renderCtaLabel(state);
       data-countdown
       data-variant="cta"
       data-start={NEXT_CLEANUP.iso}
-      data-end={NEXT_CLEANUP.endIso}>{ctaLabel}</Button
+      data-end={NEXT_CLEANUP.endIso}
+      >{ctaLabel}</Button
     >
     <Button href="/schedule" variant="secondary">View schedule</Button>
   </div>
@@ -83,7 +82,8 @@ const ctaLabel = renderCtaLabel(state);
         <h3>Why volunteer?</h3>
         <p>
           Every piece counts, down to a cigarette butt. Simply being visible inspires others to help
-          our community. Bonus: volunteering has "<a
+          our community. Bonus: volunteering has
+          "<a
             href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10159229/"
             title="Cambridge University Press (2026)"
             >significant positive effects... on social, physical, and mental health.</a
@@ -110,9 +110,8 @@ const ctaLabel = renderCtaLabel(state);
         <p>
           Sign up for our <a href="https://communitycleanupplg.substack.com/subscribe">newsletter</a
           >, follow us on <a href="https://www.instagram.com/communitycleanupplg">Instagram</a>,
-          join us on <a href="https://discord.com/invite/H9her7r8N2">Discord</a>, or just send us an <a
-            href="mailto:communitycleanupplg@gmail.com">email</a
-          >!
+          join us on <a href="https://discord.com/invite/H9her7r8N2">Discord</a>, or just send us an
+          <a href="mailto:communitycleanupplg@gmail.com">email</a>!
         </p>
       </div>
     </FeatureGrid>

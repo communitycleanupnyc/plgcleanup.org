@@ -17,10 +17,8 @@ const { title } = Astro.props;
 <p>{CLUBS_INTRO}</p>
 
 <div class="club-map" data-key={SITE.protomapsKey} data-bounds={JSON.stringify(CLUBS_BOUNDS)}></div>
-{
-  /* The external-link mark (Feather's "external-link"), shown beside a club's
-    name in the tooltip when its link leaves this site. Cloned by the script. */
-}
+{/* The external-link mark (Feather's "external-link"), shown beside a club's
+    name in the tooltip when its link leaves this site. Cloned by the script. */}
 <template id="club-map-external">
   <svg
     class="club-map__external"
@@ -31,22 +29,20 @@ const { title } = Astro.props;
     stroke-linecap="round"
     stroke-linejoin="round"
     aria-hidden="true"
-    ><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline
-      points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg
   >
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+    <polyline points="15 3 21 3 21 9"></polyline>
+    <line x1="10" y1="14" x2="21" y2="3"></line>
+  </svg>
 </template>
 
 <ul>
-  {
-    CLUBS.map((club) => (
-      <li>
-        <strong>
-          <a href={club.url}>{club.name}</a>
-        </strong>{" "}
-        – {club.where}.
-      </li>
-    ))
-  }
+  {CLUBS.map((club) => <li>
+    <strong>
+      <a href={club.url}>{club.name}</a>
+    </strong
+    >{" "} – {club.where}.
+  </li>)}
 </ul>
 
 <script>

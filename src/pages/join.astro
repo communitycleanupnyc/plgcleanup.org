@@ -36,19 +36,15 @@ const schema = eventSchema(next);
 >
   <div class="join-page">
     <h1>Our next cleanup...</h1>
-    {
-      countdownLine && (
-        <p
-          class="join-countdown"
-          data-countdown
-          data-variant="join"
-          data-start={next.iso}
-          data-end={next.endIso}
-        >
-          {countdownLine}
-        </p>
-      )
-    }
+    {countdownLine && <p
+      class="join-countdown"
+      data-countdown
+      data-variant="join"
+      data-start={next.iso}
+      data-end={next.endIso}
+    >
+      {countdownLine}
+    </p>}
     <p class="join-sub">
       Zero registration needed, and we provide the supplies—just show up. Look for the shopping cart
       with trash grabbers to find your clean leader and say hi.
@@ -58,9 +54,7 @@ const schema = eventSchema(next);
       <div class="join-detail">
         <p class="join-detail-label">When</p>
         <div class="join-when">
-          <p class="join-detail-value">
-            {next.longDate}<br />{next.time}
-          </p>
+          <p class="join-detail-value">{next.longDate}<br />{next.time}</p>
           <Button href={next.calendarUrl} variant="small" target="_blank" rel="noopener noreferrer"
             >Add to calendar</Button
           >
@@ -94,25 +88,22 @@ const schema = eventSchema(next);
           title={`Map: ${next.corner}, Brooklyn, NY`}
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
-          allowfullscreen></iframe>
+          allowfullscreen
+        ></iframe>
       </div>
       <div class="join-detail join-questions">
         <p class="join-detail-label">Questions</p>
         <p class="join-detail-value">
-          Can't find your team? Let us know you're waiting on <a
-            href="https://discord.com/invite/H9her7r8N2">Discord</a
-          > by sending a message in the #general channel. For all other inquiries, see the <a
-            href="/faq">FAQ</a
-          >.
+          Can't find your team? Let us know you're waiting on
+          <a href="https://discord.com/invite/H9her7r8N2">Discord</a> by sending a message in the
+          #general channel. For all other inquiries, see the <a href="/faq">FAQ</a>.
         </p>
       </div>
     </div>
   </div>
-  {
-    !isPastEvent && (
-      <script slot="head" type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
-    )
-  }
+  {!isPastEvent && (
+    <script slot="head" type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+  )}
 </Base>
 
 <script>

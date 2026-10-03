@@ -58,36 +58,33 @@ function renderInfo(img: ImageMetadata) {
 // Blur-up placeholders (Next.js/Figma technique), generated once at build time.
 // Parallel to `items`; an empty string means "no placeholder for this image".
 const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
+
+// The <section> below has no explicit role: a <section> with an accessible name
+// is already a `region` landmark, which is worth keeping — aria-roledescription
+// just makes a screen reader announce that region as "carousel".
+// aria-roledescription is ignored on an UNNAMED section, which is why the
+// aria-label fallback matters when there is no heading.
 ---
 
-{
-  N > 0 && (
-    /* No explicit role: a <section> with an accessible name is already a
-       `region` landmark, which is worth keeping — aria-roledescription just makes
-       a screen reader announce that region as "carousel". aria-roledescription is
-       ignored on an UNNAMED section, which is why the aria-label fallback matters
-       when there is no heading. */
-    <section
-      class="carousel-section"
-      aria-roledescription="carousel"
-      aria-labelledby={heading ? headingId : undefined}
-      aria-label={heading ? undefined : L.carousel}
-      data-carousel
-      data-variant={variant}
-      data-grayscale={String(grayscale)}
-      data-enable-popup={String(enablePopup)}
-      data-counter-label={L.counter}
-      style={`--size-d:${sizePx.desktop}px; --size-m:${sizePx.mobile}px`}
-    >
-      <header class="carousel-header">
-        {heading && (
-          <SectionHeading id={headingId} class="carousel-heading">
-            {heading}
-          </SectionHeading>
-        )}
-        <p class="carousel-counter" aria-live="polite" />
-        <div class="carousel-controls">
-          {/* Stroked, not a filled outline like it used to be. The button is now
+{N > 0 && <section
+  class="carousel-section"
+  aria-roledescription="carousel"
+  aria-labelledby={heading ? headingId : undefined}
+  aria-label={heading ? undefined : L.carousel}
+  data-carousel
+  data-variant={variant}
+  data-grayscale={String(grayscale)}
+  data-enable-popup={String(enablePopup)}
+  data-counter-label={L.counter}
+  style={`--size-d:${sizePx.desktop}px; --size-m:${sizePx.mobile}px`}
+>
+  <header class="carousel-header">
+    {heading && <SectionHeading id={headingId} class="carousel-heading">
+      {heading}
+    </SectionHeading>}
+    <p class="carousel-counter" aria-live="polite" />
+    <div class="carousel-controls">
+      {/* Stroked, not a filled outline like it used to be. The button is now
               shorter than it is wide, so the glyph is squashed vertically to keep
               its breathing room proportional (preserveAspectRatio="none") — and a
               filled arrow squashed that way gets THINNER, which is the opposite of
@@ -109,188 +106,161 @@ const placeholders = await Promise.all(items.map((item) => lqip(item.img)));
                 and only the stem changes. Shortening the shaft alone would just
                 push the glyph off-centre in its box.
               · OVERALL LENGTH — --arrow-w on its own. */}
-          <button
-            class="carousel-arrow"
-            data-dir="prev"
-            aria-controls={viewportId}
-            aria-label={L.prev}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="30.23"
-              height="24"
-              fill="none"
-              viewBox="0 0 30.23 24"
-              preserveAspectRatio="none"
-            >
-              <path
-                d="M26.23 12H4m7.478-9.5118L4 12l7.478 9.5118"
-                stroke="currentColor"
-                stroke-width="1.0397"
-                stroke-linejoin="miter"
-                vector-effect="non-scaling-stroke"
-              />
-            </svg>
-          </button>
-          {/* Mirror of the prev glyph — see the note above it. */}
-          <button
-            class="carousel-arrow"
-            data-dir="next"
-            aria-controls={viewportId}
-            aria-label={L.next}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="30.23"
-              height="24"
-              fill="none"
-              viewBox="0 0 30.23 24"
-              preserveAspectRatio="none"
-            >
-              <path
-                d="M4 12h22.23m-7.478-9.5118L26.23 12l-7.478 9.5118"
-                stroke="currentColor"
-                stroke-width="1.0397"
-                stroke-linejoin="miter"
-                vector-effect="non-scaling-stroke"
-              />
-            </svg>
-          </button>
-        </div>
-      </header>
+      <button class="carousel-arrow" data-dir="prev" aria-controls={viewportId} aria-label={L.prev}>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="30.23"
+          height="24"
+          fill="none"
+          viewBox="0 0 30.23 24"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M26.23 12H4m7.478-9.5118L4 12l7.478 9.5118"
+            stroke="currentColor"
+            stroke-width="1.0397"
+            stroke-linejoin="miter"
+            vector-effect="non-scaling-stroke"
+          />
+        </svg>
+      </button>
+      {/* Mirror of the prev glyph — see the note above it. */}
+      <button class="carousel-arrow" data-dir="next" aria-controls={viewportId} aria-label={L.next}>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="30.23"
+          height="24"
+          fill="none"
+          viewBox="0 0 30.23 24"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M4 12h22.23m-7.478-9.5118L26.23 12l-7.478 9.5118"
+            stroke="currentColor"
+            stroke-width="1.0397"
+            stroke-linejoin="miter"
+            vector-effect="non-scaling-stroke"
+          />
+        </svg>
+      </button>
+    </div>
+  </header>
 
-      <div class="embla">
-        <div class="embla__viewport" id={viewportId}>
-          <ul class="embla__container" role="list">
-            {items.map((item, index) => {
-              const info = renderInfo(item.img);
-              const blur = placeholders[index];
-              const Body = item.Body;
-              // Blur-up: paint the LQIP as the img's own background under a cover fit,
-              // matching object-position so a cropped (square) photo lines up. The
-              // decoded photo paints over it; `color:transparent` hides the alt text
-              // while it loads. Cleared on load by the script below.
-              const blurStyle = blur
-                ? `color:transparent;background-image:url("${blur}");background-size:cover;` +
-                  `background-position:${item.focusPosition ?? "50% 50%"};background-repeat:no-repeat`
-                : undefined;
-              return (
-                <li
-                  class="embla__slide card"
-                  data-index={index}
-                  aria-roledescription="slide"
-                  aria-label={slidePosition(index)}
-                  style={item.focusPosition ? `--pos:${item.focusPosition}` : undefined}
-                >
-                  <div class="card__media">
-                    <Image
-                      src={item.img}
-                      alt={item.alt}
-                      width={info.fallbackW}
-                      height={info.fallbackH}
-                      widths={info.widths}
-                      sizes={info.sizes}
-                      format="webp"
-                      quality={75}
-                      loading="lazy"
-                      decoding="async"
-                      layout="none"
-                      data-blur-up
-                      style={blurStyle}
-                    />
-                    {/* No `hidden` attribute here on purpose. `hidden` is display:none,
+  <div class="embla">
+    <div class="embla__viewport" id={viewportId}>
+      <ul class="embla__container" role="list">
+        {items.map((item, index) => {
+          const info = renderInfo(item.img);
+          const blur = placeholders[index];
+          const Body = item.Body;
+          // Blur-up: paint the LQIP as the img's own background under a cover fit,
+          // matching object-position so a cropped (square) photo lines up. The
+          // decoded photo paints over it; `color:transparent` hides the alt text
+          // while it loads. Cleared on load by the script below.
+          const blurStyle = blur
+            ? `color:transparent;background-image:url("${blur}");background-size:cover;` +
+              `background-position:${item.focusPosition ?? "50% 50%"};background-repeat:no-repeat`
+            : undefined;
+          return <li
+            class="embla__slide card"
+            data-index={index}
+            aria-roledescription="slide"
+            aria-label={slidePosition(index)}
+            style={item.focusPosition ? `--pos:${item.focusPosition}` : undefined}
+          >
+            <div class="card__media">
+              <Image
+                src={item.img}
+                alt={item.alt}
+                width={info.fallbackW}
+                height={info.fallbackH}
+                widths={info.widths}
+                sizes={info.sizes}
+                format="webp"
+                quality={75}
+                loading="lazy"
+                decoding="async"
+                layout="none"
+                data-blur-up
+                style={blurStyle}
+              />
+              {/* No `hidden` attribute here on purpose. `hidden` is display:none,
                         which would force layout + first paint of this whole text block
                         inside the frame the open animation starts — the panel visibly
                         stuttered. The CSS below hides it with `visibility: hidden`
                         instead (the same mechanism MobileMenu uses), which keeps it laid
                         out and ready to composite, and still keeps it out of the tab
                         order and the accessibility tree. */}
-                    {enablePopup && Body && (
-                      <div class="card__panel" id={panelId(index)}>
-                        <button
-                          class="card__panel-close"
-                          aria-label={withTitle(L.close, item.title)}
-                        >
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 20 20"
-                            fill="none"
-                            aria-hidden="true"
-                          >
-                            <path
-                              d="M5 5L15 15M15 5L5 15"
-                              stroke="currentColor"
-                              stroke-width="1.5"
-                              stroke-linecap="round"
-                            />
-                          </svg>
-                        </button>
-                        {/* tabindex="0" is what makes this scrollable box reachable by
+              {enablePopup && Body && <div class="card__panel" id={panelId(index)}>
+                <button class="card__panel-close" aria-label={withTitle(L.close, item.title)}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <path
+                      d="M5 5L15 15M15 5L5 15"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </button>
+                {/* tabindex="0" is what makes this scrollable box reachable by
                             keyboard — Safari, unlike Firefox/Chrome, will not focus an
                             overflow container on its own, so arrow keys can't scroll a
                             long testimonial there otherwise. */}
-                        <div
-                          class="card__panel-body"
-                          tabindex="0"
-                          role="region"
-                          aria-label={withTitle(L.region, item.title)}
-                        >
-                          <Body />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div class="card__caption">
-                    <div class="card__caption-text">
-                      <p class="card__name">{item.title}</p>
-                      <p class="card__quote">
-                        “{item.caption}
-                        {enablePopup && Body && <span class="card__quote-more"> […]</span>}”
-                        {/*<!-- {enablePopup && Body && <span class="card__quote-more"></span>} -->*/}
-                        {/*<!-- {enablePopup && Body} -->*/}
-                      </p>
-                    </div>
-                    {enablePopup && Body && (
-                      <button
-                        class="card__toggle"
-                        aria-expanded="false"
-                        aria-controls={panelId(index)}
-                        aria-label={withTitle(L.open, item.title)}
-                      >
-                        {/* The site's caret, drawn from the one place its
+                <div
+                  class="card__panel-body"
+                  tabindex="0"
+                  role="region"
+                  aria-label={withTitle(L.region, item.title)}
+                >
+                  <Body />
+                </div>
+              </div>}
+            </div>
+            <div class="card__caption">
+              <div class="card__caption-text">
+                <p class="card__name">{item.title}</p>
+                <p class="card__quote">
+                  “{item.caption}
+                  {enablePopup && Body && <span class="card__quote-more"> […]</span>}”
+                  {/*<!-- {enablePopup && Body && <span class="card__quote-more"></span>} -->*/}
+                  {/*<!-- {enablePopup && Body} -->*/}
+                </p>
+              </div>
+              {enablePopup && Body && <button
+                class="card__toggle"
+                aria-expanded="false"
+                aria-controls={panelId(index)}
+                aria-label={withTitle(L.open, item.title)}
+              >
+                {/* The site's caret, drawn from the one place its
                             geometry lives (./caret.ts) — a collapsible section
                             on a content page draws the same one. It points up
                             here because this panel rises; see the rotation on
                             .card__toggle-icon below. */}
-                        <svg
-                          class="card__toggle-icon"
-                          width={CARET.size}
-                          height={CARET.size}
-                          viewBox={CARET.viewBox}
-                          fill="none"
-                          aria-hidden="true"
-                        >
-                          <path
-                            d={CARET.path}
-                            stroke="currentColor"
-                            stroke-width={CARET.strokeWidth}
-                            stroke-linecap={CARET.strokeLinecap}
-                            stroke-linejoin={CARET.strokeLinejoin}
-                          />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </div>
-    </section>
-  )
-}
+                <svg
+                  class="card__toggle-icon"
+                  width={CARET.size}
+                  height={CARET.size}
+                  viewBox={CARET.viewBox}
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d={CARET.path}
+                    stroke="currentColor"
+                    stroke-width={CARET.strokeWidth}
+                    stroke-linecap={CARET.strokeLinecap}
+                    stroke-linejoin={CARET.strokeLinejoin}
+                  />
+                </svg>
+              </button>}
+            </div>
+          </li>;
+        })}
+      </ul>
+    </div>
+  </div>
+</section>}
 
 <style>
   /* ── Section layout ─────────────────────────────── */

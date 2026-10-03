@@ -13,11 +13,9 @@ const { backHref = "/", backLabel = "← Back home" } = Astro.props;
 
 <div class="prose">
   <slot />
-  {
-    /* set:html rather than a child expression: .prose-back is an underlined
+  {/* set:html rather than a child expression: .prose-back is an underlined
       inline-block, so a stray whitespace text node either side of the label
-      would render as underlined space. A self-closing tag can't collect any. */
-  }
+      would render as underlined space. A self-closing tag can't collect any. */}
   <!-- {backHref && <a href={backHref} class="prose-back" set:html={backLabel} />} -->
 </div>
 

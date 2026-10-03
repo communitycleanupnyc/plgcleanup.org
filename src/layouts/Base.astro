@@ -101,11 +101,9 @@ const orgSchema = {
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
-    {
-      SITE.fonts.map((href) => (
-        <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
-      ))
-    }
+    {SITE.fonts.map((href) => (
+      <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
+    ))}
     <script type="application/ld+json" is:inline set:html={JSON.stringify(orgSchema)} />
     {/* Page-specific <head> content — e.g. join.astro's Event JSON-LD. */}
     <slot name="head" />

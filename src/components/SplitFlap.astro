@@ -100,34 +100,33 @@ const chars = format(value).split("");
   style={`--flap-flip:${flip}ms`}
 >
   <span class="splitflap__flaps" aria-hidden="true">
-    {
-      chars.map((ch) =>
-        ch === "." ? (
-          <span class="flap flap--sep">
-            <span class="flap__glyph">{ch}</span>
-          </span>
-        ) : (
-          /* Four panels, which is how the real thing works: the two static
+    {chars.map((ch) =>
+      ch === "." ? (
+        <span class="flap flap--sep">
+          <span class="flap__glyph">{ch}</span>
+        </span>
+      ) : (
+        /* Four panels, which is how the real thing works: the two static
              halves are the slot, and the two leaves are the card that falls
              through it. The script addresses them by index — don't reorder. */
-          <span class="flap" data-flap>
-            <span class="flap__panel flap__panel--top">
-              <span class="flap__glyph">{ch}</span>
-            </span>
-            <span class="flap__panel flap__panel--bottom">
-              <span class="flap__glyph">{ch}</span>
-            </span>
-            <span class="flap__panel flap__panel--top flap__leaf flap__leaf--front">
-              <span class="flap__glyph">{ch}</span>
-            </span>
-            <span class="flap__panel flap__panel--bottom flap__leaf flap__leaf--back">
-              <span class="flap__glyph">{ch}</span>
-            </span>
+        <span class="flap" data-flap>
+          <span class="flap__panel flap__panel--top">
+            <span class="flap__glyph">{ch}</span>
           </span>
-        ),
-      )
-    }
-  </span><span class="sr-only">{spoken}</span>{" "}<span class="splitflap__label">{label}</span>
+          <span class="flap__panel flap__panel--bottom">
+            <span class="flap__glyph">{ch}</span>
+          </span>
+          <span class="flap__panel flap__panel--top flap__leaf flap__leaf--front">
+            <span class="flap__glyph">{ch}</span>
+          </span>
+          <span class="flap__panel flap__panel--bottom flap__leaf flap__leaf--back">
+            <span class="flap__glyph">{ch}</span>
+          </span>
+        </span>
+      ),
+    )}
+  </span
+  ><span class="sr-only">{spoken}</span>{" "}<span class="splitflap__label">{label}</span>
 </span>
 
 <style>

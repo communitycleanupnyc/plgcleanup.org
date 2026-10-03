@@ -40,64 +40,57 @@ const eventSchemas = cleanups.map(eventSchema);
       corner, show up, and we hand you a grabber and a bag.
     </p>
 
-    {
-      cleanups.length > 0 ? (
-        <ol class="schedule-list">
-          {cleanups.map((cleanup, i) => {
-            // The first row is the cleanup /join describes, so its button goes
-            // there; the rest offer the date itself, as a calendar entry.
-            //
-            // The date and the time are two cells each, not one: the month and
-            // the dash get columns of their own, which is what lines every row's
-            // months and dashes up. Splitting the date is also what drops the
-            // comma that would otherwise sit between "Saturday" and "August 29".
-            return (
-              <li class="schedule-item">
-                <div class="schedule-row">
-                  <span class="schedule-weekday">{cleanup.weekday}</span>
-                  <span class="schedule-monthday">{cleanup.monthDay}</span>
-                  <span class="schedule-time">
-                    <span class="schedule-from">{cleanup.timeFrom}</span>
-                    <span class="schedule-dash">–</span>
-                    <span class="schedule-to">{cleanup.timeTo}</span>
-                  </span>
-                  <span class="schedule-corner">{cleanup.corner}</span>
-                  <span class="schedule-action">
-                    {i === 0 ? (
-                      <Button href="/join" variant="small">
-                        Join
-                      </Button>
-                    ) : (
-                      <Button
-                        href={cleanup.calendarUrl}
-                        variant="small"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`Add the ${cleanup.weekday} ${cleanup.monthDay} cleanup to your calendar`}
-                      >
-                        Add to calendar
-                      </Button>
-                    )}
-                  </span>
-                </div>
-              </li>
-            );
-          })}
-        </ol>
-      ) : (
-        <p class="schedule-empty">
-          We're picking the next dates now. The{" "}
-          <a href="https://communitycleanupplg.substack.com/subscribe">newsletter</a> and{" "}
-          <a href="https://www.instagram.com/communitycleanupplg">Instagram</a> get them first.
-        </p>
-      )
-    }
+    {cleanups.length > 0 ? (
+      <ol class="schedule-list">
+        {cleanups.map((cleanup, i) => {
+          // The first row is the cleanup /join describes, so its button goes
+          // there; the rest offer the date itself, as a calendar entry.
+          //
+          // The date and the time are two cells each, not one: the month and
+          // the dash get columns of their own, which is what lines every row's
+          // months and dashes up. Splitting the date is also what drops the
+          // comma that would otherwise sit between "Saturday" and "August 29".
+          return <li class="schedule-item">
+            <div class="schedule-row">
+              <span class="schedule-weekday">{cleanup.weekday}</span>
+              <span class="schedule-monthday">{cleanup.monthDay}</span>
+              <span class="schedule-time">
+                <span class="schedule-from">{cleanup.timeFrom}</span>
+                <span class="schedule-dash">–</span>
+                <span class="schedule-to">{cleanup.timeTo}</span>
+              </span>
+              <span class="schedule-corner">{cleanup.corner}</span>
+              <span class="schedule-action">
+                {i === 0 ? (
+                  <Button href="/join" variant="small"> Join </Button>
+                ) : (
+                  <Button
+                    href={cleanup.calendarUrl}
+                    variant="small"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Add the ${cleanup.weekday} ${cleanup.monthDay} cleanup to your calendar`}
+                  >
+                    Add to calendar
+                  </Button>
+                )}
+              </span>
+            </div>
+          </li>;
+        })}
+      </ol>
+    ) : (
+      <p class="schedule-empty">
+        We're picking the next dates now. The{" "}
+        <a href="https://communitycleanupplg.substack.com/subscribe">newsletter</a> and{" "}
+        <a href="https://www.instagram.com/communitycleanupplg">Instagram</a> get them first.
+      </p>
+    )}
 
     <h2>Further out</h2>
     <p>Pick whichever of these you prefer to get updates from:</p>
     <ul>
-      {
-        /* The calendar feed, offered twice because no single link reaches
+      {/* The calendar feed, offered twice because no single link reaches
            everybody. Google's own subscribe screen (FEED_GOOGLE_URL) leads,
            because it is ordinary https and so works in any browser; a webcal://
            link is silently dead in Chrome, which registers no handler for the
@@ -107,46 +100,43 @@ const eventSchemas = cleanups.map(eventSchema);
            phone apps cannot subscribe by URL at all, and a reader who taps this
            on a phone and gets nowhere is the whole problem being fixed here.
            Both URLs are built in src/lib/calendar-feed.ts, which also writes the
-           file they point at. No target="_blank", like every other link here. */
-      }
+           file they point at. No target="_blank", like every other link here. */}
       <li>
-        <a href={FEED_GOOGLE_URL}>Add the cleanups to Google Calendar</a> — every date below in your own
-        calendar, adding itself as we add more. Do that one from a computer; Google can't subscribe by
-        link on a phone. On an iPhone, an iPad, or a Mac, <a href={FEED_WEBCAL_URL}
-          >subscribe in Apple Calendar</a
-        > instead — one tap, and it works on the phone itself.
+        <a href={FEED_GOOGLE_URL}>Add the cleanups to Google Calendar</a> — every date below in your
+        own calendar, adding itself as we add more. Do that one from a computer; Google can't
+        subscribe by link on a phone. On an iPhone, an iPad, or a Mac,
+        <a href={FEED_WEBCAL_URL}>subscribe in Apple Calendar</a> instead — one tap, and it works on
+        the phone itself.
       </li>
       <li>
-        <a href="https://communitycleanupplg.substack.com/subscribe">Our newsletter</a> — the schedule
-        by email, including any weather cancellations.
+        <a href="https://communitycleanupplg.substack.com/subscribe">Our newsletter</a> — the
+        schedule by email, including any weather cancellations.
       </li>
       <li>
-        <a href="https://www.instagram.com/communitycleanupplg">Instagram</a> — the route for the weekend,
-        plus photos from the last one.
+        <a href="https://www.instagram.com/communitycleanupplg">Instagram</a> — the route for the
+        weekend, plus photos from the last one.
       </li>
       <li>
-        <a href="https://discord.com/invite/H9her7r8N2">Discord</a> — the #general channel, where the
-        schedule gets posted and where you can ask if you're not sure you're in the right place.
+        <a href="https://discord.com/invite/H9her7r8N2">Discord</a> — the #general channel, where
+        the schedule gets posted and where you can ask if you're not sure you're in the right place.
       </li>
     </ul>
 
     <h2>Trashy hours</h2>
     <p>
-      Once in a while we skip the sidewalk and meet at a local business we <a href="/partners"
-        >partner</a
-      > with instead. Those get announced in the newsletter and on Instagram like any other cleanup.
+      Once in a while we skip the sidewalk and meet at a local business we
+      <a href="/partners">partner</a> with instead. Those get announced in the newsletter and on
+      Instagram like any other cleanup.
     </p>
   </div>
-  {
-    eventSchemas.length > 0 && (
-      <script
-        slot="head"
-        type="application/ld+json"
-        is:inline
-        set:html={JSON.stringify(eventSchemas)}
-      />
-    )
-  }
+  {eventSchemas.length > 0 && (
+    <script
+      slot="head"
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify(eventSchemas)}
+    />
+  )}
 </Base>
 
 <style>

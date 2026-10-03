@@ -19,5 +19,6 @@ const { link, class: className } = Astro.props;
   href={link.href}
   class={className}
   target={link.external ? "_blank" : undefined}
-  rel={link.external ? "noopener noreferrer" : undefined}>{link.label}</a
+  rel={link.external ? "noopener noreferrer" : undefined}
+  >{link.label}</a
 >

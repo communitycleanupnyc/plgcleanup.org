@@ -20,18 +20,19 @@ const { navMode = "ticker" } = Astro.props;
       <span class="nav-wordmark">{SITE.name}</span>
     </a>
     <div class="nav-links">
-      {SITE.nav.header.map((link) => <NavLink link={link} class="nav-link" />)}
-      {
-        SITE.nav.headerCta && (
-          <>
-            <span class="nav-divider" aria-hidden="true" />
-            <NavLink link={SITE.nav.headerCta} class="nav-btn" />
-          </>
-        )
-      }
+      {SITE.nav.header.map((link) => (
+        <NavLink link={link} class="nav-link" />
+      ))}
+      {SITE.nav.headerCta && (
+        <>
+          <span class="nav-divider" aria-hidden="true" />
+          <NavLink link={SITE.nav.headerCta} class="nav-btn" />
+        </>
+      )}
     </div>
   </nav>
-</header><!-- /.site-chrome -->
+</header>
+<!-- /.site-chrome -->
 
 <div id="chrome-spacer" aria-hidden="true"></div>
 

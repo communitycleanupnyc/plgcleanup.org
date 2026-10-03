@@ -183,6 +183,15 @@ Two deliberate holds. Both are checked by CI, neither is Dependabot's to change:
   just majors: it's a `0.x` package, so `0.34 → 0.35` is a minor by semver rules
   despite being a breaking release.
 
+One setting has to move with Astro rather than with Dependabot:
+
+- **`astroCompressHTML: "html"` in `.prettierrc.json`** tells prettier-plugin-astro
+  (1.x) how Astro collapses whitespace, so that formatting never changes what a
+  page renders. The plugin assumes Astro 7's `"jsx"` model by default; on Astro 6
+  that default puts newlines inside links and buttons, which is the visible
+  stray-underline bug. **When upgrading to Astro 7**, change it to `"jsx"` (or
+  delete it) and run `npm run format`.
+
 ---
 
 ## Commands

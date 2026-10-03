@@ -27,14 +27,14 @@ import NavLink from "./NavLink.astro";
      this menu is never shown and the button is display:none. -->
 <div class="mobile-menu" id="mobile-menu" role="dialog" aria-label="Navigation">
   <nav class="mobile-menu-links" aria-label="Mobile navigation">
-    {SITE.nav.mobile.map((link) => <NavLink link={link} class="mobile-menu-link" />)}
+    {SITE.nav.mobile.map((link) => (
+      <NavLink link={link} class="mobile-menu-link" />
+    ))}
   </nav>
   <div class="mobile-menu-ctas">
-    {
-      SITE.nav.mobileCtas.map((link, i) => (
-        <NavLink link={link} class={i === 0 ? "cta-primary" : "cta-secondary"} />
-      ))
-    }
+    {SITE.nav.mobileCtas.map((link, i) => (
+      <NavLink link={link} class={i === 0 ? "cta-primary" : "cta-secondary"} />
+    ))}
   </div>
 </div>
 
