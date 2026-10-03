@@ -11,7 +11,9 @@
 //    • "neighborhood": a neighborhood's id, e.g. "greenpoint-brooklyn" — its
 //      name and borough, lowercase, joined by dashes. That neighborhood is
 //      shaded and labelled, and clicking it opens the club's link. One club
-//      per neighborhood; give a second club there a "point" instead. The ids are the "slug" values in
+//      per neighborhood; give a second club there a "point" instead. A club
+//      that spans neighborhoods lists them all, separated by commas:
+//      "fort-tilden-queens, breezy-point-queens". The ids are the "slug" values in
 //      src/data/nyc-neighborhoods.geojson; a mistyped one fails the build.
 //    • "point": [longitude, latitude] — for a club with no home neighborhood.
 //      (Pick Up Pigeons sits in the East River, because pigeons fly.)
@@ -79,12 +81,21 @@ const source: { features: { properties: Record<string, unknown>; geometry: Geome
 type ClubProps = { club: string; url: string; color: string };
 type Club = (typeof clubs)[number];
 
+/** A club's neighborhood ids. Several may be given, comma-separated. */
+const slugsOf = (club: Club) =>
+  (club.neighborhood ?? "")
+    .split(",")
+    .map((slug) => slug.trim())
+    .filter(Boolean);
+
 /** A club's extent on the map, [west, south, east, north] — its shape's or its pin's. */
 const boxOf = (club: Club) => {
   const where =
     club.point ??
-    source.features.find((f) => f.properties.slug === club.neighborhood)?.geometry.coordinates;
-  const nums = [where ?? []].flat(Infinity) as number[];
+    source.features
+      .filter((f) => slugsOf(club).includes(f.properties.slug as string))
+      .map((f) => f.geometry.coordinates);
+  const nums = [where].flat(Infinity) as number[];
   const lngs = nums.filter((_, i) => i % 2 === 0);
   const lats = nums.filter((_, i) => i % 2 === 1);
   return [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
@@ -131,23 +142,24 @@ for (const club of clubs) {
       `"${club.name}" has both a "neighborhood" and a "point" in src/data/trash-clubs.json. Keep one.`,
     );
   }
-  if (!club.neighborhood) continue;
-  if (!source.features.some((f) => f.properties.slug === club.neighborhood)) {
-    throw new Error(
-      `"${club.name}" is in the neighborhood "${club.neighborhood}", which isn't on the map. ` +
-        `Write it as the name and borough, lowercase, joined by dashes ("greenpoint-brooklyn"), ` +
-        `or look up the "slug" in src/data/nyc-neighborhoods.geojson.`,
-    );
+  for (const slug of slugsOf(club)) {
+    if (!source.features.some((f) => f.properties.slug === slug)) {
+      throw new Error(
+        `"${club.name}" is in the neighborhood "${slug}", which isn't on the map. ` +
+          `Write it as the name and borough, lowercase, joined by dashes ("greenpoint-brooklyn"), ` +
+          `or look up the "slug" in src/data/nyc-neighborhoods.geojson.`,
+      );
+    }
+    // A shape opens one link when clicked, so it can only belong to one club.
+    const taken = clubsIn.get(slug);
+    if (taken) {
+      throw new Error(
+        `"${club.name}" and "${taken.club}" are both in "${slug}" in src/data/trash-clubs.json. ` +
+          `A neighborhood can hold one club — give the other a "point" inside it instead.`,
+      );
+    }
+    clubsIn.set(slug, propsOf(club));
   }
-  // A shape opens one link when clicked, so it can only belong to one club.
-  const taken = clubsIn.get(club.neighborhood);
-  if (taken) {
-    throw new Error(
-      `"${club.name}" and "${taken.club}" are both in "${club.neighborhood}" in src/data/trash-clubs.json. ` +
-        `A neighborhood can hold one club — give the other a "point" inside it instead.`,
-    );
-  }
-  clubsIn.set(club.neighborhood, propsOf(club));
 }
 
 // Every whole neighborhood is outlined. A sub-neighborhood (Prospect Lefferts

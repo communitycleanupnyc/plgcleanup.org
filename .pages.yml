@@ -258,8 +258,9 @@ content:
               The neighborhood's name and borough, lowercase, joined by dashes —
               e.g. greenpoint-brooklyn or astoria-queens. Shades that neighborhood
               and labels it with the club. A name that isn't on the map fails the
-              build with a message saying so. Leave blank for a club with no home
-              neighborhood.
+              build with a message saying so. For a club spanning several, separate
+              them with commas (fort-tilden-queens, breezy-point-queens). Leave
+              blank for a club with no home neighborhood.
           - name: point
             label: Map pin instead (optional)
             type: number
