@@ -19,6 +19,10 @@
 //      (Pick Up Pigeons sits in the East River, because pigeons fly.)
 //    • neither — the club is listed under the map but not drawn on it.
 //
+//  The map opens framed around every club on it. A club far from the rest
+//  (the Fort Tilden beach) can say "startView": false to stay on the map but
+//  out of that first view, so it doesn't shrink everyone else.
+//
 //  Each club on the map gets a colour from Observable 10, a palette from
 //  d3-scale-chromatic designed to stay tellable-apart for colourblind readers
 //  and on dark backgrounds. It has ten colours, so far-apart clubs share them;
@@ -51,6 +55,7 @@ const { intro, clubs } = z
           where: filled("A club's area"),
           neighborhood: z.string().trim().min(1).optional(),
           point: z.tuple([z.number(), z.number()]).optional(),
+          startView: z.boolean().optional(),
         }),
         { error: 'src/data/trash-clubs.json must hold a "clubs" list, in [ … ] brackets.' },
       )
@@ -194,7 +199,10 @@ export const MAP_FEATURES = { type: "FeatureCollection", features: [...shapes, .
 
 /** The box around every club on the map, [[west, south], [east, north]] — where the map opens. */
 export const CLUBS_BOUNDS = (() => {
-  const drawn = [...shapes, ...points].filter((f) => f.properties.club);
+  const offStart = new Set(clubs.filter((c) => c.startView === false).map((c) => c.name));
+  const drawn = [...shapes, ...points].filter(
+    (f) => f.properties.club && !offStart.has(f.properties.club),
+  );
   // No club placed on the map at all: open on the whole city instead.
   const all = (drawn.length ? drawn : shapes).flatMap(
     (f) => [f.geometry.coordinates].flat(Infinity) as number[],

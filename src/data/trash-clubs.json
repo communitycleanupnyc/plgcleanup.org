@@ -106,7 +106,8 @@
       "name": "Fort Tilden / Breezy Point Beach Cleanup",
       "url": "#fort-tilden--breezy-point-beach-cleanup",
       "where": "Fort Tilden & Breezy Point, Queens (details below)",
-      "neighborhood": "fort-tilden-queens, breezy-point-queens"
+      "neighborhood": "fort-tilden-queens, breezy-point-queens",
+      "startView": false
     }
   ]
 }
