@@ -46,7 +46,8 @@
     {
       "name": "Club Canned",
       "url": "https://www.instagram.com/clubcanned/",
-      "where": "Around Brooklyn"
+      "where": "Sunset Park, Brooklyn",
+      "neighborhood": "sunset-park-brooklyn"
     },
     {
       "name": "East Williamsburg Trash Club",
@@ -88,6 +89,18 @@
       "url": "https://www.instagram.com/bedstuycleanups/",
       "where": "Bedford-Stuyvesant, Brooklyn",
       "neighborhood": "bedford-stuyvesant-brooklyn"
+    },
+    {
+      "name": "Jackson Heights Beautification Group",
+      "url": "https://www.instagram.com/jhbgny/",
+      "where": "Jackson Heights, Queens",
+      "neighborhood": "jackson-heights-queens"
+    },
+    {
+      "name": "The Trash Walker",
+      "url": "https://www.instagram.com/thetrashwalker/",
+      "where": "Upper West Side, Manhattan",
+      "neighborhood": "upper-west-side-manhattan"
     }
   ]
 }
