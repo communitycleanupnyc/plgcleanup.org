@@ -220,6 +220,56 @@ content:
             required: true
             description: "Where everyone meets, e.g. Clarkson Ave & Bedford Ave. The map link is built from it."
 
+  # The map and list at the top of /new-york-trash-clubs. src/data/trash-clubs.ts
+  # checks every row on build, and its header explains the three ways a club
+  # goes on the map.
+  - name: trash-clubs
+    label: Trash clubs
+    type: file
+    path: src/data/trash-clubs.json
+    format: json
+    fields:
+      - { name: intro, label: Intro paragraph, type: text, required: true }
+      - name: clubs
+        label: Clubs
+        type: object
+        list:
+          min: 1
+          collapsible:
+            collapsed: true
+            summary: "{fields.name} · {fields.where}"
+        fields:
+          - { name: name, label: Club name, type: string, required: true }
+          - name: url
+            label: Link
+            type: string
+            required: true
+            description: "Their website or Instagram, e.g. https://www.instagram.com/greenpointtrashclub/"
+          - name: where
+            label: Where (shown in the list)
+            type: string
+            required: true
+            description: "e.g. Greenpoint, Brooklyn"
+          - name: neighborhood
+            label: Neighborhood on the map (optional)
+            type: string
+            required: false
+            description: >-
+              The neighborhood's name and borough, lowercase, joined by dashes —
+              e.g. greenpoint-brooklyn or astoria-queens. Shades that neighborhood
+              and labels it with the club. A name that isn't on the map fails the
+              build with a message saying so. Leave blank for a club with no home
+              neighborhood.
+          - name: point
+            label: Map pin instead (optional)
+            type: number
+            list: true
+            required: false
+            description: >-
+              Only for a club with no neighborhood: longitude, then latitude, e.g.
+              -73.9932 and 40.7068. Leave both blank to list the club without
+              putting it on the map.
+
   - name: stats
     label: Statistics
     type: file

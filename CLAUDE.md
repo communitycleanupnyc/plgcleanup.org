@@ -6,8 +6,9 @@ The website for Community Cleanup PLG, a Brooklyn volunteer street-cleanup group
 Static Astro 6 site (`output: "static"`), deployed by Cloudflare Pages on every
 push to `main`. **No server, no database, no API.** Content is plain Markdown and
 JSON, edited by non-technical volunteers through Pages CMS or the GitHub web
-editor. Two runtime dependencies: `astro`, `embla-carousel` (plus `sharp` for
-build-time image work).
+editor. Three runtime dependencies: `astro`, `embla-carousel`, `maplibre-gl` (the
+trash-club map only), plus two build-time ones: `sharp` for image work and
+`d3-scale-chromatic` for the map's colourblind-safe club colours.
 
 The people maintaining this after hand-off are not engineers. Optimize every
 change for "still works, untouched, in two years" over cleverness.
@@ -279,6 +280,12 @@ Two things to know when writing a component here:
   listings share). Read the `/cleanups.ics` invariant above first — `UID`,
   `DTSTAMP`, and the absent `VTIMEZONE` each have a reason. Editors never touch
   either file; the feed follows `src/data/schedule.json` on its own.
+- **Add a trash club:** a row in `src/data/trash-clubs.json` (Pages CMS: "Trash
+  clubs"). `src/data/trash-clubs.ts` explains the three ways a row lands on the
+  map and fails the build on an unknown neighborhood. The map is `ClubMap.astro`,
+  switched on by `clubMap: true` in the page's frontmatter; it renders the H1, so
+  that page's Markdown has none. The MapLibre worker is wired in by hand
+  (`?worker&url` + `setWorkerUrl`) — drop that and the map draws nothing.
 - **Update stats:** `src/data/stats.json` — plain numbers, no commas.
 - **Change how wide a page of words is:** `--content-w` in `src/styles/tokens.css`
   — 60% of the window on a desktop, the full site width on a phone. Every page

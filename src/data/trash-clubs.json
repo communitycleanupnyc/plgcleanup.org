@@ -1,0 +1,93 @@
+{
+  "intro": "New York has seen a growing trend of volunteer-run \"trash clubs\" like ours. Here are the crews we know of, so you can find one near you.",
+  "clubs": [
+    {
+      "name": "Community Cleanup PLG",
+      "url": "/",
+      "where": "Prospect Lefferts Gardens, Brooklyn",
+      "neighborhood": "prospect-lefferts-gardens-brooklyn"
+    },
+    {
+      "name": "Greenpoint Trash Club",
+      "url": "https://www.instagram.com/greenpointtrashclub/",
+      "where": "Greenpoint, Brooklyn",
+      "neighborhood": "greenpoint-brooklyn"
+    },
+    {
+      "name": "Clean Up Crown Heights",
+      "url": "https://cleanupcrownheights.weebly.com/",
+      "where": "Crown Heights, Brooklyn",
+      "neighborhood": "crown-heights-brooklyn"
+    },
+    {
+      "name": "Astoria Trash Club",
+      "url": "https://astoriatrashclub.org/",
+      "where": "Astoria, Queens",
+      "neighborhood": "astoria-queens"
+    },
+    {
+      "name": "Sunnyside Trash Club",
+      "url": "https://www.instagram.com/sunnysidetrashclub/",
+      "where": "Sunnyside, Queens",
+      "neighborhood": "sunnyside-queens"
+    },
+    {
+      "name": "Woodside Trash Club",
+      "url": "https://www.instagram.com/woodsidetrashclub/",
+      "where": "Woodside, Queens",
+      "neighborhood": "woodside-queens"
+    },
+    {
+      "name": "Pick Up Pigeons",
+      "url": "https://www.instagram.com/pickuppigeons/",
+      "where": "Around Brooklyn & Queens",
+      "point": [-73.9932, 40.7068]
+    },
+    {
+      "name": "Club Canned",
+      "url": "https://www.instagram.com/clubcanned/",
+      "where": "Around Brooklyn"
+    },
+    {
+      "name": "East Williamsburg Trash Club",
+      "url": "https://www.instagram.com/eastwburgtrashclub/",
+      "where": "East Williamsburg, Brooklyn",
+      "neighborhood": "east-williamsburg-brooklyn"
+    },
+    {
+      "name": "NYC Trash Club",
+      "url": "https://trashclub.nyc/",
+      "where": "occasional cleanups, more centered on events in Brooklyn around trash infrastructure"
+    },
+    {
+      "name": "Rego Park Trash Club",
+      "url": "https://www.instagram.com/regoparktrashclub/",
+      "where": "Rego Park, Queens",
+      "neighborhood": "rego-park-queens"
+    },
+    {
+      "name": "Bushwick Trash Lady",
+      "url": "https://www.instagram.com/bushwicktrashlady/",
+      "where": "Bushwick, Brooklyn",
+      "neighborhood": "bushwick-brooklyn"
+    },
+    {
+      "name": "Trash Talk NYC",
+      "url": "https://www.instagram.com/trashtalk_nyc/",
+      "where": "Washington Heights, Manhattan",
+      "neighborhood": "washington-heights-manhattan"
+    },
+    {
+      "name": "Litter Legion",
+      "url": "https://www.instagram.com/litter_nyc/",
+      "where": "Hell's Kitchen, Manhattan",
+      "neighborhood": "hells-kitchen-manhattan"
+    },
+    {
+      "name": "Bed-Stuy Cleanups",
+      "url": "https://www.instagram.com/bedstuycleanups/",
+      "where": "Bedford-Stuyvesant, Brooklyn",
+      "neighborhood": "bedford-stuyvesant-brooklyn"
+    }
+  ]
+}

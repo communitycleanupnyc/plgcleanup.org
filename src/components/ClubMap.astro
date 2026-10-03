@@ -1,0 +1,267 @@
+---
+// The top of /new-york-trash-clubs: heading, intro, the map, and the club list
+// under it. Placed by [slug].astro when a page sets `clubMap: true`. Everything
+// it says comes from src/data/trash-clubs.json (via trash-clubs.ts) and the
+// page title; the shapes it draws are fetched from /nyc-neighborhoods.json.
+// The list is the map's text equivalent: nothing is only on the map.
+import { CLUBS, CLUBS_INTRO, CLUBS_BOUNDS } from "../data/trash-clubs";
+import { SITE } from "../site.config";
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<h1>{title}</h1>
+<p>{CLUBS_INTRO}</p>
+
+<div class="club-map" data-key={SITE.protomapsKey} data-bounds={JSON.stringify(CLUBS_BOUNDS)}></div>
+{
+  /* The external-link mark (Feather's "external-link"), shown beside a club's
+    name in the tooltip when its link leaves this site. Cloned by the script. */
+}
+<template id="club-map-external">
+  <svg
+    class="club-map__external"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+    ><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline
+      points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg
+  >
+</template>
+
+<ul>
+  {
+    CLUBS.map((club) => (
+      <li>
+        <strong>
+          <a href={club.url}>{club.name}</a>
+        </strong>{" "}
+        – {club.where}.
+      </li>
+    ))
+  }
+</ul>
+
+<script>
+  import * as maplibregl from "maplibre-gl";
+  import "maplibre-gl/dist/maplibre-gl.css";
+  // MapLibre draws with a web worker it looks for beside its own script, where
+  // Vite's bundling doesn't put it. `?worker&url` has Vite build the worker
+  // (and the shared code it imports) as a file of its own and hand back its URL.
+  import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
+  maplibregl.setWorkerUrl(workerUrl);
+
+  const el = document.querySelector<HTMLElement>(".club-map");
+  if (el) {
+    const css = getComputedStyle(document.documentElement);
+    const color = (name: string) => css.getPropertyValue(name).trim();
+    const text = color("--text");
+    // The site-wide hover fade (--dur-fast in tokens.css), skipped for readers
+    // who ask for less motion — the same rule base.css applies to links.
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const fade = { duration: reduced ? 0 : parseFloat(color("--dur-fast")), delay: 0 };
+
+    const map = new maplibregl.Map({
+      container: el,
+      style: `https://api.protomaps.com/styles/v5/black/en.json?key=${el.dataset.key}`,
+      bounds: JSON.parse(el.dataset.bounds!),
+      fitBoundsOptions: { padding: 60 },
+      // No credits box on the map: they're in the "Attribution" section at the
+      // bottom of the page's Markdown (src/content/pages/new-york-trash-clubs.md).
+      // Keep that section if this map moves — OpenStreetMap's licence and the
+      // neighborhoods' CC BY-SA both require the credit.
+      attributionControl: false,
+      // One finger / plain scroll wheel scrolls the PAGE past the map; two
+      // fingers or ctrl+scroll move the map. Without this the map swallows the
+      // scroll of anyone reading down the page on a phone.
+      cooperativeGestures: true,
+    });
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+
+    map.on("load", () => {
+      map.addSource("hoods", {
+        type: "geojson",
+        data: "/nyc-neighborhoods.json",
+      });
+      const isClub: maplibregl.ExpressionSpecification = ["has", "club"];
+      // Not `== "Polygon"`: MapLibre reports a MultiPolygon as its own type.
+      const isShape: maplibregl.ExpressionSpecification = ["!=", ["geometry-type"], "Point"];
+
+      map.addLayer({
+        id: "clubs",
+        type: "fill",
+        source: "hoods",
+        filter: ["all", isClub, isShape],
+        // Each club's own colour, picked at build time (src/data/trash-clubs.ts).
+        paint: { "fill-color": ["get", "color"], "fill-opacity": 0.55 },
+      });
+      // The hover highlight is two identical layers taking turns, because
+      // MapLibre animates a layer's opacity but not a filter change: the one
+      // leaving fades out while the other picks up the new neighborhood and
+      // fades in — the same ease in and out as every link on the site.
+      for (const id of ["hover-a", "hover-b"]) {
+        map.addLayer({
+          id,
+          type: "fill",
+          source: "hoods",
+          filter: ["==", ["get", "slug"], ""],
+          paint: {
+            "fill-color": text,
+            "fill-opacity": 0,
+            "fill-opacity-transition": fade,
+          },
+        });
+      }
+      map.addLayer({
+        id: "outlines",
+        type: "line",
+        source: "hoods",
+        filter: isShape,
+        paint: { "line-color": text, "line-opacity": 0.35, "line-width": 0.6 },
+      });
+      map.addLayer({
+        id: "pins",
+        type: "circle",
+        source: "hoods",
+        filter: ["==", ["geometry-type"], "Point"],
+        paint: {
+          "circle-color": ["get", "color"],
+          "circle-radius": 6,
+          "circle-stroke-color": "#000",
+          "circle-stroke-width": 1,
+        },
+      });
+      map.addLayer({
+        id: "labels",
+        type: "symbol",
+        source: "hoods",
+        filter: isClub,
+        layout: {
+          "text-field": ["get", "club"],
+          "text-font": ["Noto Sans Medium"],
+          "text-size": 13,
+          // A pin's label sits beside it; a neighborhood's in its middle.
+          "text-variable-anchor": ["left", "center"],
+          "text-radial-offset": ["case", isShape, 0, 0.8],
+        },
+        paint: { "text-color": text, "text-halo-color": "#000", "text-halo-width": 1.2 },
+      });
+
+      // Invisible, but still hit by the pointer — this is what hover asks
+      // "which neighborhood is under me?", since the outlines are only hit on
+      // their edges. Topmost first, so a club's sub-neighborhood beats the
+      // neighborhood it sits inside.
+      map.addLayer({
+        id: "hit",
+        type: "fill",
+        source: "hoods",
+        filter: isShape,
+        paint: { "fill-opacity": 0 },
+      });
+
+      // The tooltip: one popup, kept on the map and faded in and out by class
+      // (the CSS below) rather than added and removed, so it eases like every
+      // other hover on the site.
+      const tip = new maplibregl.Popup({
+        className: "club-map__tip",
+        closeButton: false,
+        closeOnClick: false,
+        anchor: "bottom",
+        offset: 14,
+        maxWidth: "none",
+      });
+      const external = document.querySelector<HTMLTemplateElement>("#club-map-external")!;
+      const isExternal = (url: string) => new URL(url, location.href).origin !== location.origin;
+      const tipContent = ({ name, club, url }: Record<string, string>) => {
+        const box = document.createElement("div");
+        if (club) {
+          const title = box.appendChild(document.createElement("strong"));
+          title.textContent = club;
+          if (isExternal(url)) title.append(" ", external.content.cloneNode(true));
+        }
+        box.append(club ? document.createElement("br") : "", name);
+        return box;
+      };
+
+      let shown: string | null = null;
+      let turn = 0;
+      const hover = (e?: maplibregl.MapMouseEvent) => {
+        const feature = e && map.queryRenderedFeatures(e.point, { layers: ["pins", "hit"] })[0];
+        if (feature) tip.setLngLat(e.lngLat);
+        const slug = feature?.properties.slug ?? null;
+        if (slug === shown) return;
+        shown = slug;
+        const layers = ["hover-a", "hover-b"];
+        map.setPaintProperty(layers[turn], "fill-opacity", 0);
+        map.getCanvas().style.cursor = feature?.properties.url ? "pointer" : "";
+        if (!feature) {
+          tip.removeClassName("is-shown");
+          return;
+        }
+        turn ^= 1;
+        map.setFilter(layers[turn], ["==", ["get", "slug"], slug]);
+        map.setPaintProperty(layers[turn], "fill-opacity", 0.3);
+        tip.setDOMContent(tipContent(feature.properties));
+        if (!tip.isOpen()) tip.addTo(map);
+        tip.addClassName("is-shown");
+      };
+      map.on("mousemove", hover);
+      map.getCanvas().addEventListener("mouseleave", () => hover());
+
+      // Clicking a club opens its link: off-site ones in a new tab, as the
+      // tooltip's icon promises; this site's own pages in this one.
+      map.on("click", (e) => {
+        hover(e);
+        const [feature] = map.queryRenderedFeatures(e.point, { layers: ["pins", "hit"] });
+        const url = feature?.properties.url;
+        if (!url) return;
+        if (isExternal(url)) window.open(url, "_blank", "noopener");
+        else location.href = url;
+      });
+    });
+  }
+</script>
+
+<style>
+  .club-map {
+    position: relative;
+    height: clamp(320px, 60vh, 560px);
+    margin-block: 1.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  /* The tooltip. MapLibre builds it outside this component's markup, so
+     these reach it with :global(). */
+  .club-map :global(.club-map__tip) {
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease-out);
+    pointer-events: none;
+  }
+  .club-map :global(.club-map__tip.is-shown) {
+    opacity: 1;
+  }
+  .club-map :global(.club-map__tip .maplibregl-popup-content) {
+    padding: 0.4rem 0.65rem;
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+  .club-map :global(.club-map__tip .maplibregl-popup-tip) {
+    border-top-color: var(--bg);
+  }
+  .club-map :global(.club-map__external) {
+    width: 0.85em;
+    height: 0.85em;
+    vertical-align: -0.05em;
+  }
+</style>
