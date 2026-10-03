@@ -117,6 +117,17 @@ export const SITE = {
     statLine: "pounds of trash picked up.",
   },
 
+  // ── Map ────────────────────────────────────────────────────────────────────
+  /**
+   * The Protomaps basemap key behind the trash-club map (ClubMap.astro). It is
+   * public by nature — every visitor's browser sends it — and locked to this
+   * site's origins in the Protomaps dashboard (plgcleanup.org, its pages.dev
+   * previews; localhost is always allowed). A new domain must be added THERE
+   * first, or the map is an empty box: the API answers with no CORS header and
+   * the browser drops the style before anything draws.
+   */
+  protomapsKey: "c8bcdcb4103e6e78",
+
   // ── Structured data (JSON-LD) ──────────────────────────────────────────────
   // Emitted on every page by src/layouts/Base.astro so search and AI engines
   // know who publishes this site.

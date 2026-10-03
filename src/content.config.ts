@@ -33,6 +33,12 @@ const pages = defineCollection({
       // editor's — and merge mode there (see settings.content) keeps it in the
       // file when an editor saves the page.
       raccoon: image().optional(),
+      // Puts the trash-club map (ClubMap.astro) at the top of the page: the
+      // page title as its heading, the intro, the map, and the club list, all
+      // from src/data/trash-clubs.json — so the Markdown body starts after
+      // them and has no `#` heading of its own. Developer's choice, like
+      // `raccoon`, so it isn't in .pages.yml either.
+      clubMap: z.boolean().default(false),
     }),
 });
 

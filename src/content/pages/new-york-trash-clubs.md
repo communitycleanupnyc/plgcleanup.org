@@ -3,26 +3,10 @@ title: New York Trash Clubs
 description: A guide to volunteer street-cleanup clubs across New York City and Brooklyn — who they are, where they clean, and how to join.
 collapse:
   - Fort Tilden / Breezy Point Frequently Asked Questions
+clubMap: true
 ---
 
-# New York trash clubs
-
-New York has seen a growing trend of volunteer-run "trash clubs" like ours. Here are 
-the crews we know of, so you can find one near you.
-
 Did we miss any, or curious about starting a trash club in your neighborhood? [Email us](mailto:communitycleanupplg@gmail.com)
-
-## Clubs around the city
-
-- **[Community Cleanup PLG](/)** – Prospect Lefferts Gardens, Brooklyn.
-- **[Greenpoint Trash Club](https://www.instagram.com/greenpointtrashclub/)** – Greenpoint, Brooklyn. 
-- **[Clean Up Crown Heights](https://cleanupcrownheights.weebly.com/)** – Crown Heights, Brooklyn.
-- **[Astoria Trash Club](https://astoriatrashclub.org/)** – Astoria, Queens.
-- **[Sunnyside Trash Club](https://www.instagram.com/sunnysidetrashclub/)** – Sunnyside, Queens.
-- **[Pick Up Pigeons](https://www.instagram.com/pickuppigeons/)** – Around Brooklyn & Queens.
-- **[Club Canned](https://www.instagram.com/clubcanned/)** – Around Brooklyn.
-- **[East Williamsburg Trash Club](https://www.instagram.com/eastwburgtrashclub/)** – East Williamsburg, Brooklyn.
-- **[NYC Trash Club](https://trashclub.nyc/)** – occasional cleanups, more centered on events in Brooklyn around trash infrastructure.
 
 ## Fort Tilden / Breezy Point Beach Cleanup
 Times: Mornings, every Friday, Saturday, and Sunday.
@@ -53,3 +37,9 @@ Trash clubs keep making the news. A few stories worth reading about why efforts 
 - [In New York, trash clubs are becoming a social movement](https://www.washingtonpost.com/nation/2026/03/27/new-york-trash-cleanup-groups/) — Washington Post
 - [Greenpoint Trash Club – the only club without a cover](https://brooklyneagle.com/311169/greenpoint-trash-club-the-only-club-without-a-cover/) – Brooklyn Eagle
 - [Garbage Nights Out: How Trash Clubs Are Cleaning and Connecting NYC](https://lavocedinewyork.com/en/new-york/2025/11/25/garbage-nights-out-how-trash-clubs-are-cleaning-and-connecting-nyc/) – La Voce di New York
+
+## Attribution
+
+Map © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, drawn with [Protomaps](https://protomaps.com).
+
+Neighborhood boundaries from [NYC Neighborhood Boundaries](https://github.com/chriswhong/nyc-neighborhood-boundaries) by Chris Whong, derived from Zillow's neighborhood boundaries, licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).

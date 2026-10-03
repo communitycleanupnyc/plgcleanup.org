@@ -3,6 +3,7 @@ import { getCollection, render } from "astro:content";
 import Base from "../layouts/Base.astro";
 import Prose from "../components/Prose.astro";
 import Raccoon from "../components/Raccoon.astro";
+import ClubMap from "../components/ClubMap.astro";
 import { headingKey } from "../plugins/collapsible-sections";
 
 // One static route per Markdown file in src/content/pages/. The filename is the
@@ -70,6 +71,7 @@ for (const name of page.data.collapse) {
         </div>
       )
     }
+    {page.data.clubMap && <ClubMap title={page.data.title} />}
     <Content />
   </Prose>
 </Base>

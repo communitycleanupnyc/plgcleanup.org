@@ -55,6 +55,7 @@ edit has a mistake, the build fails and nothing broken goes live.
 | To change…                                                                                     | Edit this                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | The **cleanup schedule** (dates, times, corners)                                               | In [Pages CMS](#pages-cms-form-based-editing), open **Schedule** — or edit `src/data/schedule.json` directly. One row per cleanup; the site shows the next four and picks the first one for /join. Bad dates/times fail the build with a message naming the row. Adding a date also updates the [calendar feed](#the-calendar-feed) — anyone subscribed sees it within about a day, with nothing to send. |
+| The **trash club map** on /new-york-trash-clubs                                                | In [Pages CMS](#pages-cms-form-based-editing), open **Trash clubs** — or edit `src/data/trash-clubs.json` directly. One row per club: name, link, where, and a `neighborhood` like `greenpoint-brooklyn` (or a `point`, or neither to list it without a map spot). A misspelled neighborhood fails the build with a message naming the club.                                                              |
 | **Statistics** (pounds collected, volunteer count)                                             | In [Pages CMS](#pages-cms-form-based-editing), open **Statistics** — or edit `src/data/stats.json` directly. Plain numbers, no commas.                                                                                                                                                                                                                                                                    |
 | Any **prose page** — About, FAQ, Terms, Partners, Service hours, Lost & found, NYC trash clubs | The matching file in `src/content/pages/` (e.g. `faq.md`). Write normal Markdown. **The filename is the web address** — `faq.md` is at `/faq` — so renaming a file moves the page.                                                                                                                                                                                                                        |
 | **Gallery items** in the home-page carousel                                                    | One file per item in `src/content/gallery/` (e.g. `jaan.md`): the top block holds the title, pull quote, photo, and the photo's description; the text below is the full text shown when the card is opened.                                                                                                                                                                                               |
@@ -144,15 +145,20 @@ writing that CMS's config against the same files; no content migration.
 | Runtime   | Node 24 LTS (`.nvmrc`)                                                                       |
 | Content   | Astro Content Collections (Markdown) + `src/data/schedule.ts` for the cleanup dates          |
 | Carousel  | [Embla](https://www.embla-carousel.com/) (`embla-carousel`)                                  |
+| Map       | [MapLibre](https://maplibre.org/) (`maplibre-gl`) + Protomaps, trash-club page only          |
 | Images    | Astro `<Image>` → Sharp (build-time WebP) + a custom blur-up placeholder (`src/lib/lqip.ts`) |
 | Fonts     | Fraunces (display) + Inter (body) — self-hosted variable woff2 in `public/fonts/`            |
 | Styling   | Hand-written CSS with design tokens — no framework                                           |
 | Deploy    | Cloudflare Pages (push → build → deploy)                                                     |
 | Tooling   | `astro check` (types), Prettier, Dependabot, GitHub Actions CI                               |
 
-Only **two** dependencies ship to the browser: `astro` and `embla-carousel`.
-`sharp` is a third `dependencies` entry but is build-time only — it encodes the
-images and the social share picture, and never reaches a visitor.
+Only **three** dependencies ship to the browser: `astro`, `embla-carousel`, and
+`maplibre-gl` — the last on the trash-club page alone. Its key is
+`SITE.protomapsKey`, locked to this site's origins in the Protomaps dashboard.
+`sharp` and `d3-scale-chromatic` are `dependencies` entries too but are
+build-time only — `sharp` encodes the images and the social share picture, and
+`d3-scale-chromatic` supplies the club colours on the map (its colourblind-safe
+Observable 10 palette) — so neither reaches a visitor.
 
 ### Dependency pins
 
@@ -227,6 +233,9 @@ src/
     schedule.ts            ← reads schedule.json; picks the next cleanup, derives map links + times
     stats.json             ← editable running totals (pounds collected, volunteers) — Pages CMS writes this
     stats.ts               ← reads stats.json; validates + formats the numbers for display
+    trash-clubs.json       ← the clubs on the /new-york-trash-clubs map — Pages CMS writes this
+    trash-clubs.ts         ← reads trash-clubs.json; checks each neighborhood, builds what the map draws
+    nyc-neighborhoods.geojson ← Chris Whong's NYC neighborhood shapes (CC BY-SA), unmodified
     countdown.ts           ← pure "in 3 days / tomorrow / right now" logic + copy (build + browser)
   integrations/
     delete-unused-images/  ← vendored build plugin that prunes unreferenced images
