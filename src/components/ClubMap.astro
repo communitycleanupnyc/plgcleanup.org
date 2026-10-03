@@ -101,15 +101,29 @@ const { title } = Astro.props;
     );
 
     map.on("load", () => {
+      // Of the basemap's city names, keep only New York's: Newark, Jersey City
+      // and the rest are noise around a map of this city's clubs. Replaces the
+      // layer's own filter (kind == locality) with that plus the name.
+      map.setFilter("places_locality", [
+        "all",
+        ["==", ["get", "kind"], "locality"],
+        ["==", ["get", "name"], "New York"],
+      ]);
+
       map.addSource("hoods", {
         type: "geojson",
         data: "/nyc-neighborhoods.json",
       });
+      // Every layer below goes in just under the basemap's city name, the way
+      // map data usually sits under a basemap's place labels: so "New York"
+      // stays on top, and is placed before the club names, which move aside
+      // for it rather than hide it.
+      const add = (layer: maplibregl.AddLayerObject) => map.addLayer(layer, "places_locality");
       const isClub: maplibregl.ExpressionSpecification = ["has", "club"];
       // Not `== "Polygon"`: MapLibre reports a MultiPolygon as its own type.
       const isShape: maplibregl.ExpressionSpecification = ["!=", ["geometry-type"], "Point"];
 
-      map.addLayer({
+      add({
         id: "clubs",
         type: "fill",
         source: "hoods",
@@ -122,7 +136,7 @@ const { title } = Astro.props;
       // leaving fades out while the other picks up the new neighborhood and
       // fades in — the same ease in and out as every link on the site.
       for (const id of ["hover-a", "hover-b"]) {
-        map.addLayer({
+        add({
           id,
           type: "fill",
           source: "hoods",
@@ -134,14 +148,14 @@ const { title } = Astro.props;
           },
         });
       }
-      map.addLayer({
+      add({
         id: "outlines",
         type: "line",
         source: "hoods",
         filter: isShape,
         paint: { "line-color": text, "line-opacity": 0.35, "line-width": 0.6 },
       });
-      map.addLayer({
+      add({
         id: "pins",
         type: "circle",
         source: "hoods",
@@ -153,7 +167,7 @@ const { title } = Astro.props;
           "circle-stroke-width": 1,
         },
       });
-      map.addLayer({
+      add({
         id: "labels",
         type: "symbol",
         source: "hoods",
@@ -199,7 +213,7 @@ const { title } = Astro.props;
       // "which neighborhood is under me?", since the outlines are only hit on
       // their edges. Topmost first, so a club's sub-neighborhood beats the
       // neighborhood it sits inside.
-      map.addLayer({
+      add({
         id: "hit",
         type: "fill",
         source: "hoods",
@@ -290,7 +304,7 @@ const { title } = Astro.props;
   }
   .club-map :global(.club-map__tip .maplibregl-popup-content) {
     padding: 0.4rem 0.65rem;
-    border-radius: 4px;
+    border-radius: 0;
     background: var(--bg);
     color: var(--text);
     font: inherit;
