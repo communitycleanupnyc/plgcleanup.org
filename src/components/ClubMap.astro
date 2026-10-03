@@ -85,6 +85,21 @@ const { title } = Astro.props;
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
+    // Every label on the map in the site's body font. The basemap asks for its
+    // three Noto Sans names, and MapLibre's `font-faces` draws each of them
+    // from Inter instead, so no layer needs editing. Same file the page already
+    // loads (src/styles/fonts.css), so it comes from the cache — if the body
+    // font is ever swapped, change it here too. Inter is variable, so all
+    // three draw at its regular weight.
+    const BODY_FONT = "/fonts/Inter.woff2";
+    map.once("style.load", () =>
+      map.setFontFaces({
+        "Noto Sans Regular": BODY_FONT,
+        "Noto Sans Medium": BODY_FONT,
+        "Noto Sans Italic": BODY_FONT,
+      }),
+    );
+
     map.on("load", () => {
       map.addSource("hoods", {
         type: "geojson",
@@ -146,10 +161,36 @@ const { title } = Astro.props;
         layout: {
           "text-field": ["get", "club"],
           "text-font": ["Noto Sans Medium"],
-          "text-size": 13,
-          // A pin's label sits beside it; a neighborhood's in its middle.
-          "text-variable-anchor": ["left", "center"],
-          "text-radial-offset": ["case", isShape, 0, 0.8],
+          "text-size": 12,
+          "text-padding": 1,
+          // Where a name may go, in order of preference. A neighborhood's sits
+          // in its middle, else just above, below, or beside it; a pin's beside
+          // the dot. Without the fallbacks, a name that collides with a
+          // neighbour's is simply dropped — in the crowded middle of the map
+          // that hid half the clubs at the opening zoom.
+          "text-variable-anchor-offset": [
+            "case",
+            isShape,
+            [
+              "literal",
+              [
+                "center",
+                [0, 0],
+                "top",
+                [0, 0.6],
+                "bottom",
+                [0, -0.6],
+                "left",
+                [0.6, 0],
+                "right",
+                [-0.6, 0],
+              ],
+            ],
+            [
+              "literal",
+              ["left", [0.8, 0], "right", [-0.8, 0], "top", [0, 0.8], "bottom", [0, -0.8]],
+            ],
+          ],
         },
         paint: { "text-color": text, "text-halo-color": "#000", "text-halo-width": 1.2 },
       });

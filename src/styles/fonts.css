@@ -7,7 +7,8 @@
         and the weight range the variable font actually covers.
      3. Point --font-body / --font-display (src/styles/tokens.css) at the new
         family names, and update SITE.fonts (src/site.config.ts) so the right
-        files are preloaded in <head>.
+        files are preloaded in <head>. The map on /new-york-trash-clubs draws
+        its labels from the body font's file too: BODY_FONT in ClubMap.astro.
 
    Both fonts here are variable and are deliberately NOT subset — see
    "Dependency pins" in the README for the measurement behind that decision. */
