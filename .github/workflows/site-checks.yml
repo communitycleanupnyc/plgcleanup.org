@@ -143,7 +143,9 @@ jobs:
           # substack.com is on that list for our OWN newsletter link: it serves
           # 403 to GitHub's runners and 200 to a browser (and to lychee's own
           # user agent from a home connection) — it is the runner's IP being
-          # walled, not a broken link.
+          # walled, not a broken link. brooklyneagle.com (a news link on the
+          # trash-clubs page) is the same story via Cloudflare: scripts get a 403
+          # with `cf-mitigated: challenge`, browsers get the article.
           # webcal: excluded because it is not a scheme lychee fetches — it is the
           # calendar subscribe link on /schedule, and scripts/seo-audit.mjs
           # resolves it against dist instead (see the webcal branch in its link
@@ -155,6 +157,7 @@ jobs:
             --accept 200..299,301,302,308,429
             --exclude instagram.com --exclude amazon.com --exclude discord.com
             --exclude washingtonpost.com --exclude substack.com
+            --exclude brooklyneagle.com
             --exclude '^webcal:'
             'dist/**/*.html'
           fail: true
