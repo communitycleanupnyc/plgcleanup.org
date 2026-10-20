@@ -53,6 +53,24 @@
       "startTime": "10:00am",
       "endTime": "11:00am",
       "corner": "Flatbush Ave & Rutland Rd"
+    },
+    {
+      "date": "2026-11-08",
+      "startTime": "2pm",
+      "endTime": "3pm",
+      "corner": "Flatbush Ave & Lefferts Ave"
+    },
+    {
+      "date": "2026-11-14",
+      "startTime": "10:00am",
+      "endTime": "11:00am",
+      "corner": "New York Ave & Clarkson Ave"
+    },
+    {
+      "date": "2026-11-22",
+      "startTime": "2pm",
+      "endTime": "3pm",
+      "corner": "New York Ave & Winthrop St"
     }
   ]
 }
