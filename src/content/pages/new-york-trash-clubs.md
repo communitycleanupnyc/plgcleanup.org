@@ -30,15 +30,6 @@ Q: "Are supplies for cleaning provided?"
 
 A: "We're not a non-profit organization, so we can't supply the cleanup gear, unforch. We're just a bunch of people who have a love for the beach, who feel the urgency to preserve nature, and who are aiming to form new connection in their lives not mediated by social media! Don't hesitate to pester your local bar, restaurant, or grocery store for gloves & trash bags! Just tell them it's for a good cause! If you're taking the ferry, tell the ferry workers you're headed to a beach cleanup and ask if they can spare a set.
 
-## Brooklyn Brigilante
-Where: Brooklyn Heights, Brooklyn.
-
-Cleanups and other meetups are posted to [their calendar](https://www.google.com/calendar/embed?src=nolocksyeslox@gmail.com). Find out how to join on [their Get Involved page](https://www.brooklynbrigilante.com/get-involved), or follow along on [Instagram](https://www.instagram.com/brooklynbrigilante).
-
-"There's no 'I' in team, but there's a 'U' in Community."
-
-Have trash bags, gloves, or other supplies to donate? They're asking for them, so get in touch through their site.
-
 ## In the press
 
 Trash clubs keep making the news. A few stories worth reading about why efforts like ours are growing:
