@@ -28,6 +28,10 @@ Sanitation workers collect the trash, recycling, and compost we set out.; they e
 
 Property owners, including businesses, must clean the sidewalk along their building, including tree pits and grass strips, and the gutter out to 18 inches past the curb. Failure to do this can result in fines of [up to $300](https://www.nyc.gov/site/dsny/what-we-do/cleaning/sidewalks-gutters.page). Business Improvement Districts supplement that duty and do not replace it. 
 
+![Three volunteers picking up litter in front of a dark brick building. A yellow band highlights the sidewalk, labelled "All adjacent sidewalks", and an arrow from the curb into the street is labelled "18 inches from curb into street".](../../assets/litter-legion-sidewalk.jpg)
+
+*What a property owner must keep clean: the sidewalk, and the gutter out to 18 inches. Photo: [Litter Legion](https://www.litterlegion.org/)*
+
 The New York City Department of Sanitation fines dirty sidewalks only during set hours, and those hours differ by property type. Agents ticket dirty sidewalks and gutters only during the specified periods, though they can ticket other violations at any time. Residential enforcement runs 8–9 AM and 6–7 PM, seven days a week. Commercial enforcement is also limited to two one-hour windows a day, and the exact times depend on the address.
 
 Neighborhood groups like ours fill a different role. We bring people together, raise awareness, and some of us tend green spaces. When neighbors see our volunteers cleaning, many remember their own duty. But volunteers can’t substitute for owners and businesses following the rules. DSNY itself says it writes sidewalk summonses every day but [can’t keep the city clean alone](https://www.nyc.gov/site/dsny/what-we-do/cleaning/sidewalk-slobs.page).

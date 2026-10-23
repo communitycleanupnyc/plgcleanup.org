@@ -52,6 +52,13 @@ const { backHref = "/", backLabel = "← Back home" } = Astro.props;
     margin-bottom: 1.25rem;
   }
 
+  /* A Markdown image is emitted at its full pixel width; fit it to the column. */
+  .prose :global(img) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
   /* Lists match the paragraphs around them. Without this they fall back to the
      browser's default 1rem — <body> sets no size — so raising --fs-body moved
      the prose and left every bullet behind. `li` inherits it, and so does a
