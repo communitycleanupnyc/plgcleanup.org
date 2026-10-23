@@ -77,6 +77,21 @@ const orgSchema = {
 <!doctype html>
 <html lang={SITE.lang}>
   <head>
+    {/* Google Analytics. Google's own snippet, verbatim, where its install
+        instructions put it: first thing in <head>. `is:inline` keeps Astro
+        from bundling it into a module, which would hide the global gtag()
+        the snippet defines. Delete these two tags to remove analytics. */}
+    <!-- Google tag (gtag.js) -->
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-SEJB1XY6YE"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-SEJB1XY6YE");
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content={SITE.themeColor} />
