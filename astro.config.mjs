@@ -13,7 +13,7 @@ import headingAnchors from "./src/plugins/heading-anchors.ts";
 // pinned by astro to one exact version, and this import is the recipe Astro's
 // docs give for plugins that need the ids. Declaring it here as well would risk
 // a second, differently-versioned copy the day astro moves.
-import { rehypeHeadingIds } from "@astrojs/markdown-remark";
+import { rehypeHeadingIds, unified } from "@astrojs/markdown-remark";
 
 export default defineConfig({
   // Canonical production origin — used to build absolute URLs (e.g. the social
@@ -64,7 +64,9 @@ export default defineConfig({
     //     alone, so the ids stay Astro's and stay stable.
     //   headingAnchors — before collapsibleSections, so a heading that moves
     //     into a <summary> takes its link with it.
-    rehypePlugins: [rehypeHeadingIds, headingAnchors, collapsibleSections],
+    processor: unified({
+      rehypePlugins: [rehypeHeadingIds, headingAnchors, collapsibleSections],
+    }),
   },
   server: {
     host: true,
