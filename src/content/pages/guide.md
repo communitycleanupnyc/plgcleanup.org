@@ -3,6 +3,8 @@ title: Guide
 description: How to lead volunteers for a neighborhood cleanup.
 ---
 
+# Cleanup leader guide
+
 You’re the Leader! You greet volunteers, run the intro, and answer questions during the clean. You're the face of the clean today. Be welcoming, keep it moving, have fun out there.
 
 ⚠️ EMERGENCY PROTOCOL: Message [Discord](https://discord.com/invite/H9her7r8N2) in case of injury or incident. Serious injury or emergency: call 911, then message [Discord](https://discord.com/invite/H9her7r8N2).
