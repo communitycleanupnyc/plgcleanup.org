@@ -192,6 +192,12 @@ One setting has to move with Astro rather than with Dependabot:
   stray-underline bug. **When upgrading to Astro 7**, change it to `"jsx"` (or
   delete it) and run `npm run format`.
 
+One dev dependency looks unused and isn't:
+
+- **`@emnapi/runtime`** is needed by `@astrojs/check`'s own dependencies, but npm
+  skips it on a Mac, and `npm run check` then stops at a prompt to install
+  `@astrojs/check` instead of checking anything. Linux CI doesn't show this.
+
 ---
 
 ## Commands

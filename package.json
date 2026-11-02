@@ -27,6 +27,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
     "@astrojs/sitemap": "^3.7.4",
+    "@emnapi/runtime": "^1.11.3",
     "@types/d3-scale-chromatic": "^3.1.0",
     "prettier": "^3.9.10",
     "prettier-plugin-astro": "^1.1.2",
