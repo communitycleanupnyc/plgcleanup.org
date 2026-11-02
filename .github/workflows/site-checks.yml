@@ -145,7 +145,11 @@ jobs:
           # user agent from a home connection) — it is the runner's IP being
           # walled, not a broken link. brooklyneagle.com (a news link on the
           # trash-clubs page) is the same story via Cloudflare: scripts get a 403
-          # with `cf-mitigated: challenge`, browsers get the article.
+          # with `cf-mitigated: challenge`, browsers get the article. The FAQ's
+          # nycgovparks.org link (405) and /join's generated Google Maps link
+          # (403) also load for a browser but fail intermittently on the runners.
+          # a860-gpp.nyc.gov (the city's publications portal, also in the FAQ)
+          # sits behind Akamai, which answers scripts with "Access Denied".
           # webcal: excluded because it is not a scheme lychee fetches — it is the
           # calendar subscribe link on /schedule, and scripts/seo-audit.mjs
           # resolves it against dist instead (see the webcal branch in its link
@@ -158,6 +162,8 @@ jobs:
             --exclude instagram.com --exclude amazon.com --exclude discord.com
             --exclude washingtonpost.com --exclude substack.com
             --exclude brooklyneagle.com
+            --exclude nycgovparks.org --exclude a860-gpp.nyc.gov
+            --exclude google.com/maps
             --exclude '^webcal:'
             'dist/**/*.html'
           fail: true

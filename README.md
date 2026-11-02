@@ -759,9 +759,9 @@ scattered comments, and delete a line when it's done.
 - [ ] **Review the Volunteering Terms.** `src/content/pages/terms.md` was drafted
       by the Claude agent, not by a lawyer — read it and make it say what you
       actually mean, especially the photo-consent and under-18 paragraphs.
-- [ ] **Keep the schedule fed.** `src/data/schedule.json` runs to `2026-11-02`.
-      Add more in Pages CMS → **Schedule**; the audit warns whenever the last
-      date is under three weeks away.
+- [ ] **Keep the schedule fed.** Add more dates to `src/data/schedule.json` in
+      Pages CMS → **Schedule**; the audit warns whenever the last date is under
+      three weeks away.
 - [ ] What is left in **[LAUNCH.md](LAUNCH.md)**: A.5 (issue watchers), and B.4
       to B.6 (the pages.dev bulk redirect, HSTS, Search Console). The domain
       cutover and the 2026-09-05 account move are done — but the old
@@ -778,8 +778,6 @@ scattered comments, and delete a line when it's done.
 
 - [ ] `faq.md` — only two questions so far.
 - [ ] `partners.md` — three of the partners are bare names with no description.
-- [ ] `new-york-trash-clubs.md` — lists only this club; the page promises a guide
-      to crews across the city.
 - [ ] `about.md` — the "Team" section names nobody.
 
 **Housekeeping**
