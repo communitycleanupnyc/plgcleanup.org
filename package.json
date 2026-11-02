@@ -18,18 +18,18 @@
     "astro": "^6.4.8",
     "d3-scale-chromatic": "^3.1.0",
     "embla-carousel": "^8.6.0",
-    "maplibre-gl": "^6.11.2",
+    "maplibre-gl": "^6.16.0",
     "sharp": "^0.34.5"
   },
   "overrides": {
     "esbuild": "^0.28.1"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.10",
+    "@astrojs/check": "^0.9.12",
     "@astrojs/sitemap": "^3.7.4",
     "@types/d3-scale-chromatic": "^3.1.0",
-    "prettier": "^3.9.9",
-    "prettier-plugin-astro": "^1.1.0",
+    "prettier": "^3.9.10",
+    "prettier-plugin-astro": "^1.1.2",
     "typescript": "^5.9.3"
   }
 }
